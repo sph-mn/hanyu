@@ -45,7 +45,9 @@ cedict_extract = () ->
     word = parsed[2]
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
-    pinyin = pinyin_utils.numberToMark(pinyin).split(" ").join("")
+    pinyin = pinyin.split(" ").map (a) ->
+      pinyin_utils.numberToMark(a)
+    pinyin = pinyin.join("")
     glossary = parsed[4].replace /\[([^\]]+)\]/g, ""
     glossary = glossary.replace /\s([^a-zA-Z0-9,. \|]+)\|([^a-zA-Z0-9,. ]+)(\W|$)/g, (a, b, c, d) ->
       " " + c + d
