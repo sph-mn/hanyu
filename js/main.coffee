@@ -56,20 +56,20 @@ cedict_extract = () ->
     frequency.indexOf(a) - frequency.indexOf(b)
   fs.writeFile "data/cedict.csv", csv_stringify.stringify(data), on_error
 
-viewer_cedict_to_json = (data) ->
+dictionary_cedict_to_json = (data) ->
   JSON.stringify data.map (a) ->
     a[3] = a[3].split "/"
     a
 
-update_viewer = (config) ->
+update_dictionary = (config) ->
   words = read_csv_file "data/cedict.csv", ","
-  words = viewer_cedict_to_json words
-  html = fs.readFileSync "html/viewer-template.html", "utf8"
+  words = dictionary_cedict_to_json words
+  html = fs.readFileSync "html/dictionary-template.html", "utf8"
   html = html.replace("{word-data}", words)
   on_error = (a) -> if a then console.error a
-  fs.writeFile "download/viewer.html", html, on_error
+  fs.writeFile "download/hanyu-dictionary.html", html, on_error
 
 #cedict_extract()
 #frequency_list()
 #character_list()
-#update_viewer()
+update_dictionary()
