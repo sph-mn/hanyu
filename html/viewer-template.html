@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1"/>
+    <title>chinese dictionary</title>
+    <style>
+      html {
+          font-size: 16px;
+      }
+      body {
+          background-color: black;
+          color: #ddd;
+      }
+      body a {
+          color: #ddd;
+      }
+      #filter, #word-results {
+          margin-top: 0.5rem;
+      }
+      h1 {
+          font-size: 1rem;
+          display: inline-block;
+          margin: 0;
+      }
+      #description {
+          font-size: 0.5rem;
+      }
+      #filter input {
+          border: 0;
+          background-color: #eee;
+      }
+      #word-results {
+          font-size: 1.75rem;
+      }
+      #about-link {
+          cursor: pointer;
+          display: inline-block;
+          margin-left: 2ch;
+          text-decoration: underline;
+          font-size: 0.75rem;
+      }
+      #about.hidden {
+          display: none;
+      }
+      #filter .row {
+          display: inline-block;
+      }
+      #filter label {
+          white-space: nowrap;
+      }
+      #word-search-translation {
+          margin: 0;
+          margin-right: 3px;
+      }
+      @media (max-width: 700px) {
+        html {
+            font-size: 14px;
+        }
+        input {
+            height: 3rem;
+            margin: 5px;
+            font-size: 120%;
+        }
+        button {
+          padding: 10px;
+          margin: 5px;
+        }
+        body > :first-child ~ * {
+            margin-top: 0;
+        }
+        #word-results {
+            font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>chinese language dictionary</h1>
+    <div id="about-link">about</div>
+    <div id="about" class="hidden">
+      word search
+      <ul>
+        <li></li>
+        <li>finds words with similar spelling and pronunciation. for example, in case you hear a word and cant quite make out if it has a short or long vowel, or a "z" or "s", this search will find it anyway.
+          this is only done when entering readings in latin letters, but searching words using hanzi is also possible</li>
+        <li>supports regexp syntax. for example, ^word for searching at the beginning, word$ for searching at the end, or . for wildcards</li>
+        <li>"word for searching exactly as typed</li>
+        <li>there is a limit on the length of result words, relative to the length of input, so that small word searches dont list many longer words where it is contained</li>
+      </ul>
+    </div>
+    <div id="filter">
+      <div class="row">
+        <input id="word-input" placeholder="word search..."/><button id="word-reset">reset</button>
+        <label title= "search inside translations"><input id="word-extended" type="checkbox"/>extended</label>
+        <label title= "show pinyin"><input id="word-pinyin" type="checkbox"/>pinyin</label>
+      </div>
+    </div>
+    <div id="word-results"></div>
+    <script>
+      var word_data = {word-data};
+      var abc_regexp = /[a-z]/
+
+      function word_search_init() {
+        function make_search_regexp(word) {
+          if ("\"" == word[0]) return RegExp(word.replace("\"", ""))
+          var replacements = []
+          replacements.forEach(function(a) {word = word.replace(a[0], a[1])})
+          return new RegExp(word)
+        }
+        function make_result_line(data, show_pinyin) {
+          const row = [data[0]]
+          if (show_pinyin) row.push(data[1])
+          let glossary = data[3].join("; ")
+          glossary = "\"" + glossary.replace(/\"/g, "'") + "\""
+          row.push(glossary)
+          return row.join(" ")
+        }
+        var input = document.getElementById("word-input")
+        var button = document.getElementById("word-reset")
+        var checkbox_extended = document.getElementById("word-extended")
+        var checkbox_pinyin = document.getElementById("word-pinyin")
+        var results = document.getElementById("word-results")
+        var result_limit = 150
+        function on_filter() {
+          results.innerHTML = ""
+          var value = input.value.trim()
+          if (0 == value.length) return
+          var matches = []
+          if (abc_regexp.test(value)) {
+            var extended = checkbox_extended.checked
+            var pinyin = checkbox_pinyin.checked
+            var translation_regexp = new RegExp("\\b" + value)
+            var regexp = make_search_regexp(value)
+            var length_limit_subtraction = extended ? 2 : 3
+            var length_limit = value.length + Math.pow(Math.max(0, value.length - length_limit_subtraction), 2)
+            for (var i = 0; (i < word_data.length && matches.length < result_limit); i += 1) {
+              if ((length_limit >= word_data[i][2].length && regexp.test(word_data[i][2]))
+                  || (extended && value.length > 2
+                      && word_data[i][3].some(a => translation_regexp.test(a)))) {
+                matches.push(make_result_line(word_data[i], pinyin))
+              }
+            }
+          } else {
+            var regexp = new RegExp(value)
+            for (var i = 0; (i < word_data.length && matches.length < result_limit); i += 1) {
+              if (regexp.test(word_data[i][0])) matches.push(make_result_line(word_data[i], pinyin))
+            }
+          }
+          results.innerHTML = matches.join("<br/>")
+          if (0 == matches.length) results.innerHTML = "no word results"
+        }
+        function on_reset() {
+          input.value = ""
+          results.innerHTML = ""
+        }
+        input.addEventListener("keyup", on_filter)
+        input.addEventListener("change", on_filter)
+        button.addEventListener("click", on_reset)
+        checkbox_extended.addEventListener("change", on_filter)
+      }
+
+      function about_init() {
+        var about_link = document.getElementById("about-link")
+        var about = document.getElementById("about")
+        about_link.addEventListener("click", function() {about.classList.toggle("hidden")})
+      }
+
+      word_search_init()
+      about_init()
+    </script>
+  </body>
+</html>

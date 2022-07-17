@@ -1,0 +1,11 @@
+{
+  "name": "hanyu",
+  "version": "1.0.0",
+  "license": "cc-by-sa",
+  "dependencies": {
+    "coffeescript": "*",
+    "csv": "*",
+    "table-scraper": "*",
+    "pinyin-utils": "*"
+  }
+}
