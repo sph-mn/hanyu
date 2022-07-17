@@ -34,6 +34,12 @@ character_list = () ->
     hanzi = tables.flat().map (a) -> a.Hanzi
     fs.writeFile "data/togscc.csv", hanzi.join("\n") + "\n", on_error
 
+cedict_glossary = (a) ->
+  definitions = a.split("/")
+  definitions = definitions.filter (a) ->
+    !a.match(/^Taiwan pr./) && !a.match(/variant of/)
+  return definitions.join("/")
+
 cedict_extract = () ->
   cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
   frequency = array_from_newline_file("data/frequency.csv", "utf-8")
@@ -48,9 +54,8 @@ cedict_extract = () ->
     pinyin = pinyin.split(" ").map (a) ->
       pinyin_utils.numberToMark(a)
     pinyin = pinyin.join("")
-    glossary = parsed[4].replace /\[([^\]]+)\]/g, ""
-    glossary = glossary.replace /\s([^a-zA-Z0-9,. \|]+)\|([^a-zA-Z0-9,. ]+)(\W|$)/g, (a, b, c, d) ->
-      " " + c + d
+    glossary = cedict_glossary parsed[4]
+    unless glossary then return null
     pinyin_no_tone = pinyin_utils.removeTone pinyin
     [word, pinyin, pinyin_no_tone, glossary]
   data = data.filter((a) -> a)
