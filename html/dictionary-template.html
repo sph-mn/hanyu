@@ -79,7 +79,6 @@
     <h1>chinese to english dictionary</h1>
     <div id="about-link">about</div>
     <div id="about" class="hidden">
-      word search
       <ul>
         <li>supports regexp syntax. for example, ^word for searching at the beginning, word$ for searching at the end, or . for wildcards</li>
         <li>"word for searching exactly as typed</li>
@@ -90,7 +89,6 @@
       <div class="row">
         <input id="word-input" placeholder="word search..."/><button id="word-reset">reset</button>
         <label title= "search inside translations"><input id="word-extended" type="checkbox"/>extended</label>
-        <label title= "hide pinyin"><input id="word-pinyin" type="checkbox"/>hide pinyin</label>
       </div>
     </div>
     <div id="word-results"></div>
@@ -101,14 +99,20 @@
       function word_search_init() {
         function make_search_regexp(word) {
           if ("\"" == word[0]) return RegExp(word.replace("\"", ""))
-          var replacements = []
+          const replacements = [
+              ["a", "(a|ā|á|ǎ|à)"],
+              ["e", "(e|ē|é|ě|è)"],
+              ["i", "(i|ī|í|ǐ|ì)"],
+              ["o", "(o|ō|ó|ǒ|ò)"],
+              ["u", "(u|ū|ú|ǔ|ù|ǖ|ǘ|ǚ|ǜ|ü)"]
+          ]
           replacements.forEach(function(a) {word = word.replace(a[0], a[1])})
+          console.log(word)
           return new RegExp(word)
         }
-        function make_result_line(data, show_pinyin) {
-          const row = [data[0]]
-          if (show_pinyin) row.push(data[1])
-          let glossary = data[3].join("; ")
+        function make_result_line(data) {
+          const row = [data[0], data[1]]
+          let glossary = data[2].join("; ")
           glossary = "\"" + glossary.replace(/\"/g, "'") + "\""
           row.push(glossary)
           return row.join(" ")
@@ -116,7 +120,6 @@
         var input = document.getElementById("word-input")
         var button = document.getElementById("word-reset")
         var checkbox_extended = document.getElementById("word-extended")
-        var checkbox_pinyin = document.getElementById("word-pinyin")
         var results = document.getElementById("word-results")
         var result_limit = 150
         function on_filter() {
@@ -126,22 +129,21 @@
           var matches = []
           if (abc_regexp.test(value)) {
             var extended = checkbox_extended.checked
-            var pinyin = !checkbox_pinyin.checked
             var translation_regexp = new RegExp("\\b" + value)
             var regexp = make_search_regexp(value)
             var length_limit_subtraction = extended ? 2 : 3
             var length_limit = value.length + Math.pow(Math.max(0, value.length - length_limit_subtraction), 2)
             for (var i = 0; (i < word_data.length && matches.length < result_limit); i += 1) {
-              if ((length_limit >= word_data[i][2].length && regexp.test(word_data[i][2]))
+              if ((length_limit >= word_data[i][1].length && regexp.test(word_data[i][1]))
                   || (extended && value.length > 2
                       && word_data[i][3].some(a => translation_regexp.test(a)))) {
-                matches.push(make_result_line(word_data[i], pinyin))
+                matches.push(make_result_line(word_data[i]))
               }
             }
           } else {
             var regexp = new RegExp(value)
             for (var i = 0; (i < word_data.length && matches.length < result_limit); i += 1) {
-              if (regexp.test(word_data[i][0])) matches.push(make_result_line(word_data[i], pinyin))
+              if (regexp.test(word_data[i][0])) matches.push(make_result_line(word_data[i]))
             }
           }
           results.innerHTML = matches.join("<br/>")
@@ -155,7 +157,6 @@
         input.addEventListener("change", on_filter)
         button.addEventListener("click", on_reset)
         checkbox_extended.addEventListener("change", on_filter)
-        checkbox_pinyin.addEventListener("change", on_filter)
       }
 
       function about_init() {
