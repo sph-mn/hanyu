@@ -8,26 +8,6 @@ read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
 on_error = (a) -> if a then console.error a
 
-frequency_list = () ->
-  url_prefix = "https://en.wiktionary.org/wiki/Appendix:Mandarin_Frequency_lists"
-  url_suffixes = [
-    "1-1000"
-    "1001-2000"
-    "2001-3000"
-    "3001-4000"
-    "4001-5000"
-    "5001-6000"
-    "6001-7000"
-    "7001-8000"
-    "8001-9000"
-    "9001-10000"
-  ]
-  url_suffixes.forEach (url_suffix) ->
-    url = "#{url_prefix}/#{url_suffix}"
-    scraper.get(url).then (rows) ->
-      rows = rows[0].map (row) ->
-        console.log row.Simplified
-
 character_list = () ->
   url = "https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters"
   scraper.get(url).then (tables) ->
@@ -92,6 +72,5 @@ update_dictionary = (config) ->
   fs.writeFile "download/hanyu-dictionary.html", html, on_error
 
 #cedict_extract()
-#frequency_list()
 #character_list()
 update_dictionary()
