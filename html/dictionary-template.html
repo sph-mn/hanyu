@@ -107,7 +107,6 @@
               ["u", "(u|ū|ú|ǔ|ù|ǖ|ǘ|ǚ|ǜ|ü)"]
           ]
           replacements.forEach(function(a) {word = word.replace(a[0], a[1])})
-          console.log(word)
           return new RegExp(word)
         }
         function make_result_line(data) {
@@ -134,10 +133,11 @@
             var length_limit_subtraction = extended ? 2 : 3
             var length_limit = value.length + Math.pow(Math.max(0, value.length - length_limit_subtraction), 2)
             for (var i = 0; (i < word_data.length && matches.length < result_limit); i += 1) {
-              if ((length_limit >= word_data[i][1].length && regexp.test(word_data[i][1]))
+              const entry = word_data[i]
+              if ((length_limit >= entry[1].length && regexp.test(entry[1]))
                   || (extended && value.length > 2
-                      && word_data[i][3].some(a => translation_regexp.test(a)))) {
-                matches.push(make_result_line(word_data[i]))
+                      && entry[2].some(a => translation_regexp.test(a)))) {
+                matches.push(make_result_line(entry))
               }
             }
           } else {
