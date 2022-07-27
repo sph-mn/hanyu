@@ -106,7 +106,7 @@
               ["o", "(o|ō|ó|ǒ|ò)"],
               ["u", "(u|ū|ú|ǔ|ù|ǖ|ǘ|ǚ|ǜ|ü)"]
           ]
-          replacements.forEach(function(a) {word = word.replace(a[0], a[1])})
+          replacements.forEach(function(a) {word = word.replace(new RegExp(a[0], "g"), a[1])})
           return new RegExp(word)
         }
         function make_result_line(data) {
