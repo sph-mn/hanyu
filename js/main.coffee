@@ -44,7 +44,7 @@ cedict_extract = () ->
     fa = frequency[a[0]]
     fb = frequency[b[0]]
     if fa is undefined and fb is undefined
-      0
+      a[0].length - b[0].length
     else if fa is undefined
       1
     else if fb is undefined
@@ -56,6 +56,7 @@ cedict_extract = () ->
     example2 = data.findIndex((a) => a[0] is "熊猫")
     if example1 < example2 then console.log "success"
     else console.log "failure"
+  #test_order()
   fs.writeFile "data/cedict.csv", csv_stringify.stringify(data), on_error
 
 dictionary_cedict_to_json = (data) ->
