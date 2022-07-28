@@ -17,7 +17,8 @@ character_list = () ->
 cedict_glossary = (a) ->
   definitions = a.split("/")
   definitions = definitions.filter (a) ->
-    !a.match(/^Taiwan pr./) && !a.match(/variant of/)
+    !a.match(/^Taiwan pr./) && !a.match(/variant of/) && !a.match(/^CL:/)
+  definitions = definitions.map (a) -> a.toLowerCase()
   return definitions.join("/")
 
 cedict_extract = () ->
