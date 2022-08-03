@@ -68,7 +68,7 @@ dictionary_cedict_to_json = (data) ->
 update_dictionary = (config) ->
   words = read_csv_file "data/cedict.csv", ","
   words = dictionary_cedict_to_json words
-  html = fs.readFileSync "html/dictionary-template.html", "utf8"
+  html = fs.readFileSync "html/hanyu-dictionary-template.html", "utf8"
   html = html.replace("{word-data}", words)
   on_error = (a) -> if a then console.error a
   fs.writeFile "download/hanyu-dictionary.html", html, on_error
