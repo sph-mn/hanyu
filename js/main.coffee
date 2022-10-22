@@ -3,6 +3,7 @@ scraper = require "table-scraper"
 csv_stringify = require "csv-stringify/sync"
 pinyin_utils = require "pinyin-utils"
 csv_parse = require "csv-parse/sync"
+hanzi_tools = require "hanzi-tools"
 
 read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-8"), {delimiter: delimiter}
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
@@ -73,6 +74,16 @@ update_dictionary = (config) ->
   on_error = (a) -> if a then console.error a
   fs.writeFile "download/hanyu-dictionary.html", html, on_error
 
+remove_non_chinese_characters = (a) -> a.replace /[^\p{Script=Han}]/ug, ""
+traditional_to_simplified = (a) -> hanzi_tools.simplify a
+
+clean_frequency_list = () ->
+  frequency_array = array_from_newline_file "data/frequency.csv", "utf-8"
+  frequency_array = frequency_array.filter (a) ->
+    traditional_to_simplified remove_non_chinese_characters a
+  frequency_array.forEach (a) -> console.log a
+
+#clean_frequency_list()
 #cedict_extract()
 #character_list()
 update_dictionary()

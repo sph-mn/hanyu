@@ -6,6 +6,7 @@
     "coffeescript": "*",
     "csv": "*",
     "table-scraper": "*",
-    "pinyin-utils": "*"
+    "pinyin-utils": "*",
+    "hanzi-tools": "*"
   }
 }
