@@ -1,0 +1,4 @@
+#!./node_modules/coffeescript/bin/coffee
+
+main = require "../js/main"
+main.csv_add_translations 0

@@ -66,7 +66,7 @@ dictionary_cedict_to_json = (data) ->
     a[2] = a[2].split "/"
     a
 
-update_dictionary = (config) ->
+update_dictionary = () ->
   words = read_csv_file "data/cedict.csv", ","
   words = dictionary_cedict_to_json words
   html = fs.readFileSync "html/hanyu-dictionary-template.html", "utf8"
@@ -83,7 +83,25 @@ clean_frequency_list = () ->
     traditional_to_simplified remove_non_chinese_characters a
   frequency_array.forEach (a) -> console.log a
 
-#clean_frequency_list()
-#cedict_extract()
-#character_list()
-update_dictionary()
+dictionary_lookup_f = () ->
+  dictionary = {}
+  words = read_csv_file "data/cedict.csv", ","
+  words.forEach (a) -> dictionary[a[0]] = a.slice 1
+  (word) ->
+    dictionary[word]
+
+csv_add_translations = (word_column_index) ->
+  dictionary_lookup = dictionary_lookup_f()
+  lines = read_csv_file 0, ","
+  lines = lines.map (a) ->
+    a.concat dictionary_lookup(a[word_column_index]) || ""
+  on_error = (a) -> if a then console.error a
+  console.log csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
+
+module.exports = {
+  clean_frequency_list
+  cedict_extract
+  character_list
+  update_dictionary
+  csv_add_translations
+}
