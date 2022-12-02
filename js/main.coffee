@@ -24,7 +24,7 @@ cedict_glossary = (a) ->
 
 cedict_extract = () ->
   cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
-  frequency_array = array_from_newline_file("data/frequency.csv", "utf-8")
+  frequency_array = array_from_newline_file "data/frequency.csv", "utf-8"
   frequency = {}
   frequency_array.forEach (a, i) -> frequency[a] = i
   lines = cedict.split "\n"
@@ -86,9 +86,8 @@ clean_frequency_list = () ->
 dictionary_lookup_f = () ->
   dictionary = {}
   words = read_csv_file "data/cedict.csv", ","
-  words.forEach (a) -> dictionary[a[0]] = a.slice 1
-  (word) ->
-    dictionary[word]
+  words.forEach (a) -> unless dictionary[a[0]] then dictionary[a[0]] = a.slice 1
+  (word) -> dictionary[word]
 
 csv_add_translations = (word_column_index) ->
   dictionary_lookup = dictionary_lookup_f()
