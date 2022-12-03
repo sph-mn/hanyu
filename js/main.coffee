@@ -16,11 +16,31 @@ character_list = () ->
     fs.writeFile "data/togscc.csv", hanzi.join("\n") + "\n", on_error
 
 cedict_glossary = (a) ->
+  filter_regexp = [
+    /^taiwan pr./
+    /variant of /
+    /^cl:/
+    /^surname /
+    /^abbr\. for /
+    /^see [^a-zA-Z]/
+    /^see also [^a-zA-Z]/
+    /^used in [^a-zA-Z]/
+    /^\(used in /
+    /^\(tw\) /
+    /^also pr\. /
+  ]
   definitions = a.split("/")
-  definitions = definitions.filter (a) ->
-    !a.match(/^Taiwan pr./) && !a.match(/variant of/) && !a.match(/^CL:/)
   definitions = definitions.map (a) -> a.toLowerCase()
-  return definitions.join("/")
+  definitions.filter (a) -> !filter_regexp.some((b) -> a.match b)
+
+cedict_merge_definitions = (a) ->
+  table = {}
+  a.forEach (a, index) ->
+    key = a[0] + "#" + a[1]
+    if table[key]
+      table[key][1][2] = table[key][1][2].concat a[2]
+    else table[key] = [index, a]
+  Object.values(table).sort((a, b) -> a[0] - b[0]).map((a) -> a[1])
 
 cedict_extract = () ->
   cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
@@ -36,12 +56,15 @@ cedict_extract = () ->
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
     pinyin = pinyin.split(" ").map (a) -> pinyin_utils.numberToMark(a)
-    pinyin = pinyin.join("")
+    pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary parsed[4]
-    unless glossary then return null
+    unless glossary.length then return null
     pinyin_no_tone = pinyin_utils.removeTone pinyin
     [word, pinyin, glossary]
-  data = data.filter((a) -> a)
+  data = data.filter (a) -> a
+  data = cedict_merge_definitions data
+  data.forEach (a) -> a[2] = a[2].join "; "
+  # sort by frequency
   data = data.sort (a, b) ->
     fa = frequency[a[0]]
     fb = frequency[b[0]]
@@ -87,7 +110,7 @@ dictionary_lookup_f = () ->
   dictionary = {}
   words = read_csv_file "data/cedict.csv", ","
   words.forEach (a) -> unless dictionary[a[0]] then dictionary[a[0]] = a.slice 1
-  (word) -> dictionary[word]
+  (a) -> dictionary[a]
 
 csv_add_translations = (word_column_index) ->
   dictionary_lookup = dictionary_lookup_f()

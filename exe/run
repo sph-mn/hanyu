@@ -1,7 +1,7 @@
 #!./node_modules/coffeescript/bin/coffee
 
 main = require "../js/main"
-main.update_dictionary
-#main.clean_frequency_list
-#main.cedict_extract
-#main.character_list
+#main.cedict_extract()
+main.update_dictionary()
+#main.clean_frequency_list()
+#main.character_list()
