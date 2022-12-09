@@ -17,6 +17,7 @@ character_list = () ->
 
 cedict_glossary = (a) ->
   filter_regexp = [
+    /[^()a-z0-9?': ,.-]/
     /^taiwan pr./
     /variant of /
     /^cl:/
@@ -26,10 +27,19 @@ cedict_glossary = (a) ->
     /^see also [^a-zA-Z]/
     /^used in [^a-zA-Z]/
     /^\(used in /
-    /^\(tw\) /
+    /\(tw\)/
     /^also pr\. /
+    /^taiwanese \. /
+    /\(\d+/
+    /\(budd.+\)/
+    /.buddhism/
+    /buddhism./
+    /buddhist./
+    /.buddhist/
+    /.sanskrit/
+    /sanskrit./
   ]
-  definitions = a.split("/")
+  definitions = a.split "/"
   definitions = definitions.map (a) -> a.toLowerCase()
   definitions.filter (a) -> !filter_regexp.some((b) -> a.match b)
 
@@ -41,6 +51,10 @@ cedict_merge_definitions = (a) ->
       table[key][1][2] = table[key][1][2].concat a[2]
     else table[key] = [index, a]
   Object.values(table).sort((a, b) -> a[0] - b[0]).map((a) -> a[1])
+
+data_additions = (a) ->
+  a.push ["你", "nǐ", ["you"]]
+  a
 
 cedict_extract = () ->
   cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
@@ -59,9 +73,11 @@ cedict_extract = () ->
     pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary parsed[4]
     unless glossary.length then return null
-    pinyin_no_tone = pinyin_utils.removeTone pinyin
     [word, pinyin, glossary]
   data = data.filter (a) -> a
+  data = data_additions data
+  console.log(data[data.length - 2])
+  console.log(data[data.length - 1])
   data = cedict_merge_definitions data
   data.forEach (a) -> a[2] = a[2].join "; "
   # sort by frequency

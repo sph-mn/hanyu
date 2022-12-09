@@ -134,9 +134,8 @@
             var extended = checkbox_extended.checked
             var translation_regexp = new RegExp("\\b" + value)
             var regexp = make_search_regexp(value)
-            var length_limit_subtraction = extended ? 2 : 3
-            var length_limit = value.length + Math.pow(Math.max(0, value.length - length_limit_subtraction), 2)
-            for (var i = 0; (i < word_data.length && matches.length < result_limit); i += 1) {
+            var length_limit = value.length * ((value.length > 4 || extended) ? 3 : 2)
+            for (let i = 0; (i < word_data.length && matches.length < result_limit); i += 1) {
               const entry = word_data[i]
               if ((length_limit >= entry[1].length && regexp.test(entry[1]))
                   || (extended && value.length > 2
@@ -147,7 +146,7 @@
           } else {
             var regexp = new RegExp(value)
             for (var i = 0; (i < word_data.length && matches.length < result_limit); i += 1) {
-              if (regexp.test(word_data[i][0])) matches.push(make_result_line(word_data[i]))
+              if (regexp.test(word_data[i][0]) || regexp.test(word_data[i][1])) matches.push(make_result_line(word_data[i]))
             }
           }
           results.innerHTML = matches.join("<br/>")
