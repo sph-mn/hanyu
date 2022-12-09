@@ -31,6 +31,7 @@ cedict_glossary = (a) ->
     /^also pr\. /
     /^taiwanese \. /
     /\(\d+/
+    /\d+-\d+/
     /\(budd.+\)/
     /.buddhism/
     /buddhism./
@@ -38,6 +39,7 @@ cedict_glossary = (a) ->
     /.buddhist/
     /.sanskrit/
     /sanskrit./
+    /.bird species./
   ]
   definitions = a.split "/"
   definitions = definitions.map (a) -> a.toLowerCase()
@@ -76,8 +78,6 @@ cedict_extract = () ->
     [word, pinyin, glossary]
   data = data.filter (a) -> a
   data = data_additions data
-  console.log(data[data.length - 2])
-  console.log(data[data.length - 1])
   data = cedict_merge_definitions data
   data.forEach (a) -> a[2] = a[2].join "; "
   # sort by frequency
@@ -92,6 +92,8 @@ cedict_extract = () ->
       -1
     else
       fa - fb
+  data = data.filter (a, index) ->
+    index < 3000 || a[0].length < 3
   test_order = () ->
     example1 = data.findIndex((a) => a[0] is "猫")
     example2 = data.findIndex((a) => a[0] is "熊猫")
