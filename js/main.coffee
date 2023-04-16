@@ -33,6 +33,7 @@ cedict_glossary = (a) ->
     /\(\d+/
     /\d+-\d+/
     /\(budd.+\)/
+    /\(onom\.\)/
     /.buddhism/
     /buddhism./
     /buddhist./
@@ -57,6 +58,41 @@ cedict_merge_definitions = (a) ->
 data_additions = (a) ->
   a.push ["你", "nǐ", ["you"]]
   a
+
+cedict_filter_only = () ->
+  cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
+  frequency_array = array_from_newline_file "data/frequency.csv", "utf-8"
+  frequency = {}
+  frequency_array.forEach (a, i) -> frequency[a] = i
+  lines = cedict.split "\n"
+  data = lines.map (line) ->
+    if "#" is line[0] then return null
+    line = line.trim()
+    parsed = line.match(/^([^ ]+) ([^ ]+) \[([^\]]+)\] \/(.*)\//)
+    word_traditional = parsed[1]
+    word = parsed[2]
+    if word.match(/[a-zA-Z0-9]/) then return null
+    pinyin = parsed[3]
+    glossary = cedict_glossary(parsed[4]).join("/")
+    line = [word_traditional, word, "[#{pinyin}]", "/#{glossary}/"].join(" ")
+    frequency = frequency[word] || (word.length + frequency_array.length)
+    [frequency, line, word, word_traditional] if glossary.length
+  data = data.filter (a) -> a
+  data = data.sort (a, b) -> a[0] - b[0]
+  cedict_filtered_lines = data.map (a) -> a[1]
+  cedict_filtered = cedict_filtered_lines.join "\n"
+  fs.writeFile "data/cedict-filtered.u8", cedict_filtered, on_error
+  index_lines = []
+  index_lines_traditional = []
+  character_offset = 0
+  data.forEach (a) ->
+    word = a[2]
+    word_traditional = a[3]
+    character_offset = cedict_filtered.indexOf("#{word_traditional} #{word} ", character_offset)
+    index_lines.push "#{word},#{character_offset}"
+    index_lines_traditional.push "#{word_traditional},#{character_offset}"
+  index_lines = index_lines.concat index_lines_traditional
+  fs.writeFile "data/cedict-filtered.idx", index_lines.join("\n"), on_error
 
 cedict_extract = () ->
   cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
@@ -144,4 +180,5 @@ module.exports = {
   character_list
   update_dictionary
   csv_add_translations
+  cedict_filter_only
 }
