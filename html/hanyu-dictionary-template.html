@@ -82,7 +82,7 @@
       <ul>
         <li>search results are sorted by word frequency and word length</li>
         <li>supports regexp syntax. for example, ^word for searching at the beginning, word$ for searching at the end, or . for wildcards</li>
-        <li>"word for searching exactly as typed</li>
+        <li>&quot;word for searching exactly as typed</li>
         <li>result word length is limited based on the length of input</li>
         <li>word frequency from <a href="https://github.com/ernop/anki-chinese-word-frequency/" target="_blank">ernop/anki-chinese-word-frequency</a></li>
         <li>translations from <a href="https://www.mdbg.net/chinese/dictionary?page=cc-cedict" target="_blank">cc-cedict</a></li>
@@ -103,15 +103,7 @@
       function word_search_init() {
         function make_search_regexp(word) {
           if ("\"" == word[0]) return RegExp(word.replace("\"", ""))
-          const replacements = [
-              ["a", "(a|ā|á|ǎ|à)"],
-              ["e", "(e|ē|é|ě|è)"],
-              ["i", "(i|ī|í|ǐ|ì)"],
-              ["o", "(o|ō|ó|ǒ|ò)"],
-              ["u", "(u|ū|ú|ǔ|ù|ǖ|ǘ|ǚ|ǜ|ü)"]
-          ]
-          replacements.forEach(function(a) {word = word.replace(new RegExp(a[0], "g"), a[1])})
-          return new RegExp(word)
+          return new RegExp(word.replace(/u/g, "(u|ü)"))
         }
         function make_result_line(data) {
           const row = [data[0], data[1]]
@@ -137,7 +129,8 @@
             var length_limit = value.length * ((value.length > 4 || extended) ? 3 : 2)
             for (let i = 0; (i < word_data.length && matches.length < result_limit); i += 1) {
               const entry = word_data[i]
-              if ((length_limit >= entry[1].length && regexp.test(entry[1]))
+              if ((length_limit >= entry[1].length
+                   && (regexp.test(entry[1]) || regexp.test(entry[1].replace(/[0-4]/g, ""))))
                   || (extended && value.length > 2
                       && entry[2].some(a => translation_regexp.test(a)))) {
                 matches.push(make_result_line(entry))

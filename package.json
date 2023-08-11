@@ -5,8 +5,9 @@
   "dependencies": {
     "coffeescript": "*",
     "csv": "*",
-    "table-scraper": "*",
+    "hanzi-tools": "*",
+    "pinyin-split": "*",
     "pinyin-utils": "*",
-    "hanzi-tools": "*"
+    "table-scraper": "*"
   }
 }

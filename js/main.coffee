@@ -2,6 +2,7 @@ fs = require "fs"
 scraper = require "table-scraper"
 csv_stringify = require "csv-stringify/sync"
 pinyin_utils = require "pinyin-utils"
+pinyin_split = require "pinyin-split"
 csv_parse = require "csv-parse/sync"
 hanzi_tools = require "hanzi-tools"
 
@@ -73,6 +74,8 @@ cedict_filter_only = () ->
     word = parsed[2]
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
+    pinyin = pinyin.split(" ").map (a) -> pinyin_utils.markToNumber(a)
+    pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary(parsed[4]).join("/")
     line = [word_traditional, word, "[#{pinyin}]", "/#{glossary}/"].join(" ")
     frequency = frequency[word] || (word.length + frequency_array.length)
@@ -107,7 +110,7 @@ cedict_extract = () ->
     word = parsed[2]
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
-    pinyin = pinyin.split(" ").map (a) -> pinyin_utils.numberToMark(a)
+    pinyin = pinyin.split(" ").map (a) -> pinyin_utils.markToNumber(a)
     pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary parsed[4]
     unless glossary.length then return null
@@ -148,7 +151,6 @@ update_dictionary = () ->
   words = dictionary_cedict_to_json words
   html = fs.readFileSync "html/hanyu-dictionary-template.html", "utf8"
   html = html.replace("{word-data}", words)
-  on_error = (a) -> if a then console.error a
   fs.writeFile "download/hanyu-dictionary.html", html, on_error
 
 remove_non_chinese_characters = (a) -> a.replace /[^\p{Script=Han}]/ug, ""
@@ -163,16 +165,36 @@ clean_frequency_list = () ->
 dictionary_lookup_f = () ->
   dictionary = {}
   words = read_csv_file "data/cedict.csv", ","
-  words.forEach (a) -> unless dictionary[a[0]] then dictionary[a[0]] = a.slice 1
+  words.forEach (a) ->
+    unless dictionary[a[0]]
+      if "打" is a[0]
+        console.log a
+      dictionary[a[0]] = a.slice 1
   (a) -> dictionary[a]
 
 csv_add_translations = (word_column_index) ->
   dictionary_lookup = dictionary_lookup_f()
   lines = read_csv_file 0, ","
-  lines = lines.map (a) ->
-    a.concat dictionary_lookup(a[word_column_index]) || ""
-  on_error = (a) -> if a then console.error a
+  lines = lines.map (a) -> a.concat dictionary_lookup(a[word_column_index]) || ""
   console.log csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
+
+update_hsk3 = () ->
+  files = fs.readdirSync "data/hsk3"
+  data = files.map (a) -> read_csv_file("data/hsk3/#{a}", "\t")
+  data = data.flat(1).map (a) ->
+    pinyin = pinyin_split.split(a[2]).map(pinyin_utils.markToNumber).join("")
+    [a[1], pinyin]
+  data = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/hsk3.csv", data, on_error
+
+update_frequency_pinyin = () ->
+  frequency = array_from_newline_file "data/frequency.csv", "utf-8"
+  hsk = read_csv_file "data/hsk3.csv", " "
+  hsk_index = {}
+  hsk.forEach (a) -> hsk_index[a[0]] = a[1] unless hsk_index[a[0]]
+  data = frequency.map (a) -> [a, (hsk_index[a] || "")]
+  data = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/frequency-pinyin.csv", data, on_error
 
 module.exports = {
   clean_frequency_list
@@ -181,4 +203,6 @@ module.exports = {
   update_dictionary
   csv_add_translations
   cedict_filter_only
+  update_hsk3
+  update_frequency_pinyin
 }
