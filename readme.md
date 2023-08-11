@@ -5,7 +5,7 @@ single page dictionary that sorts results by word frequency and length. see down
 data sources:
 * [word frequency](https://github.com/ernop/anki-chinese-word-frequency/blob/master/internet-zh.num)
 * [chinese to english translations](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)
-* [hsk3 work list](https://github.com/krmanik/HSK-3.0-words-list/tree/main)
+* [hsk3 word list](https://github.com/krmanik/HSK-3.0-words-list/tree/main)
 
 license: creative commons share-alike
 

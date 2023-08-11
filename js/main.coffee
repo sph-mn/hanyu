@@ -99,9 +99,11 @@ cedict_filter_only = () ->
 
 cedict_extract = () ->
   cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
-  frequency_array = array_from_newline_file "data/frequency.csv", "utf-8"
-  frequency = {}
-  frequency_array.forEach (a, i) -> frequency[a] = i
+  frequency = array_from_newline_file "data/frequency-pinyin.csv", "utf-8"
+  frequency_index = {}
+  frequency.forEach (a, i) ->
+    a = a.replace(" ", "")
+    frequency_index[a] = i
   lines = cedict.split "\n"
   data = lines.map (line) ->
     if "#" is line[0] then return null
@@ -119,10 +121,9 @@ cedict_extract = () ->
   data = data_additions data
   data = cedict_merge_definitions data
   data.forEach (a) -> a[2] = a[2].join "; "
-  # sort by frequency
   data = data.sort (a, b) ->
-    fa = frequency[a[0]]
-    fb = frequency[b[0]]
+    fa = frequency_index[a[0] + a[1]]
+    fb = frequency_index[b[0] + b[1]]
     if fa is undefined and fb is undefined
       a[0].length - b[0].length
     else if fa is undefined
@@ -131,8 +132,7 @@ cedict_extract = () ->
       -1
     else
       fa - fb
-  data = data.filter (a, index) ->
-    index < 3000 || a[0].length < 3
+  data = data.filter (a, index) -> index < 3000 || a[0].length < 3
   test_order = () ->
     example1 = data.findIndex((a) => a[0] is "猫")
     example2 = data.findIndex((a) => a[0] is "熊猫")
