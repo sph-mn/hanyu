@@ -26,9 +26,9 @@ function word_search_init() {
     results.innerHTML = ""
     const value = input.value.trim()
     if (0 == value.length) return
+    const search_translations = checkbox_search_translations.checked
     const matches = []
     if (abc_regexp.test(value)) {
-      const search_translations = checkbox_search_translations.checked
       const translation_regexp = new RegExp("\\b" + value)
       var regexp = make_search_regexp(value)
       const length_limit = value.length * (value.length > 4 ? 3 : 2)
@@ -44,6 +44,7 @@ function word_search_init() {
         }
       }
     } else {
+      if (search_translations) return
       const search_split = checkbox_search_split.checked
       if (search_split) {
         const characters = value.replace(/[^\u4E00-\u9FA5]/ig, "").split("")

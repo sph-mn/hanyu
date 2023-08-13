@@ -33,8 +33,12 @@ cedict_glossary = (a) ->
     /^taiwanese \. /
     /\(\d+/
     /\d+-\d+/
+    /\(budd.+/
+    /\(classical/
+    /\(in classical/
+    /\(onom/
+    /\(old\)/
     /\(budd.+\)/
-    /\(onom\.\)/
     /.buddhism/
     /buddhism./
     /buddhist./
