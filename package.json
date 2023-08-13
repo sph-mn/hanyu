@@ -6,6 +6,7 @@
     "coffeescript": "*",
     "csv": "*",
     "hanzi-tools": "*",
+    "lebab": "^3.2.1",
     "pinyin-split": "*",
     "pinyin-utils": "*",
     "table-scraper": "*"

@@ -57,7 +57,7 @@ cedict_merge_definitions = (a) ->
   Object.values(table).sort((a, b) -> a[0] - b[0]).map((a) -> a[1])
 
 data_additions = (a) ->
-  a.push ["你", "nǐ", ["you"]]
+  a.push ["你", "ni3", ["you"]]
   a
 
 cedict_filter_only = () ->
@@ -149,8 +149,10 @@ dictionary_cedict_to_json = (data) ->
 update_dictionary = () ->
   words = read_csv_file "data/cedict.csv", ","
   words = dictionary_cedict_to_json words
+  js = fs.readFileSync "js/dictionary.js", "utf8"
+  js = js.replace "__word_data__", words
   html = fs.readFileSync "html/hanyu-dictionary-template.html", "utf8"
-  html = html.replace("{word-data}", words)
+  html = html.replace "__script__", js.trim()
   fs.writeFile "download/hanyu-dictionary.html", html, on_error
 
 remove_non_chinese_characters = (a) -> a.replace /[^\p{Script=Han}]/ug, ""
@@ -167,8 +169,6 @@ dictionary_lookup_f = () ->
   words = read_csv_file "data/cedict.csv", ","
   words.forEach (a) ->
     unless dictionary[a[0]]
-      if "打" is a[0]
-        console.log a
       dictionary[a[0]] = a.slice 1
   (a) -> dictionary[a]
 
@@ -176,6 +176,7 @@ csv_add_translations = (word_column_index) ->
   dictionary_lookup = dictionary_lookup_f()
   lines = read_csv_file 0, ","
   lines = lines.map (a) -> a.concat dictionary_lookup(a[word_column_index]) || ""
+  lines = lines.filter (a) -> 3 is a.length
   console.log csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
 
 update_hsk3 = () ->
