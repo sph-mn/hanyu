@@ -46,6 +46,15 @@ cedict_glossary = (a) ->
     /.sanskrit/
     /sanskrit./
     /.bird species./
+    /japanese/
+    /.japan/
+    /japan./
+    /.taiwan/
+    /taiwan./
+    /korea./
+    /.korea/
+    /ancient./
+    /.ancient/
   ]
   definitions = a.split "/"
   definitions = definitions.map (a) -> a.toLowerCase()
@@ -103,7 +112,7 @@ cedict_filter_only = () ->
   index_lines = index_lines.concat index_lines_traditional
   fs.writeFile "data/cedict-filtered.idx", index_lines.join("\n"), on_error
 
-cedict_extract = () ->
+update_cedict_csv = () ->
   cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
   frequency = array_from_newline_file "data/frequency-pinyin.csv", "utf-8"
   frequency_index = {}
@@ -212,13 +221,13 @@ update_frequency_pinyin_translation = () ->
   fs.writeFile "data/frequency-pinyin-translation.csv", data, on_error
 
 module.exports = {
-  clean_frequency_list
-  cedict_extract
-  character_list
-  update_dictionary
-  csv_add_translations
   cedict_filter_only
-  update_hsk3
+  character_list
+  clean_frequency_list
+  csv_add_translations
+  update_cedict_csv
+  update_dictionary
   update_frequency_pinyin
   update_frequency_pinyin_translation
+  update_hsk3
 }
