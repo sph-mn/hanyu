@@ -61,10 +61,12 @@ cedict_merge_definitions = (a) ->
   Object.values(table).sort((a, b) -> a[0] - b[0]).map((a) -> a[1])
 
 data_additions = (a) ->
+  # manual additions to the dictionary
   a.push ["你", "ni3", ["you"]]
   a
 
 cedict_filter_only = () ->
+  # retains the original cedict format.
   cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
   frequency_array = array_from_newline_file "data/frequency.csv", "utf-8"
   frequency = {}
@@ -198,8 +200,16 @@ update_frequency_pinyin = () ->
   hsk_index = {}
   hsk.forEach (a) -> hsk_index[a[0]] = a[1] unless hsk_index[a[0]]
   data = frequency.map (a) -> [a, (hsk_index[a] || "")]
-  data = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
+  data = csv_stringify.stringify(data, {delimiter: " "}, on_error)
   fs.writeFile "data/frequency-pinyin.csv", data, on_error
+
+update_frequency_pinyin_translation = () ->
+  dictionary_lookup = dictionary_lookup_f()
+  lines = read_csv_file "data/frequency.csv", " "
+  lines = lines.map (a) -> a.concat dictionary_lookup(a[0]) || ""
+  lines = lines.filter (a) -> 3 is a.length
+  data = csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/frequency-pinyin-translation.csv", data, on_error
 
 module.exports = {
   clean_frequency_list
@@ -210,4 +220,5 @@ module.exports = {
   cedict_filter_only
   update_hsk3
   update_frequency_pinyin
+  update_frequency_pinyin_translation
 }
