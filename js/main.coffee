@@ -18,47 +18,48 @@ character_list = () ->
 
 cedict_glossary = (a) ->
   filter_regexp = [
-    /[^()a-z0-9?': ,.-]/
-    /^taiwan pr./
-    /variant of /
-    /^cl:/
-    /^surname /
     /^abbr\. for /
-    /^see [^a-zA-Z]/
-    /^see also [^a-zA-Z]/
-    /^used in [^a-zA-Z]/
-    /^\(used in /
-    /\(tw\)/
     /^also pr\. /
-    /^taiwanese \. /
-    /\(\d+/
-    /\d+-\d+/
+    /.ancient/
+    /ancient./
+    /[^()a-z0-9?':; ,.-]/
+    /.bird species./
     /\(budd.+/
-    /\(classical/
-    /\(in classical/
-    /\(onom/
-    /\(old\)/
-    /\(budd.+\)/
     /.buddhism/
     /buddhism./
-    /buddhist./
     /.buddhist/
-    /.sanskrit/
-    /sanskrit./
-    /.bird species./
-    /japanese/
+    /buddhist./
+    /^cl:/
+    /\(classical/
+    /\(\d+/
+    /\d+-\d+/
+    /\(in classical/
     /.japan/
     /japan./
+    /japanese/
+    /.korea/
+    /korea./
+    /\(old\)/
+    /\(onom/
+    /.sanskrit/
+    /sanskrit./
+    /^see also [^a-zA-Z]/
+    /^see [^a-zA-Z]/
+    /^surname /
     /.taiwan/
     /taiwan./
-    /korea./
-    /.korea/
-    /ancient./
-    /.ancient/
+    /^taiwanese \. /
+    /^taiwan pr./
+    /\(tw\)/
+    /^\(used in /
+    /^used in /
+    /variant of /
+    /\(loanword/
+    /\(neologism/
   ]
-  definitions = a.split "/"
-  definitions = definitions.map (a) -> a.toLowerCase()
-  definitions.filter (a) -> !filter_regexp.some((b) -> a.match b)
+  a = a.split("/").map (a) -> a.toLowerCase().split(";")
+  a = a.flat().map (a) -> a.trim()
+  a.filter (a) -> !filter_regexp.some((b) -> a.match b)
 
 cedict_merge_definitions = (a) ->
   table = {}
@@ -69,7 +70,7 @@ cedict_merge_definitions = (a) ->
     else table[key] = [index, a]
   Object.values(table).sort((a, b) -> a[0] - b[0]).map((a) -> a[1])
 
-data_additions = (a) ->
+cedict_additions = (a) ->
   # manual additions to the dictionary
   a.push ["你", "ni3", ["you"]]
   a
@@ -117,8 +118,8 @@ update_cedict_csv = () ->
   frequency = array_from_newline_file "data/frequency-pinyin.csv", "utf-8"
   frequency_index = {}
   frequency.forEach (a, i) ->
-    a = a.replace(" ", "")
-    frequency_index[a] = i
+    a = a.replace " ", ""
+    frequency_index[a] = i unless frequency_index[a]
   lines = cedict.split "\n"
   data = lines.map (line) ->
     if "#" is line[0] then return null
@@ -133,7 +134,7 @@ update_cedict_csv = () ->
     unless glossary.length then return null
     [word, pinyin, glossary]
   data = data.filter (a) -> a
-  data = data_additions data
+  data = cedict_additions data
   data = cedict_merge_definitions data
   data.forEach (a) -> a[2] = a[2].join "; "
   data = data.sort (a, b) ->
@@ -148,12 +149,11 @@ update_cedict_csv = () ->
     else
       fa - fb
   data = data.filter (a, index) -> index < 3000 || a[0].length < 3
-  test_order = () ->
+  test = () ->
     example1 = data.findIndex((a) => a[0] is "猫")
     example2 = data.findIndex((a) => a[0] is "熊猫")
-    if example1 < example2 then console.log "success"
-    else console.log "failure"
-  #test_order()
+    throw "test failed" unless example1 < example2
+  #test()
   fs.writeFile "data/cedict.csv", csv_stringify.stringify(data), on_error
 
 dictionary_cedict_to_json = (data) ->
@@ -179,26 +179,11 @@ clean_frequency_list = () ->
     traditional_to_simplified remove_non_chinese_characters a
   frequency_array.forEach (a) -> console.log a
 
-dictionary_lookup_f = () ->
-  dictionary = {}
-  words = read_csv_file "data/cedict.csv", ","
-  words.forEach (a) ->
-    unless dictionary[a[0]]
-      dictionary[a[0]] = a.slice 1
-  (a) -> dictionary[a]
-
-csv_add_translations = (word_column_index) ->
-  dictionary_lookup = dictionary_lookup_f()
-  lines = read_csv_file 0, ","
-  lines = lines.map (a) -> a.concat dictionary_lookup(a[word_column_index]) || ""
-  lines = lines.filter (a) -> 3 is a.length
-  console.log csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
-
 update_hsk3 = () ->
   files = fs.readdirSync "data/hsk3"
   data = files.map (a) -> read_csv_file("data/hsk3/#{a}", "\t")
   data = data.flat(1).map (a) ->
-    pinyin = pinyin_split.split(a[2]).map(pinyin_utils.markToNumber).join("")
+    pinyin = pinyin_split.split(a[2]).map(pinyin_utils.markToNumber).join("").toLowerCase()
     [a[1], pinyin]
   data = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/hsk3.csv", data, on_error
@@ -207,15 +192,30 @@ update_frequency_pinyin = () ->
   frequency = array_from_newline_file "data/frequency.csv", "utf-8"
   hsk = read_csv_file "data/hsk3.csv", " "
   hsk_index = {}
-  hsk.forEach (a) -> hsk_index[a[0]] = a[1] unless hsk_index[a[0]]
+  hsk.forEach (a) ->
+    return if hsk_index[a[0]]
+    pinyin = a[1]
+    pinyin += "5" unless /[0-5]$/.test pinyin
+    hsk_index[a[0]] = pinyin
   data = frequency.map (a) -> [a, (hsk_index[a] || "")]
   data = csv_stringify.stringify(data, {delimiter: " "}, on_error)
   fs.writeFile "data/frequency-pinyin.csv", data, on_error
 
 update_frequency_pinyin_translation = () ->
+  dictionary_lookup_f = () ->
+    dictionary = {}
+    words = read_csv_file "data/cedict.csv", ","
+    words.forEach (a) ->
+      key = a[0] + a[1]
+      dictionary[key] = a.slice(1) unless dictionary[key]
+      dictionary[a[0]] = a.slice(1) unless dictionary[a[0]]
+    (word, pinyin) -> dictionary[word + pinyin]
   dictionary_lookup = dictionary_lookup_f()
-  lines = read_csv_file "data/frequency.csv", " "
-  lines = lines.map (a) -> a.concat dictionary_lookup(a[0]) || ""
+  frequency_pinyin = read_csv_file "data/frequency-pinyin.csv", " "
+  lines = frequency_pinyin.map (a) ->
+    translation = dictionary_lookup a[0], a[1]
+    return [] unless translation
+    [a[0], translation[0], translation[1]]
   lines = lines.filter (a) -> 3 is a.length
   data = csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/frequency-pinyin-translation.csv", data, on_error
@@ -224,7 +224,6 @@ module.exports = {
   cedict_filter_only
   character_list
   clean_frequency_list
-  csv_add_translations
   update_cedict_csv
   update_dictionary
   update_frequency_pinyin
