@@ -5,6 +5,7 @@ pinyin_utils = require "pinyin-utils"
 pinyin_split = require "pinyin-split"
 csv_parse = require "csv-parse/sync"
 hanzi_tools = require "hanzi-tools"
+pinyin_split = require "pinyin-split"
 
 read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-8"), {delimiter: delimiter}
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
@@ -220,6 +221,74 @@ update_frequency_pinyin_translation = () ->
   data = csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/frequency-pinyin-translation.csv", data, on_error
 
+mark_to_number = (a) ->
+  a.split(" ").map((a) -> pinyin_split.split(a).map(pinyin_utils.markToNumber).join("")).join(" ")
+
+dictionary_index_f = (key_index) ->
+  dictionary = {}
+  words = read_csv_file "data/cedict.csv", ","
+  words.forEach (a) ->
+    key = a[key_index]
+    if dictionary[key] then dictionary[key].push a
+    else dictionary[key] = [a]
+  (pinyin) -> dictionary[pinyin]
+
+pinyin_to_hanzi = (a) ->
+  # for each space separated element, find all longest most frequent words with the pronunciation.
+  dictionary_lookup = dictionary_index_f 1
+  results = []
+  a.split(" ").forEach (a) ->
+    syllables = pinyin_split.split a
+    max_word_length = 5
+    per_length = (i, j) -> syllables.slice(i, j).join("")
+    per_syllable = (i) ->
+      end = Math.min(i + max_word_length, syllables.length) + 1
+      per_length i, j for j in [(i + 1)...end]
+    candidates = (per_syllable i for i in [0...syllables.length])
+    i = 0
+    while i < candidates.length
+      matches = []
+      j = 0
+      reversed_candidates = candidates[i].reverse()
+      while j < reversed_candidates.length
+        translations = dictionary_lookup reversed_candidates[j]
+        if translations
+          matches.push translations.map((a) -> a[0]).join "/"
+          i += reversed_candidates.length - j
+          break
+        j += 1
+      results.push (if matches.length then matches[0] else candidates[i][0])
+      i += 1
+  results.join " "
+
+hanzi_to_pinyin = (a) ->
+  # same algorithm as for pinyin_to_hanzi except for hanzi as input
+  dictionary_lookup = dictionary_index_f 0
+  results = []
+  a.split(" ").forEach (a) ->
+    syllables = a.trim().split ""
+    max_word_length = 5
+    per_length = (i, j) -> syllables.slice(i, j).join("")
+    per_syllable = (i) ->
+      end = Math.min(i + max_word_length, syllables.length) + 1
+      per_length i, j for j in [(i + 1)...end]
+    candidates = (per_syllable i for i in [0...syllables.length])
+    i = 0
+    while i < candidates.length
+      matches = []
+      j = 0
+      reversed_candidates = candidates[i].reverse()
+      while j < reversed_candidates.length
+        translations = dictionary_lookup reversed_candidates[j]
+        if translations
+          matches.push translations.map((a) -> a[1]).join "/"
+          i += reversed_candidates.length - j
+          break
+        j += 1
+      results.push (if matches.length then matches[0] else candidates[i][0])
+      i += 1
+  results.join " "
+
 module.exports = {
   cedict_filter_only
   character_list
@@ -229,4 +298,8 @@ module.exports = {
   update_frequency_pinyin
   update_frequency_pinyin_translation
   update_hsk3
+  traditional_to_simplified
+  pinyin_to_hanzi
+  hanzi_to_pinyin
+  mark_to_number
 }

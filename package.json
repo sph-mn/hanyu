@@ -4,6 +4,7 @@
   "license": "cc-by-sa",
   "dependencies": {
     "coffeescript": "*",
+    "commander": ">=11",
     "csv": "*",
     "hanzi-tools": "*",
     "lebab": "^3.2.1",

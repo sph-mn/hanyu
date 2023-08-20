@@ -1,0 +1,17 @@
+#!./node_modules/coffeescript/bin/coffee
+fs = require "fs"
+commander = require "commander"
+main = require "../js/main"
+commander
+  .name("hanzi-convert")
+  .description("convert chinese text. reads from standard input and writes to standard output")
+  .option("-s, --simplify", "convert from traditional to simlified")
+  .option("-p, --pinyin", "convert from pinyin to hanzi, resolving ambiguities by preferring the longest most frequent words")
+  .option("-z, --hanzi", "convert from pinyin to hanzi")
+  .option("-n, --numbers", "convert from pinyin marks to numbers")
+options = commander.parse().opts()
+input = fs.readFileSync 0, "utf-8"
+if options.simplify then console.log main.traditional_to_simplified input
+else if options.numbers then console.log main.mark_to_number input
+else if options.pinyin then console.log main.hanzi_to_pinyin input
+else if options.hanzi then console.log main.pinyin_to_hanzi input
