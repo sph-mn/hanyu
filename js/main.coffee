@@ -254,11 +254,10 @@ pinyin_to_hanzi = (a) ->
         translations = dictionary_lookup reversed_candidates[j]
         if translations
           matches.push translations.map((a) -> a[0]).join "/"
-          i += reversed_candidates.length - j
           break
         j += 1
       results.push (if matches.length then matches[0] else candidates[i][0])
-      i += 1
+      i += reversed_candidates.length - j
   results.join " "
 
 hanzi_to_pinyin = (a) ->
@@ -282,11 +281,10 @@ hanzi_to_pinyin = (a) ->
         translations = dictionary_lookup reversed_candidates[j]
         if translations
           matches.push translations.map((a) -> a[1]).join "/"
-          i += reversed_candidates.length - j
           break
         j += 1
       results.push (if matches.length then matches[0] else candidates[i][0])
-      i += 1
+      i += reversed_candidates.length - j
   results.join " "
 
 module.exports = {
