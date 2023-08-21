@@ -1,6 +1,7 @@
-#!./node_modules/coffeescript/bin/coffee
+#!/usr/bin/coffee
 fs = require "fs"
 commander = require "commander"
+path = require "node:path"
 main = require "../js/main"
 commander
   .name("hanzi-convert")
@@ -11,6 +12,7 @@ commander
   .option("-n, --numbers", "convert from pinyin marks to numbers")
 options = commander.parse().opts()
 input = fs.readFileSync 0, "utf-8"
+process.chdir path.dirname __dirname
 if options.simplify then console.log main.traditional_to_simplified input
 else if options.numbers then console.log main.mark_to_number input
 else if options.pinyin then console.log main.hanzi_to_pinyin input

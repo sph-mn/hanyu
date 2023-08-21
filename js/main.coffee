@@ -233,12 +233,15 @@ dictionary_index_f = (key_index) ->
     else dictionary[key] = [a]
   (pinyin) -> dictionary[pinyin]
 
-pinyin_to_hanzi = (a) ->
+non_hanzi_regexp = /[^\u4E00-\u9FA5]/g
+non_pinyin_regexp = /[^a-z0-5]/g
+
+find_multiple_word_matches = (a, lookup_index, translation_index, split_syllables) ->
   # for each space separated element, find all longest most frequent words with the pronunciation.
-  dictionary_lookup = dictionary_index_f 1
+  dictionary_lookup = dictionary_index_f lookup_index
   results = []
   a.split(" ").forEach (a) ->
-    syllables = pinyin_split.split a
+    syllables = split_syllables a
     max_word_length = 5
     per_length = (i, j) -> syllables.slice(i, j).join("")
     per_syllable = (i) ->
@@ -249,43 +252,29 @@ pinyin_to_hanzi = (a) ->
     while i < candidates.length
       matches = []
       j = 0
-      reversed_candidates = candidates[i].reverse()
+      reversed_candidates = candidates[i].toReversed()
       while j < reversed_candidates.length
         translations = dictionary_lookup reversed_candidates[j]
         if translations
-          matches.push translations.map((a) -> a[0]).join "/"
+          matches.push translations.map((a) -> a[translation_index]).join "/"
           break
         j += 1
-      results.push (if matches.length then matches[0] else candidates[i][0])
-      i += reversed_candidates.length - j
+      if matches.length
+        results.push matches[0]
+        i += reversed_candidates.length - j
+      else
+        results.push candidates[i][0]
+        i += 1
   results.join " "
 
+
+pinyin_to_hanzi = (a) ->
+  a = a.replace(non_pinyin_regexp, " ").trim()
+  find_multiple_word_matches a, 1, 0, pinyin_split.split
+
 hanzi_to_pinyin = (a) ->
-  # same algorithm as for pinyin_to_hanzi except for hanzi as input
-  dictionary_lookup = dictionary_index_f 0
-  results = []
-  a.split(" ").forEach (a) ->
-    syllables = a.trim().split ""
-    max_word_length = 5
-    per_length = (i, j) -> syllables.slice(i, j).join("")
-    per_syllable = (i) ->
-      end = Math.min(i + max_word_length, syllables.length) + 1
-      per_length i, j for j in [(i + 1)...end]
-    candidates = (per_syllable i for i in [0...syllables.length])
-    i = 0
-    while i < candidates.length
-      matches = []
-      j = 0
-      reversed_candidates = candidates[i].reverse()
-      while j < reversed_candidates.length
-        translations = dictionary_lookup reversed_candidates[j]
-        if translations
-          matches.push translations.map((a) -> a[1]).join "/"
-          break
-        j += 1
-      results.push (if matches.length then matches[0] else candidates[i][0])
-      i += reversed_candidates.length - j
-  results.join " "
+  a = a.replace(non_hanzi_regexp, " ").trim()
+  find_multiple_word_matches a, 0, 1, (a) -> a.split ""
 
 module.exports = {
   cedict_filter_only
