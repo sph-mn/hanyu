@@ -267,7 +267,6 @@ find_multiple_word_matches = (a, lookup_index, translation_index, split_syllable
         i += 1
   results.join " "
 
-
 pinyin_to_hanzi = (a) ->
   a = a.replace(non_pinyin_regexp, " ").trim()
   find_multiple_word_matches a, 1, 0, pinyin_split.split
