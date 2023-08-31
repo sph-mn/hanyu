@@ -180,18 +180,18 @@ clean_frequency_list = () ->
     traditional_to_simplified remove_non_chinese_characters a
   frequency_array.forEach (a) -> console.log a
 
-update_hsk3 = () ->
-  files = fs.readdirSync "data/hsk3"
-  data = files.map (a) -> read_csv_file("data/hsk3/#{a}", "\t")
+update_hsk = () ->
+  files = fs.readdirSync "data/hsk"
+  data = files.map (a) -> read_csv_file("data/hsk/#{a}", "\t")
   data = data.flat(1).map (a) ->
     pinyin = pinyin_split.split(a[2]).map(pinyin_utils.markToNumber).join("").toLowerCase()
     [a[1], pinyin]
   data = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/hsk3.csv", data, on_error
+  fs.writeFile "data/hsk.csv", data, on_error
 
 update_frequency_pinyin = () ->
   frequency = array_from_newline_file "data/frequency.csv", "utf-8"
-  hsk = read_csv_file "data/hsk3.csv", " "
+  hsk = read_csv_file "data/hsk.csv", " "
   hsk_index = {}
   hsk.forEach (a) ->
     return if hsk_index[a[0]]
@@ -202,36 +202,40 @@ update_frequency_pinyin = () ->
   data = csv_stringify.stringify(data, {delimiter: " "}, on_error)
   fs.writeFile "data/frequency-pinyin.csv", data, on_error
 
-update_frequency_pinyin_translation = () ->
-  dictionary_lookup_f = () ->
-    dictionary = {}
-    words = read_csv_file "data/cedict.csv", ","
-    words.forEach (a) ->
-      key = a[0] + a[1]
-      dictionary[key] = a.slice(1) unless dictionary[key]
-      dictionary[a[0]] = a.slice(1) unless dictionary[a[0]]
-    (word, pinyin) -> dictionary[word + pinyin]
-  dictionary_lookup = dictionary_lookup_f()
-  frequency_pinyin = read_csv_file "data/frequency-pinyin.csv", " "
-  lines = frequency_pinyin.map (a) ->
-    translation = dictionary_lookup a[0], a[1]
-    return [] unless translation
-    [a[0], translation[0], translation[1]]
-  lines = lines.filter (a) -> 3 is a.length
-  data = csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/frequency-pinyin-translation.csv", data, on_error
-
-mark_to_number = (a) ->
-  a.split(" ").map((a) -> pinyin_split.split(a).map(pinyin_utils.markToNumber).join("")).join(" ")
+object_array_add = (object, key, value) ->
+  if object[key] then object[key].push value else object[key] = [value]
 
 dictionary_index_f = (key_index) ->
   dictionary = {}
   words = read_csv_file "data/cedict.csv", ","
   words.forEach (a) ->
     key = a[key_index]
-    if dictionary[key] then dictionary[key].push a
-    else dictionary[key] = [a]
-  (pinyin) -> dictionary[pinyin]
+    object_array_add dictionary, key, a
+  (a) -> dictionary[a]
+
+dictionary_index_word_pinyin_f = (word_index, pinyin_index) ->
+  dictionary = {}
+  words = read_csv_file "data/cedict.csv", ","
+  words.forEach (a) ->
+    word = a[word_index]
+    key = a[word_index] + a[pinyin_index]
+    object_array_add dictionary, key, a
+    object_array_add dictionary, word, a
+  (word, pinyin) -> dictionary[word + pinyin]
+
+update_frequency_pinyin_translation = () ->
+  dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
+  frequency_pinyin = read_csv_file "data/frequency-pinyin.csv", " "
+  lines = frequency_pinyin.map (a) ->
+    translation = dictionary_lookup a[0], a[1]
+    return [] unless translation
+    [a[0], translation[0][1], translation[0][2]]
+  lines = lines.filter (a) -> 3 is a.length
+  data = csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/frequency-pinyin-translation.csv", data, on_error
+
+mark_to_number = (a) ->
+  a.split(" ").map((a) -> pinyin_split.split(a).map(pinyin_utils.markToNumber).join("")).join(" ")
 
 non_hanzi_regexp = /[^\u4E00-\u9FA5]/g
 non_pinyin_regexp = /[^a-z0-5]/g
@@ -267,6 +271,23 @@ find_multiple_word_matches = (a, lookup_index, translation_index, split_syllable
         i += 1
   results.join " "
 
+dsv_add_translations = (word_index, pinyin_index) ->
+  dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
+  rows = read_csv_file(0, ",").map (a) ->
+    translations = dictionary_lookup a[0], a[1]
+    return a unless translations
+    a.concat [translations[0][2]]
+  console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
+
+update_hsk_pinyin_translations = () ->
+  dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
+  hsk = read_csv_file("data/hsk.csv", " ").map (a) ->
+    translations = dictionary_lookup a[0], a[1]
+    return a unless translations
+    a.concat [translations[0][2]]
+  data = csv_stringify.stringify(hsk, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/hsk-pinyin-translation.csv", data, on_error
+
 pinyin_to_hanzi = (a) ->
   a = a.replace(non_pinyin_regexp, " ").trim()
   find_multiple_word_matches a, 1, 0, pinyin_split.split
@@ -279,11 +300,13 @@ module.exports = {
   cedict_filter_only
   character_list
   clean_frequency_list
+  dsv_add_translations
   update_cedict_csv
   update_dictionary
   update_frequency_pinyin
   update_frequency_pinyin_translation
-  update_hsk3
+  update_hsk
+  update_hsk_pinyin_translations
   traditional_to_simplified
   pinyin_to_hanzi
   hanzi_to_pinyin
