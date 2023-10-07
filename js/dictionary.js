@@ -3,7 +3,7 @@ function word_search_init() {
     input: document.getElementById("input"),
     button: document.getElementById("input-clear"),
     search_translations: document.getElementById("search-translations"),
-    search_partial: document.getElementById("search-partial"),
+    search_split: document.getElementById("search-split"),
     results: document.getElementById("results")
   }
 
@@ -40,7 +40,7 @@ function word_search_init() {
       }
     } else {
       let regexp
-      if (dom.search_partial.checked) regexp = new RegExp(value)
+      if (!dom.search_split.checked) regexp = new RegExp(value)
       else {
         const characters = value.replace(/[^\u4E00-\u9FA5]/ig, "").split("")
         const words = []
@@ -68,7 +68,7 @@ function word_search_init() {
   dom.input.addEventListener("keyup", on_filter)
   dom.input.addEventListener("change", on_filter)
   dom.search_translations.addEventListener("change", on_filter)
-  dom.search_partial.addEventListener("change", on_filter)
+  dom.search_split.addEventListener("change", on_filter)
 }
 
 word_search_init()
