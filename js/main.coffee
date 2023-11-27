@@ -1,5 +1,5 @@
 fs = require "fs"
-scraper = require "table-scraper"
+#scraper = require "table-scraper"
 csv_stringify = require "csv-stringify/sync"
 pinyin_utils = require "pinyin-utils"
 pinyin_split = require "pinyin-split"
@@ -11,11 +11,11 @@ read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
 on_error = (a) -> if a then console.error a
 
-character_list = () ->
-  url = "https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters"
-  scraper.get(url).then (tables) ->
-    hanzi = tables.flat().map (a) -> a.Hanzi
-    fs.writeFile "data/togscc.csv", hanzi.join("\n") + "\n", on_error
+#character_list = () ->
+#  url = "https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters"
+#  scraper.get(url).then (tables) ->
+#    hanzi = tables.flat().map (a) -> a.Hanzi
+#    fs.writeFile "data/togscc.csv", hanzi.join("\n") + "\n", on_error
 
 cedict_glossary = (a) ->
   filter_regexp = [
@@ -279,6 +279,12 @@ dsv_add_translations = (word_index, pinyin_index) ->
     a.concat [translations[0][2]]
   console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
 
+dsv_mark_to_number = (pinyin_index) ->
+  rows = read_csv_file(0, " ").map (a) ->
+    a[pinyin_index] = a[pinyin_index].split(", ").map(pinyin_utils.markToNumber).join(", ")
+    a
+  console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
+
 update_hsk_pinyin_translations = () ->
   dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
   hsk = read_csv_file("data/hsk.csv", " ").map (a) ->
@@ -296,11 +302,30 @@ hanzi_to_pinyin = (a) ->
   a = a.replace(non_hanzi_regexp, " ").trim()
   find_multiple_word_matches a, 0, 1, (a) -> a.split ""
 
+find_components = (a, decompositions) ->
+  b = decompositions[a]
+  c = []
+  return c unless b
+  return c if b[1] is b[2]
+  c.push b[1] unless b[1] is "*" or a is b[1]
+  c.push b[2] unless b[2] is "*" or a is b[2]
+  c.concat(c.map (c) -> find_components(c, decompositions)).flat()
+
+update_compositions = () ->
+  chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
+  decompositions_csv = read_csv_file("data/decompositions.csv", "\t").sort (a, b) -> a[1] - b[1]
+  decompositions = {}
+  decompositions_csv.forEach (a) -> decompositions[a[0]] = [a[1], a[3], a[5]]
+  compositions = chars.map (a) -> [a].concat find_components(a, decompositions)
+  data = csv_stringify.stringify(compositions, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/compositions.csv", data, on_error
+
 module.exports = {
+  update_compositions
   cedict_filter_only
-  character_list
   clean_frequency_list
   dsv_add_translations
+  dsv_mark_to_number
   update_cedict_csv
   update_dictionary
   update_frequency_pinyin

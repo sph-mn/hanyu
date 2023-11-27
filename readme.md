@@ -7,6 +7,8 @@ data sources:
 * [word frequency](https://github.com/ernop/anki-chinese-word-frequency/blob/master/internet-zh.num)
 * [chinese to english translations](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)
 * [hsk3 word list](https://github.com/krmanik/HSK-3.0-words-list/tree/main)
+* [chinese character decompositions](https://commons.wikimedia.org/wiki/Commons:Chinese_characters_decomposition)
+* [table of general standard chinese characters](https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters)
 
 license: creative commons share-alike
 
@@ -18,6 +20,8 @@ development:
 see under data/
 * frequency-pinyin-translation.csv: words with pinyin and translation sorted by frequency
 * cedict.csv: filtered csv version of cedict with one translation per line
+* compositions.csv: characters split into components
+* table-of-general-standard-chinese-characters.csv
 * characters-by-reading.txt, and more
 
 # hanzi-convert
