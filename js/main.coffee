@@ -7,7 +7,7 @@ csv_parse = require "csv-parse/sync"
 hanzi_tools = require "hanzi-tools"
 pinyin_split = require "pinyin-split"
 
-read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-8"), {delimiter: delimiter}
+read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-8"), {delimiter: delimiter, relax_column_count: true}
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
 on_error = (a) -> if a then console.error a
 
