@@ -281,7 +281,7 @@ dsv_add_translations = (word_index, pinyin_index) ->
 
 dsv_mark_to_number = (pinyin_index) ->
   rows = read_csv_file(0, " ").map (a) ->
-    a[pinyin_index] = a[pinyin_index].split(", ").map(pinyin_utils.markToNumber).join(", ")
+    a[pinyin_index] = mark_to_number a[pinyin_index]
     a
   console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
 
@@ -320,6 +320,18 @@ update_compositions = () ->
   data = csv_stringify.stringify(compositions, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/compositions.csv", data, on_error
 
+dsv_process = (a, b) ->
+  # add pinyin looked up from other file
+  pronunciations = {}
+  read_csv_file(a, " ").forEach (a) -> pronunciations[a[0]] = a[1]
+  words = read_csv_file b, " "
+  words = words.map (a) -> [a[0], pronunciations[a[0]]]
+  console.log csv_stringify.stringify(words, {delimiter: " "}, on_error).trim()
+  # filter characters
+  #chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
+  #rows = read_csv_file(0, " ").map (a) ->
+  #  [a[0]].concat a.slice(1).filter (a) -> chars.includes a
+
 module.exports = {
   update_compositions
   cedict_filter_only
@@ -336,4 +348,5 @@ module.exports = {
   pinyin_to_hanzi
   hanzi_to_pinyin
   mark_to_number
+  dsv_process
 }
