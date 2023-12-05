@@ -273,8 +273,8 @@ find_multiple_word_matches = (a, lookup_index, translation_index, split_syllable
 
 dsv_add_translations = (word_index, pinyin_index) ->
   dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
-  rows = read_csv_file(0, ",").map (a) ->
-    translations = dictionary_lookup a[0], a[1]
+  rows = read_csv_file(0, " ").map (a) ->
+    translations = dictionary_lookup a[word_index], a[pinyin_index]
     return a unless translations
     a.concat [translations[0][2]]
   console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
@@ -332,11 +332,23 @@ dsv_process = (a, b) ->
   #rows = read_csv_file(0, " ").map (a) ->
   #  [a[0]].concat a.slice(1).filter (a) -> chars.includes a
 
+dsv_add_example_words = () ->
+  dictionary = dictionary_index_word_pinyin_f 0, 1
+  words = read_csv_file "data/frequency-pinyin-translation.csv", " "
+  rows = read_csv_file(0, " ").map (a) ->
+    char_words = words.filter((b) -> b[0].includes a[0])
+    unless char_words.length
+      char_words = dictionary(a[0], a[1]) || []
+    a.push char_words.slice(0, 5).map((b) -> b.join(" ")).join("\n")
+    a
+  console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
+
 module.exports = {
   update_compositions
   cedict_filter_only
   clean_frequency_list
   dsv_add_translations
+  dsv_add_example_words
   dsv_mark_to_number
   update_cedict_csv
   update_dictionary

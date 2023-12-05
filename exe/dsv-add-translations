@@ -1,0 +1,5 @@
+#!/usr/bin/coffee
+main = require "../js/main"
+word_index = process.argv[2]
+pinyin_index = process.argv[3]
+main.dsv_add_translations word_index, pinyin_index

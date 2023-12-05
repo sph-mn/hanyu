@@ -1,0 +1,3 @@
+#!/usr/bin/coffee
+main = require "../js/main"
+main.dsv_add_example_words()
