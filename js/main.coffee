@@ -343,6 +343,23 @@ dsv_add_example_words = () ->
     a
   console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
 
+update_characters_by_reading = () ->
+  chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv", " "
+  by_reading = {}
+  chars.forEach (a) ->
+    b = a[1]
+    a = a[0]
+    if b.includes ", "
+      b = b.split ", "
+    else b = [b]
+    b.forEach (b) ->
+      if by_reading[b] then by_reading[b].push a
+      else by_reading[b] = [a]
+  rows = Object.keys(by_reading).map (a) -> [a, by_reading[a].join("")]
+  rows = rows.sort (a, b) -> b[1].length - a[1].length
+  data = csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/characters-by-reading.csv", data, on_error
+
 module.exports = {
   update_compositions
   cedict_filter_only
@@ -361,4 +378,5 @@ module.exports = {
   hanzi_to_pinyin
   mark_to_number
   dsv_process
+  update_characters_by_reading
 }
