@@ -169,7 +169,7 @@ update_dictionary = () ->
   js = js.replace "__word_data__", words
   html = fs.readFileSync "html/hanyu-dictionary-template.html", "utf8"
   html = html.replace "__script__", js.trim()
-  fs.writeFile "download/hanyu-dictionary.html", html, on_error
+  fs.writeFile "html/hanyu-dictionary.html", html, on_error
 
 remove_non_chinese_characters = (a) -> a.replace /[^\p{Script=Han}]/ug, ""
 traditional_to_simplified = (a) -> hanzi_tools.simplify a

@@ -1,28 +1,32 @@
 # chinese language learning material
 
 # dictionary
-single page dictionary that sorts results by word frequency and length. see download/ for the html file (needs to be hosted on a server for the javascript to run). also hosted here [sph.mn/other/chinese/hanyu-dictionary.html](http://sph.mn/other/chinese/hanyu-dictionary.html).
-
-data sources:
-* [word frequency](https://github.com/ernop/anki-chinese-word-frequency/blob/master/internet-zh.num)
-* [chinese to english translations](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)
-* [hsk3 word list](https://github.com/krmanik/HSK-3.0-words-list/tree/main)
-* [chinese character decompositions](https://commons.wikimedia.org/wiki/Commons:Chinese_characters_decomposition)
-* [table of general standard chinese characters](https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters)
-
-license: creative commons share-alike
-
-development:
-* ./exe/update-dictionary to build download/hanyu-dictionary.html from html/hanyu-dictionary-template.html
-* the main code file is js/main.coffee
+dictionary that sorts results by word frequency and character count. it is a single file, html/hanyu-dictionary.html, and needs to be served via http for the javascript to run in the browser. also hosted [here](http://sph.mn/other/chinese/hanyu-dictionary.html).
 
 # data files
 see under data/
 * frequency-pinyin-translation.csv: words with pinyin and translation sorted by frequency
 * cedict.csv: filtered csv version of cedict with one translation per line
 * compositions.csv: characters split into components
-* table-of-general-standard-chinese-characters.csv
-* characters-by-reading.txt, and more
+* table-of-general-standard-chinese-characters.csv: the official character list including pronunciations
+* characters-by-reading.txt
+* words-by-type/: separated by verb, noun, adjective, and so on
+* hsk.csv and hsk-pinyin-translations.csv
+* ... and more
+
+# data sources
+* [word frequency](https://github.com/ernop/anki-chinese-word-frequency/blob/master/internet-zh.num)
+* [chinese to english translations](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)
+* [hsk3 word list](https://github.com/krmanik/HSK-3.0-words-list/tree/main)
+* [chinese character decompositions](https://commons.wikimedia.org/wiki/Commons:Chinese_characters_decomposition)
+* [table of general standard chinese characters](https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters)
+
+# license
+creative commons share-alike
+
+# development
+* ./exe/update-dictionary to build html/hanyu-dictionary.html from html/hanyu-dictionary-template.html
+* the main code file is js/main.coffee
 
 # hanzi-convert
 a command-line utility to convert text.
