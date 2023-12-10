@@ -6,6 +6,8 @@ pinyin_split = require "pinyin-split"
 csv_parse = require "csv-parse/sync"
 hanzi_tools = require "hanzi-tools"
 pinyin_split = require "pinyin-split"
+http =  require "https"
+html_parser = require "node-html-parser"
 
 read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-8"), {delimiter: delimiter, relax_column_count: true}
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
@@ -311,7 +313,7 @@ find_components = (a, decompositions) ->
   c.push b[2] unless b[2] is "*" or a is b[2]
   c.concat(c.map (c) -> find_components(c, decompositions)).flat()
 
-update_compositions = () ->
+compositions_from_decompositions = () ->
   chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
   decompositions_csv = read_csv_file("data/decompositions.csv", "\t").sort (a, b) -> a[1] - b[1]
   decompositions = {}
@@ -360,6 +362,50 @@ update_characters_by_reading = () ->
   data = csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/characters-by-reading.csv", data, on_error
 
+http_get = (url) ->
+  new Promise (resolve, reject) ->
+    http.get url, (response) ->
+      data = []
+      response.on "data", (a) -> data.push a
+      response.on "end", () -> resolve Buffer.concat(data).toString()
+      response.on "error", (error) -> reject error
+
+update_compositions = () ->
+  path = "data/character-compositions.csv"
+  if fs.existsSync path then rows = read_csv_file path, " "
+  else rows = []
+  existing = {}
+  rows.forEach (a) -> existing[a[0]] = true
+  chars = read_csv_file("data/radicals.csv", " ").map (a) -> a[1]
+  chars = chars.concat read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
+  chars = [...new Set(chars)]
+  for a in chars
+    continue if existing[a]
+    console.log a
+    body = await http_get "https://en.wiktionary.org/wiki/#{a}"
+    html = html_parser.parse body
+    b = html.querySelector "a[title=\"w:Chinese character description languages\"]"
+    unless b
+      rows.push [a]
+      continue
+    b = b.parentNode.parentNode.textContent
+    b = b.match(/composition (.*)\)/)
+    rows.push [a, b[1]]
+  data = csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
+  fs.writeFile path, data, on_error
+
+update_strokecounts = () ->
+  counts = {}
+  counts_csv = read_csv_file "data/decompositions.csv", "\t"
+  counts_csv.forEach (a) -> counts[a[0]] = parseInt(a[1])
+  chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv", " "
+  chars.forEach (a) -> a.push counts[a[0]]
+  data = csv_stringify.stringify(chars, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/table-2.csv", data, on_error
+
+run = () ->
+  update_compositions()
+
 module.exports = {
   update_compositions
   cedict_filter_only
@@ -379,4 +425,5 @@ module.exports = {
   mark_to_number
   dsv_process
   update_characters_by_reading
+  run
 }

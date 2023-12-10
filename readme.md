@@ -18,8 +18,8 @@ see under data/
 * [word frequency](https://github.com/ernop/anki-chinese-word-frequency/blob/master/internet-zh.num)
 * [chinese to english translations](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)
 * [hsk3 word list](https://github.com/krmanik/HSK-3.0-words-list/tree/main)
-* [chinese character decompositions](https://commons.wikimedia.org/wiki/Commons:Chinese_characters_decomposition)
 * [table of general standard chinese characters](https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters)
+* [character decompositions](https://en.wiktionary.org)
 
 # license
 creative commons share-alike
