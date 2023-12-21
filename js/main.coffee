@@ -398,28 +398,39 @@ http_get = (url) ->
       response.on "end", () -> resolve Buffer.concat(data).toString()
       response.on "error", (error) -> reject error
 
-update_compositions = () ->
-  path = "data/character-compositions.csv"
-  if fs.existsSync path then rows = read_csv_file path, " "
-  else rows = []
+update_compositions_for_chars = (chars, existing_rows) ->
   existing = {}
-  rows.forEach (a) -> existing[a[0]] = true
-  chars = read_csv_file("data/radicals.csv", " ", "utf-8").map (a) -> a[1]
-  chars = chars.concat read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
-  chars = [...new Set(chars)]
+  existing_rows.forEach (a) -> existing[a[0]] = true
   for a in chars
     continue if existing[a]
     body = await http_get "https://en.wiktionary.org/wiki/#{a}"
     html = html_parser.parse body
     b = html.querySelector "a[title=\"w:Chinese character description languages\"]"
     unless b
-      rows.push [a]
+      existing_rows.push [a]
       continue
     b = b.parentNode.parentNode.textContent
     b = b.match(/composition (.*)\)/)
-    rows.push [a, b[1]]
-  data = csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
-  fs.writeFile path, data, on_error
+    existing_rows.push [a, b[1]]
+  existing_rows
+
+sort_by_array_with_index = (a, sorting, index) ->
+  a.sort (a, b) -> sorting.indexOf(a[index]) - sorting.indexOf(b[index])
+
+update_compositions = () ->
+  compositions = read_csv_file("data/character-compositions.csv", " ", "utf-8")
+  radicals = read_csv_file("data/radicals.csv", " ", "utf-8").map (a) -> a[1]
+  radical_compositions = compositions.filter (a) -> radicals.includes a[0]
+  radical_compositions = await update_compositions_for_chars radicals, radical_compositions
+  radical_compositions = sort_by_array_with_index radical_compositions, radicals, 0
+  data = csv_stringify.stringify(radical_compositions, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/radical-compositions.csv", data, on_error
+  standard = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
+  standard_compositions = compositions.filter (a) -> standard.includes a[0]
+  standard_compositions = await update_compositions_for_chars standard, standard_compositions
+  standard_compositions = sort_by_array_with_index standard_compositions, standard, 0
+  data = csv_stringify.stringify(standard_compositions, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/standard-compositions.csv", data, on_error
 
 update_strokecounts = () ->
   counts = {}
@@ -491,14 +502,18 @@ update_character_learning = () ->
   frequency_index = get_character_frequency_index()
   groups = groups.map (a) ->
     a = sort_by_character_frequency frequency_index, 0, a
+  groups = groups.map (a) ->
+    a.map (a, index) ->
+      a.push index
+      a
   groups.forEach (a, index) ->
     data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
     name = (index + 1) + ".csv"
     fs.writeFile "data/character-learning/#{name}", data, on_error
 
 run = () ->
-  #update_compositions()
-  update_character_learning()
+  update_compositions()
+  #update_character_learning()
 
 module.exports = {
   update_compositions
