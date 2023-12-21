@@ -116,13 +116,51 @@ cedict_filter_only = () ->
   index_lines = index_lines.concat index_lines_traditional
   fs.writeFile "data/cedict-filtered.idx", index_lines.join("\n"), on_error
 
-update_cedict_csv = () ->
-  cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
+get_frequency_index = () ->
   frequency = array_from_newline_file "data/frequency-pinyin.csv", "utf-8"
   frequency_index = {}
   frequency.forEach (a, i) ->
     a = a.replace " ", ""
     frequency_index[a] = i unless frequency_index[a]
+  frequency_index
+
+get_character_frequency_index = () ->
+  frequency = array_from_newline_file "data/frequency-pinyin.csv", "utf-8"
+  frequency = frequency.map((a) -> [...a[0]]).flat()
+  frequency_index = {}
+  frequency.forEach (a, i) ->
+    frequency_index[a[0]] = i unless frequency_index[a[0]]
+  frequency_index
+
+sort_by_frequency = (frequency_index, word_key, pinyin_key, data) ->
+  data = data.sort (a, b) ->
+    fa = frequency_index[a[word_key] + a[pinyin_key]]
+    fb = frequency_index[b[word_key] + b[pinyin_key]]
+    if fa is undefined and fb is undefined
+      a[word_key].length - b[word_key].length
+    else if fa is undefined
+      1
+    else if fb is undefined
+      -1
+    else
+      fa - fb
+
+sort_by_character_frequency = (frequency_index, character_key, data) ->
+  data = data.sort (a, b) ->
+    fa = frequency_index[a[character_key]]
+    fb = frequency_index[b[character_key]]
+    if fa is undefined and fb is undefined
+      a[character_key].length - b[character_key].length
+    else if fa is undefined
+      1
+    else if fb is undefined
+      -1
+    else
+      fa - fb
+
+update_cedict_csv = () ->
+  cedict = fs.readFileSync "data/cedict_ts.u8", "utf-8"
+  frequency_index = get_frequency_index()
   lines = cedict.split "\n"
   data = lines.map (line) ->
     if "#" is line[0] then return null
@@ -140,17 +178,7 @@ update_cedict_csv = () ->
   data = cedict_additions data
   data = cedict_merge_definitions data
   data.forEach (a) -> a[2] = a[2].join "; "
-  data = data.sort (a, b) ->
-    fa = frequency_index[a[0] + a[1]]
-    fb = frequency_index[b[0] + b[1]]
-    if fa is undefined and fb is undefined
-      a[0].length - b[0].length
-    else if fa is undefined
-      1
-    else if fb is undefined
-      -1
-    else
-      fa - fb
+  data = sort_by_frequency frequency_index, 0, 1, data
   data = data.filter (a, index) -> index < 3000 || a[0].length < 3
   test = () ->
     example1 = data.findIndex((a) => a[0] is "猫")
@@ -376,12 +404,11 @@ update_compositions = () ->
   else rows = []
   existing = {}
   rows.forEach (a) -> existing[a[0]] = true
-  chars = read_csv_file("data/radicals.csv", " ").map (a) -> a[1]
+  chars = read_csv_file("data/radicals.csv", " ", "utf-8").map (a) -> a[1]
   chars = chars.concat read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
   chars = [...new Set(chars)]
   for a in chars
     continue if existing[a]
-    console.log a
     body = await http_get "https://en.wiktionary.org/wiki/#{a}"
     html = html_parser.parse body
     b = html.querySelector "a[title=\"w:Chinese character description languages\"]"
@@ -403,8 +430,75 @@ update_strokecounts = () ->
   data = csv_stringify.stringify(chars, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/table-2.csv", data, on_error
 
+get_character_groups = () ->
+  chars = read_csv_file "data/characters-by-reading.csv", " ", "utf-8"
+  chars = chars.map (a) -> [...a[1]].map (b) -> [b, a[0]]
+  groups = []
+  index = 0
+  max_group_size = 800
+  min_pronunciation_count = 2
+  while index < chars.length
+    count = 0
+    group = []
+    while count < min_pronunciation_count || group.length < max_group_size
+      a = chars[index]
+      group = group.concat a
+      count += 1
+      index += 1
+      break if index >= chars.length
+    groups.push group
+    index += 1
+  groups
+
+add_example_words = () ->
+  dictionary = dictionary_index_word_pinyin_f 0, 1
+  words = read_csv_file "data/frequency-pinyin-translation.csv", " "
+  (rows) ->
+    rows.map (a) ->
+      char_words = words.filter((b) -> b[0].includes a[0])
+      unless char_words.length
+        char_words = dictionary(a[0], a[1]) || []
+      a.push char_words.slice(0, 5).map((b) -> b.join(" ")).join("\n")
+      a
+
+delete_duplicates = (a) -> [...new Set(a)]
+random_integer = (min, max) -> Math.floor(Math.random() * (max - min + 1)) + min
+random_element = (a) -> a[random_integer 0, a.length - 1]
+n_times = (n, f) -> [...Array(n).keys()].map f
+
+array_shuffle = (a) ->
+  i = a.length
+  while 0 < i
+    random_index = Math.floor(Math.random() * i)
+    i -= 1
+    temp = a[i]
+    a[i] = a[random_index]
+    a[random_index] = temp
+  a
+
+add_alternatives = (rows) ->
+  syllables = delete_duplicates rows.map (a) -> a[1]
+  rows.map (a) ->
+    alternatives = n_times 4, (n) -> random_element syllables
+    alternatives = delete_duplicates array_shuffle [a[1]].concat alternatives
+    a.push alternatives.join "/"
+    a
+
+update_character_learning = () ->
+  groups = get_character_groups()
+  groups = groups.map add_alternatives
+  groups = groups.map add_example_words()
+  frequency_index = get_character_frequency_index()
+  groups = groups.map (a) ->
+    a = sort_by_character_frequency frequency_index, 0, a
+  groups.forEach (a, index) ->
+    data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
+    name = (index + 1) + ".csv"
+    fs.writeFile "data/character-learning/#{name}", data, on_error
+
 run = () ->
-  update_compositions()
+  #update_compositions()
+  update_character_learning()
 
 module.exports = {
   update_compositions
