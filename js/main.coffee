@@ -12,6 +12,24 @@ html_parser = require "node-html-parser"
 read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-8"), {delimiter: delimiter, relax_column_count: true}
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
 on_error = (a) -> if a then console.error a
+delete_duplicates = (a) -> [...new Set(a)]
+random_integer = (min, max) -> Math.floor(Math.random() * (max - min + 1)) + min
+random_element = (a) -> a[random_integer 0, a.length - 1]
+n_times = (n, f) -> [...Array(n).keys()].map f
+remove_non_chinese_characters = (a) -> a.replace /[^\p{Script=Han}]/ug, ""
+traditional_to_simplified = (a) -> hanzi_tools.simplify a
+non_hanzi_regexp = /[^\u4E00-\u9FA5]/g
+non_pinyin_regexp = /[^a-z0-5]/g
+
+array_shuffle = (a) ->
+  i = a.length
+  while 0 < i
+    random_index = Math.floor(Math.random() * i)
+    i -= 1
+    temp = a[i]
+    a[i] = a[random_index]
+    a[random_index] = temp
+  a
 
 #character_list = () ->
 #  url = "https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters"
@@ -201,9 +219,6 @@ update_dictionary = () ->
   html = html.replace "__script__", js.trim()
   fs.writeFile "html/hanyu-dictionary.html", html, on_error
 
-remove_non_chinese_characters = (a) -> a.replace /[^\p{Script=Han}]/ug, ""
-traditional_to_simplified = (a) -> hanzi_tools.simplify a
-
 clean_frequency_list = () ->
   frequency_array = array_from_newline_file "data/frequency.csv", "utf-8"
   frequency_array = frequency_array.filter (a) ->
@@ -235,16 +250,15 @@ update_frequency_pinyin = () ->
 object_array_add = (object, key, value) ->
   if object[key] then object[key].push value else object[key] = [value]
 
-dictionary_index_f = (key_index) ->
+dictionary_index_word_f = () ->
   dictionary = {}
-  words = read_csv_file "data/cedict.csv", ","
-  words.forEach (a) ->
-    key = a[key_index]
-    object_array_add dictionary, key, a
+  read_csv_file("data/cedict.csv", ",").forEach (a) -> object_array_add dictionary, a[0], a
   (a) -> dictionary[a]
 
-dictionary_index_word_pinyin_f = (word_index, pinyin_index) ->
+dictionary_index_word_pinyin_f = () ->
   dictionary = {}
+  word_index = 0
+  pinyin_index = 1
   words = read_csv_file "data/cedict.csv", ","
   words.forEach (a) ->
     word = a[word_index]
@@ -267,12 +281,9 @@ update_frequency_pinyin_translation = () ->
 mark_to_number = (a) ->
   a.split(" ").map((a) -> pinyin_split.split(a).map(pinyin_utils.markToNumber).join("")).join(" ")
 
-non_hanzi_regexp = /[^\u4E00-\u9FA5]/g
-non_pinyin_regexp = /[^a-z0-5]/g
-
 find_multiple_word_matches = (a, lookup_index, translation_index, split_syllables) ->
   # for each space separated element, find all longest most frequent words with the pronunciation.
-  dictionary_lookup = dictionary_index_f lookup_index
+  dictionary_lookup = dictionary_index_word_f lookup_index
   results = []
   a.split(" ").forEach (a) ->
     syllables = split_syllables a
@@ -301,12 +312,20 @@ find_multiple_word_matches = (a, lookup_index, translation_index, split_syllable
         i += 1
   results.join " "
 
-dsv_add_translations = (word_index, pinyin_index) ->
+dsv_add_translations_with_pinyin = (word_index, pinyin_index) ->
   dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
   rows = read_csv_file(0, " ").map (a) ->
     translations = dictionary_lookup a[word_index], a[pinyin_index]
     return a unless translations
     a.concat [translations[0][2]]
+  console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
+
+dsv_add_translations = (word_index) ->
+  dictionary_lookup = dictionary_index_word_f()
+  rows = read_csv_file(0, " ").map (a) ->
+    translations = dictionary_lookup a[word_index]
+    return a unless translations
+    a.concat [translations[0][1], translations[0][2]]
   console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
 
 dsv_mark_to_number = (pinyin_index) ->
@@ -471,21 +490,6 @@ add_example_words = () ->
         char_words = dictionary(a[0], a[1]) || []
       a.push char_words.slice(0, 5).map((b) -> b.join(" ")).join("\n")
       a
-
-delete_duplicates = (a) -> [...new Set(a)]
-random_integer = (min, max) -> Math.floor(Math.random() * (max - min + 1)) + min
-random_element = (a) -> a[random_integer 0, a.length - 1]
-n_times = (n, f) -> [...Array(n).keys()].map f
-
-array_shuffle = (a) ->
-  i = a.length
-  while 0 < i
-    random_index = Math.floor(Math.random() * i)
-    i -= 1
-    temp = a[i]
-    a[i] = a[random_index]
-    a[random_index] = temp
-  a
 
 add_alternatives = (rows) ->
   syllables = delete_duplicates rows.map (a) -> a[1]
