@@ -483,6 +483,9 @@ update_character_learning = () ->
     rows.map (a) ->
       a.push compositions[a[0]]
       a
+  add_sort_index = (rows) -> rows.map (a, i) ->
+    a.push i
+    a
   frequency_index = get_character_frequency_index()
   a = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> [a[0], a[1]]
   #a = a.slice(0, 500)
@@ -490,6 +493,7 @@ update_character_learning = () ->
   a = add_guess_pronunciations a
   a = add_compositions a
   a = add_example_words a
+  a = add_sort_index a
   data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/hanzi-learning.csv", data, on_error
 
