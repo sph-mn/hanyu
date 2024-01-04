@@ -12,7 +12,7 @@ see under data/
 * characters-by-reading.txt
 * words-by-type/: separated by verb, noun, adjective, and so on
 * hsk.csv and hsk-pinyin-translations.csv
-* character-learning/ contains files grouped by the most common readings and sorted by frequency. character, pinyin, guess_alternatives, example_words, sort_index
+* hanzi-learning.csv: characters sorted by frequency, with false pronunciations for guessing, compositions, character meaning, and example words
 * ... and more
 
 # data sources

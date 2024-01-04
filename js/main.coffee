@@ -460,64 +460,42 @@ update_strokecounts = () ->
   data = csv_stringify.stringify(chars, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/table-2.csv", data, on_error
 
-get_character_groups = () ->
-  chars = read_csv_file "data/characters-by-reading.csv", " ", "utf-8"
-  chars = chars.map (a) -> [...a[1]].map (b) -> [b, a[0]]
-  groups = []
-  index = 0
-  max_group_size = 800
-  min_pronunciation_count = 2
-  while index < chars.length
-    count = 0
-    group = []
-    while count < min_pronunciation_count || group.length < max_group_size
-      a = chars[index]
-      group = group.concat a
-      count += 1
-      index += 1
-      break if index >= chars.length
-    groups.push group
-    index += 1
-  groups
-
-add_example_words = () ->
-  dictionary = dictionary_index_word_pinyin_f 0, 1
-  words = read_csv_file "data/frequency-pinyin-translation.csv", " "
-  (rows) ->
+update_character_learning = () ->
+  add_example_words = (rows) ->
+    dictionary = dictionary_index_word_pinyin_f 0, 1
+    words = read_csv_file "data/frequency-pinyin-translation.csv", " "
     rows.map (a) ->
-      char_words = words.filter((b) -> b[0].includes a[0])
-      unless char_words.length
-        char_words = dictionary(a[0], a[1]) || []
+      char_word = words.find((b) -> b[0] is a[0]) || dictionary(a[0], a[1])
+      char_words = if char_word then [char_word] else []
+      char_words = char_words.concat words.filter (b) -> b[0].includes(a[0]) && b[0] != a[0]
       a.push char_words.slice(0, 5).map((b) -> b.join(" ")).join("\n")
       a
-
-add_alternatives = (rows) ->
-  syllables = delete_duplicates rows.map (a) -> a[1]
-  rows.map (a) ->
-    alternatives = n_times 4, (n) -> random_element syllables
-    alternatives = delete_duplicates array_shuffle [a[1]].concat alternatives
-    a.push alternatives.join "/"
-    a
-
-update_character_learning = () ->
-  groups = get_character_groups()
-  groups = groups.map add_alternatives
-  groups = groups.map add_example_words()
-  frequency_index = get_character_frequency_index()
-  groups = groups.map (a) ->
-    a = sort_by_character_frequency frequency_index, 0, a
-  groups = groups.map (a) ->
-    a.map (a, index) ->
-      a.push index
+  add_guess_pronunciations = (rows) ->
+    syllables = delete_duplicates rows.map (a) -> a[1].split(",")[0]
+    rows.map (a) ->
+      alternatives = n_times 4, (n) -> random_element syllables
+      alternatives = delete_duplicates array_shuffle [a[1].split(",")[0]].concat alternatives
+      a.push alternatives.join " "
       a
-  groups.forEach (a, index) ->
-    data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
-    name = (index + 1) + ".csv"
-    fs.writeFile "data/character-learning/#{name}", data, on_error
+  add_compositions = (rows) ->
+    compositions = {}
+    read_csv_file("data/character-compositions.csv", " ").forEach (a) -> compositions[a[0]] = a[1]
+    rows.map (a) ->
+      a.push compositions[a[0]]
+      a
+  frequency_index = get_character_frequency_index()
+  a = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> [a[0], a[1]]
+  #a = a.slice(0, 500)
+  a = sort_by_character_frequency frequency_index, 0, a
+  a = add_guess_pronunciations a
+  a = add_compositions a
+  a = add_example_words a
+  data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/hanzi-learning.csv", data, on_error
 
 run = () ->
-  update_compositions()
-  #update_character_learning()
+  #update_compositions()
+  update_character_learning()
 
 module.exports = {
   update_compositions
