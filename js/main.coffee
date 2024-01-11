@@ -401,6 +401,7 @@ update_characters_by_reading = () ->
     if b.includes ", "
       b = b.split ", "
     else b = [b]
+    if 1 < b.length then b = b.filter (b) -> !b.endsWith "5"
     b.forEach (b) ->
       if by_reading[b] then by_reading[b].push a
       else by_reading[b] = [a]
@@ -499,7 +500,7 @@ update_character_learning = () ->
 
 run = () ->
   #update_compositions()
-  update_character_learning()
+  #update_character_learning()
 
 module.exports = {
   update_compositions
