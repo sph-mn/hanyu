@@ -498,7 +498,22 @@ update_character_learning = () ->
   data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/hanzi-learning.csv", data, on_error
 
+update_syllables_by_reading = () ->
+  a = read_csv_file("data/characters-by-reading.csv", " ").map (a) -> [a[0].replace(/\d/, ""), a[1].length]
+  counts = {}
+  a.forEach (a) ->
+    if counts[a[0]]
+      counts[a[0]] += a[1]
+    else
+      counts[a[0]] = a[1]
+  a = a.map (a) -> a[0]
+  a = a.filter (b, index) -> index <= a.indexOf(b)
+  a = a.map((a) -> [a, counts[a]]).sort (a, b) -> b[1] - a[1]
+  data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
+  console.log data
+
 run = () ->
+  update_syllables_by_reading()
   #update_compositions()
   #update_character_learning()
 
