@@ -392,7 +392,17 @@ dsv_add_example_words = () ->
     a
   console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
 
+get_character_reading_frequency_index = () ->
+  index = {}
+  frequency = read_csv_file "data/frequency-pinyin.csv", " "
+  frequency = frequency.slice(0, 100).forEach (a, i) ->
+    pinyin_split.split(a[1]).forEach (b, j) ->
+      b = b.replace("5", "")
+      index[a[0][j] + b] = i unless index[a[0][j]]
+  index
+
 update_characters_by_reading = () ->
+  frequency_index = get_character_reading_frequency_index()
   chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv", " "
   by_reading = {}
   chars.forEach (a) ->
