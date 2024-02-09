@@ -1,0 +1,15 @@
+#!/bin/sh
+
+in=data/table-of-general-standard-chinese-characters.csv
+
+out=reading-difficulty-examples/table-first
+head -n 10 $in > $out-10
+head -n 100 $in > $out-100
+head -n 1000 $in > $out-1000
+head -n 3000 $in > $out-3000
+
+out=reading-difficulty-examples/table-last
+tail -n 10 $in > $out-10
+tail -n 100 $in > $out-100
+tail -n 1000 $in > $out-1000
+tail -n 3000 $in > $out-3000

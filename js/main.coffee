@@ -1,4 +1,5 @@
 fs = require "fs"
+path = require "path"
 #scraper = require "table-scraper"
 csv_stringify = require "csv-stringify/sync"
 pinyin_utils = require "pinyin-utils"
@@ -13,12 +14,38 @@ read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
 on_error = (a) -> if a then console.error a
 delete_duplicates = (a) -> [...new Set(a)]
+delete_duplicates_stable = (a) ->
+  result = []
+  existing = {}
+  a.forEach (a) ->
+    unless existing[a]
+      existing[a] = true
+      result.push a
+  result
 random_integer = (min, max) -> Math.floor(Math.random() * (max - min + 1)) + min
 random_element = (a) -> a[random_integer 0, a.length - 1]
 n_times = (n, f) -> [...Array(n).keys()].map f
 remove_non_chinese_characters = (a) -> a.replace /[^\p{Script=Han}]/ug, ""
 traditional_to_simplified = (a) -> hanzi_tools.simplify a
-non_hanzi_regexp = /[^\u4E00-\u9FA5]/g
+
+# https://en.wikipedia.org/wiki/CJK_Unified_Ideographs
+hanzi_unicode_ranges = [
+  ["4E00", "9FFF"]
+  ["3400", "4DBF"]
+  ["20000", "2A6DF"]
+  ["2A700", "2B73F"]
+  ["2B740", "2B81F"]
+  ["2B820", "2CEAF"]
+  ["2CEB0", "2EBEF"]
+  ["30000", "3134F"]
+  ["31350", "323AF"]
+  ["2EBF0", "2EE5F"]
+]
+
+hanzi_unicode_ranges_regexp = hanzi_unicode_ranges.map((a) -> "[" + a.map((b) -> "\\u{#{b}}").join("-") + "]").join("|")
+non_hanzi_unicode_ranges_regexp = "[^" + hanzi_unicode_ranges.map((a) -> a.map((b) -> "\\u{#{b}}").join("-")).join("") + "]"
+hanzi_regexp = new RegExp hanzi_unicode_ranges_regexp, "gu"
+non_hanzi_regexp = new RegExp non_hanzi_unicode_ranges_regexp, "gu"
 non_pinyin_regexp = /[^a-z0-5]/g
 
 array_shuffle = (a) ->
@@ -142,12 +169,14 @@ get_frequency_index = () ->
     frequency_index[a] = i unless frequency_index[a]
   frequency_index
 
+get_all_characters = () ->
+  a = fs.readFileSync("data/frequency-pinyin.csv", "utf-8") + fs.readFileSync("data/table-of-general-standard-chinese-characters.csv", "utf-8")
+  delete_duplicates_stable a.match hanzi_regexp
+
 get_character_frequency_index = () ->
-  frequency = array_from_newline_file "data/frequency-pinyin.csv", "utf-8"
-  frequency = frequency.map((a) -> [...a[0]]).flat()
+  chars = get_all_characters()
   frequency_index = {}
-  frequency.forEach (a, i) ->
-    frequency_index[a[0]] = i unless frequency_index[a[0]]
+  chars.forEach (a, i) -> frequency_index[a] = i
   frequency_index
 
 sort_by_frequency = (frequency_index, word_key, pinyin_key, data) ->
@@ -250,9 +279,9 @@ update_frequency_pinyin = () ->
 object_array_add = (object, key, value) ->
   if object[key] then object[key].push value else object[key] = [value]
 
-dictionary_index_word_f = () ->
+dictionary_index_word_f = (lookup_index) ->
   dictionary = {}
-  read_csv_file("data/cedict.csv", ",").forEach (a) -> object_array_add dictionary, a[0], a
+  read_csv_file("data/cedict.csv", ",").forEach (a) -> object_array_add dictionary, a[lookup_index], a
   (a) -> dictionary[a]
 
 dictionary_index_word_pinyin_f = () ->
@@ -274,7 +303,7 @@ update_frequency_pinyin_translation = () ->
     translation = dictionary_lookup a[0], a[1]
     return [] unless translation
     [a[0], translation[0][1], translation[0][2]]
-  lines = lines.filter (a) -> 3 is a.length
+  lines = lies.filter (a) -> 3 is a.length
   data = csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/frequency-pinyin-translation.csv", data, on_error
 
@@ -522,8 +551,28 @@ update_syllables_by_reading = () ->
   data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
   console.log data
 
+median = (a) -> a.slice().sort((a, b) -> a - b)[Math.floor(a.length / 2)]
+sum = (a) -> a.reduce ((a, b) -> a + b), 0
+mean = (a) -> sum(a) / a.length
+
+grade_text_files = (paths) ->
+  paths.forEach (a) -> console.log grade_text(fs.readFileSync(a, "utf-8")) + " " + path.basename(a)
+
+grade_text = (a) ->
+  chars = delete_duplicates a.match hanzi_regexp
+  frequency_index = get_character_frequency_index()
+  all_chars_count = Object.keys(frequency_index).length
+  frequencies = chars.map((a) -> frequency_index[a] || all_chars_count).sort((a, b) -> a - b)
+  count_score = chars.length / all_chars_count
+  rarity_score = median(frequencies.splice(-10)) / all_chars_count
+  Math.max 1, Math.round(10 * (count_score + rarity_score))
+
+display_all_characters = () -> console.log get_all_characters().join("")
+
 run = () ->
-  update_syllables_by_reading()
+  console.log "/" + hanzi_unicode_ranges_regexp + "/gu"
+  #display_all_characters()
+  #update_syllables_by_reading()
   #update_compositions()
   #update_character_learning()
 
@@ -546,5 +595,7 @@ module.exports = {
   mark_to_number
   dsv_process
   update_characters_by_reading
+  grade_text
+  grade_text_files
   run
 }
