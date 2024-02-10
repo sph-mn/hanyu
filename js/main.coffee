@@ -42,10 +42,11 @@ hanzi_unicode_ranges = [
   ["2EBF0", "2EE5F"]
 ]
 
-hanzi_unicode_ranges_regexp = hanzi_unicode_ranges.map((a) -> "[" + a.map((b) -> "\\u{#{b}}").join("-") + "]").join("|")
-non_hanzi_unicode_ranges_regexp = "[^" + hanzi_unicode_ranges.map((a) -> a.map((b) -> "\\u{#{b}}").join("-")).join("") + "]"
-hanzi_regexp = new RegExp hanzi_unicode_ranges_regexp, "gu"
-non_hanzi_regexp = new RegExp non_hanzi_unicode_ranges_regexp, "gu"
+unicode_ranges_pattern = (a, is_reject) -> "[" + (if is_reject then "^" else "") + a.map((a) -> a.map((b) -> "\\u{#{b}}").join("-")).join("") + "]"
+unicode_ranges_regexp = (a, is_reject) -> new RegExp unicode_ranges_pattern(a, is_reject), "gu"
+hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges
+non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
+hanzi_and_idc_regexp = unicode_ranges_regexp hanzi_unicode_ranges.concat([["2FF0", "2FFF"]])
 non_pinyin_regexp = /[^a-z0-5]/g
 
 array_shuffle = (a) ->
@@ -390,6 +391,7 @@ find_components = (a, decompositions) ->
   c.concat(c.map (c) -> find_components(c, decompositions)).flat()
 
 compositions_from_decompositions = () ->
+  # old method of getting compositions from the decompositions file from wiktionary
   chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
   decompositions_csv = read_csv_file("data/decompositions.csv", "\t").sort (a, b) -> a[1] - b[1]
   decompositions = {}
@@ -491,6 +493,27 @@ update_compositions = () ->
   data = csv_stringify.stringify(standard_compositions, {delimiter: " "}, on_error).trim()
   fs.writeFile "data/standard-compositions.csv", data, on_error
 
+array_intersection = (a, b) -> a.filter (a) -> b.includes(a)
+
+update_similar_characters = () ->
+  compositions = read_csv_file "data/character-compositions.csv", " ", "utf-8"
+  compositions = compositions.slice 0, 1000
+  compositions = compositions.map (a) ->
+    if a.length < 2 then a
+    else
+      a1 = a[1].split(" or ")[0].match(hanzi_regexp)
+      [a[0], a1 || []]
+  similarities = compositions.map (a) ->
+    unless a.length < 2
+      char = a[0]
+      similarities = compositions.map (b) ->
+        [char, b[0], (if b.length < 2 then 0 else delete_duplicates(array_intersection(a[1], b[1])).length), (if b.length < 2 then "" else delete_duplicates(array_intersection(a[1], b[1])).join(""))]
+      similarities.filter ((a) -> a && a[2] > 1 && a[1] != char)
+  console.log similarities.filter (a) -> a && a.length
+  #console.log similarities.filter ((a) -> a && a[2] > 1 && a[0] != char)
+  #char + similarities.filter((a) -> a[1] > 2 && a[0] != char).sort((a, b) -> a[1] - b[1]).map((a) -> a[0]).join("")
+  #console.log similarities.join("\n")
+
 update_strokecounts = () ->
   counts = {}
   counts_csv = read_csv_file "data/decompositions.csv", "\t"
@@ -521,35 +544,53 @@ update_character_learning = () ->
     compositions = {}
     read_csv_file("data/character-compositions.csv", " ").forEach (a) -> compositions[a[0]] = a[1]
     rows.map (a) ->
-      a.push compositions[a[0]]
+      c = compositions[a[0]]
+      a.push c if c
       a
   add_sort_index = (rows) -> rows.map (a, i) ->
     a.push i
     a
+  add_syllable_counts = (rows) ->
+    syllables_index = {}
+    read_csv_file("data/syllables-with-tones-by-character-count.csv", " ").forEach (a) -> syllables_index[a[0]] = a[1]
+    rows.map (a) ->
+      a[1] = a[1].split(", ").map((a) -> a + " (" + (syllables_index[a] || 1) + ")").join(", ")
+      a
   frequency_index = get_character_frequency_index()
   a = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> [a[0], a[1]]
   #a = a.slice(0, 500)
   a = sort_by_character_frequency frequency_index, 0, a
+  a = add_syllable_counts a
   a = add_guess_pronunciations a
   a = add_compositions a
   a = add_example_words a
   a = add_sort_index a
   data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/hanzi-learning.csv", data, on_error
+  fs.writeFile "data/character-learning.csv", data, on_error
 
 update_syllables_by_reading = () ->
   a = read_csv_file("data/characters-by-reading.csv", " ").map (a) -> [a[0].replace(/\d/, ""), a[1].length]
   counts = {}
   a.forEach (a) ->
-    if counts[a[0]]
-      counts[a[0]] += a[1]
-    else
-      counts[a[0]] = a[1]
+    if counts[a[0]] then counts[a[0]] += a[1]
+    else counts[a[0]] = a[1]
   a = a.map (a) -> a[0]
   a = a.filter (b, index) -> index <= a.indexOf(b)
   a = a.map((a) -> [a, counts[a]]).sort (a, b) -> b[1] - a[1]
   data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
   console.log data
+
+update_syllables_with_tones_by_reading = () ->
+  a = read_csv_file("data/characters-by-reading.csv", " ").map (a) -> [a[0], a[1].length]
+  counts = {}
+  a.forEach (a) ->
+    if counts[a[0]] then counts[a[0]] += a[1]
+    else counts[a[0]] = a[1]
+  a = a.map (a) -> a[0]
+  a = a.filter (b, index) -> index <= a.indexOf(b)
+  a = a.map((a) -> [a, counts[a]]).sort (a, b) -> b[1] - a[1]
+  data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
+  fs.writeFile "data/syllables-with-tones-by-character-count.csv", data, on_error
 
 median = (a) -> a.slice().sort((a, b) -> a - b)[Math.floor(a.length / 2)]
 sum = (a) -> a.reduce ((a, b) -> a + b), 0
@@ -570,11 +611,13 @@ grade_text = (a) ->
 display_all_characters = () -> console.log get_all_characters().join("")
 
 run = () ->
-  console.log "/" + hanzi_unicode_ranges_regexp + "/gu"
+  update_character_learning()
+  #update_syllables_with_tones_by_reading()
+  #update_similar_characters()
+  #console.log "/" + hanzi_unicode_ranges_regexp + "/gu"
   #display_all_characters()
   #update_syllables_by_reading()
   #update_compositions()
-  #update_character_learning()
 
 module.exports = {
   update_compositions
@@ -595,6 +638,7 @@ module.exports = {
   mark_to_number
   dsv_process
   update_characters_by_reading
+  update_character_learning
   grade_text
   grade_text_files
   run
