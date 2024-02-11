@@ -1,3 +1,0 @@
-#!./node_modules/coffeescript/bin/coffee
-main = require "../js/main"
-main.update_frequency_pinyin_translation()
