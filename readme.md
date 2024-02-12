@@ -1,4 +1,4 @@
-# chinese language learning material
+# chinese language data and dictionary
 
 # dictionary
 dictionary that sorts results by word frequency and character count. it is a single file, html/hanyu-dictionary.html, and needs to be served via http for the javascript to run in the browser. also hosted [here](http://sph.mn/other/chinese/hanyu-dictionary.html).
@@ -13,6 +13,7 @@ see under data/
 * words-by-type/: separated by verb, noun, adjective, and so on
 * hsk.csv and hsk-pinyin-translations.csv
 * character-learning.csv: characters sorted by frequency, with readings and number of words with this reading, false pronunciations for guessing and syllable commonness among all characters, compositions, character meaning, and example words
+* character-similarities.txt: each character followed by the most similar characters based on the number of shared components, structure, and stroke count
 * ... and more
 
 # data sources

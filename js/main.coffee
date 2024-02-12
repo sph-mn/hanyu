@@ -565,17 +565,17 @@ get_stroke_count_index = (a) ->
 update_similar_characters = () ->
   stroke_count_index = get_stroke_count_index()
   compositions = read_csv_file "data/character-compositions.csv", " "
-  compositions = compositions.slice 0, 1000
+  #compositions = compositions.slice 0, 1000
   compositions = compositions.map (a) ->
     if a.length is 2
-      a1 = a[1].split(" or ")[0].match(hanzi_regexp)
+      a1 = a[1].split(" or ")[0].match(hanzi_and_idc_regexp)
       if a1 and a1.length > 1 then [a[0], a1]
   compositions = compositions.filter (a) -> a
   similarities = compositions.map (a) ->
     similarities = compositions.map (b) ->
       intersection = delete_duplicates(array_intersection(a[1], b[1]))
       stroke_count_difference = Math.abs stroke_count_index[b[0]] - stroke_count_index[a[0]]
-      [a[0], b[0], intersection.length / b[1].length, stroke_count_difference, intersection.join(""), b[1].join("")]
+      [a[0], b[0], intersection.length / a[1].length, stroke_count_difference, intersection.join(""), b[1].join("")]
     similarities.filter ((b) -> b[2] > 0.4 && b[1] != a[0] && b[3] < 2)
   similarities = similarities.filter (a) -> a.length
   similarities = similarities.map (a) -> a.sort (a, b) -> b[2] - a[2] || b[3] - a[3]
