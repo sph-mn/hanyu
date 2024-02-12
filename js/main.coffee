@@ -549,24 +549,40 @@ update_compositions = () ->
 
 array_intersection = (a, b) -> a.filter (a) -> b.includes(a)
 
+get_stroke_count_index = (a) ->
+  result = {}
+  strokes = read_csv_file "data/table-of-general-standard-chinese-characters.csv", " "
+  previous_count = 0
+  strokes.forEach (a) ->
+    if a[2].length
+      count = parseInt a[2]
+      previous_count = count
+    else
+      count = previous_count
+    result[a[0]] = count
+  result
+
 update_similar_characters = () ->
-  compositions = read_csv_file "data/character-compositions.csv", " ", "utf-8"
+  stroke_count_index = get_stroke_count_index()
+  compositions = read_csv_file "data/character-compositions.csv", " "
   compositions = compositions.slice 0, 1000
   compositions = compositions.map (a) ->
-    if a.length < 2 then a
-    else
+    if a.length is 2
       a1 = a[1].split(" or ")[0].match(hanzi_regexp)
-      [a[0], a1 || []]
+      if a1 and a1.length > 1 then [a[0], a1]
+  compositions = compositions.filter (a) -> a
   similarities = compositions.map (a) ->
-    unless a.length < 2
-      char = a[0]
-      similarities = compositions.map (b) ->
-        [char, b[0], (if b.length < 2 then 0 else delete_duplicates(array_intersection(a[1], b[1])).length), (if b.length < 2 then "" else delete_duplicates(array_intersection(a[1], b[1])).join(""))]
-      similarities.filter ((a) -> a && a[2] > 1 && a[1] != char)
-  console.log similarities.filter (a) -> a && a.length
-  #console.log similarities.filter ((a) -> a && a[2] > 1 && a[0] != char)
-  #char + similarities.filter((a) -> a[1] > 2 && a[0] != char).sort((a, b) -> a[1] - b[1]).map((a) -> a[0]).join("")
-  #console.log similarities.join("\n")
+    similarities = compositions.map (b) ->
+      intersection = delete_duplicates(array_intersection(a[1], b[1]))
+      stroke_count_difference = Math.abs stroke_count_index[b[0]] - stroke_count_index[a[0]]
+      [a[0], b[0], intersection.length / b[1].length, stroke_count_difference, intersection.join(""), b[1].join("")]
+    similarities.filter ((b) -> b[2] > 0.4 && b[1] != a[0] && b[3] < 2)
+  similarities = similarities.filter (a) -> a.length
+  similarities = similarities.map (a) -> a.sort (a, b) -> b[2] - a[2] || b[3] - a[3]
+  similarities = similarities.map (a) ->
+    b = a.map (a) -> a[1]
+    a[0][0] + b.join("")
+  fs.writeFileSync "data/character-similarities.txt", similarities.join("\n")
 
 update_strokecounts = () ->
   counts = {}
@@ -575,7 +591,7 @@ update_strokecounts = () ->
   chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv", " "
   chars.forEach (a) -> a.push counts[a[0]]
   data = csv_stringify.stringify(chars, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/table-2.csv", data, on_error
+  fs.writeFileSync "data/table-2.csv", data, on_error
 
 get_character_reading_count_index = () ->
   result = {}
@@ -670,9 +686,9 @@ display_all_characters = () -> console.log get_all_characters().join("")
 run = () ->
   #update_syllables_character_count()
   #update_character_reading_count()
-  update_character_learning()
+  #update_character_learning()
   #update_syllables_with_tones_by_reading()
-  #update_similar_characters()
+  update_similar_characters()
   #console.log "/" + hanzi_unicode_ranges_regexp + "/gu"
   #display_all_characters()
   #update_syllables_by_reading()
