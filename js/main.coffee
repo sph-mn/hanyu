@@ -21,6 +21,7 @@ pinyin_split2 = (a) -> a.replace(/[0-5]/g, (a) -> a + " ").trim().split " "
 median = (a) -> a.slice().sort((a, b) -> a - b)[Math.floor(a.length / 2)]
 sum = (a) -> a.reduce ((a, b) -> a + b), 0
 mean = (a) -> sum(a) / a.length
+object_array_add = (object, key, value) -> if object[key] then object[key].push value else object[key] = [value]
 
 write_csv_file = (path, data) ->
   csv = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
@@ -323,9 +324,6 @@ update_hsk = () ->
     [a[1], pinyin]
   write_csv_file "data/hsk.csv", data
 
-object_array_add = (object, key, value) ->
-  if object[key] then object[key].push value else object[key] = [value]
-
 dictionary_index_word_f = (lookup_index) ->
   dictionary = {}
   read_csv_file("data/cedict.csv", ",").forEach (a) -> object_array_add dictionary, a[lookup_index], a
@@ -601,7 +599,10 @@ get_character_example_words_f = () ->
   dictionary = dictionary_index_word_pinyin_f 0, 1
   words = read_csv_file "data/frequency-pinyin-translation.csv"
   (char, pinyin) ->
-    char_word = words.find((b) -> b[0] is char) || dictionary(char, pinyin)
+    char_word = words.find((b) -> b[0] is char)
+    unless char_word
+      char_word = dictionary(char, pinyin)
+      char_word = char_word[0] if char_word
     char_words = if char_word then [char_word] else []
     char_words.concat words.filter (b) -> b[0].includes(char) && b[0] != char
 
@@ -621,35 +622,51 @@ sort_standard_character_readings = () ->
     a
   write_csv_file path, rows
 
+get_character_by_reading_index = () ->
+  result = {}
+  read_csv_file("data/table-of-general-standard-chinese-characters.csv").forEach (a) ->
+    pinyin = a[1].split(", ")[0]
+    object_array_add result, pinyin, a[0]
+  result
+
 update_character_learning = () ->
   character_frequency_index = get_character_frequency_index()
-  syllable_count_index = get_character_syllables_tones_count_index()
   reading_count_index = get_character_reading_count_index()
+  character_by_reading_index = get_character_by_reading_index()
   dictionary = dictionary_index_word_pinyin_f 0, 1
-  get_character_example_words = get_character_example_words()
+  get_character_example_words = get_character_example_words_f()
   compositions_index = get_character_compositions_index()
-  rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1]]
+  rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
   rows = sort_by_character_frequency character_frequency_index, 0, rows
   syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
-  # add example words
-  rows.map (a) ->
-    words = get_character_example_words(a[0], a[1]).slice(0, 5).map((b) -> b.join(" ")).join("\n")
-    a.push words
-    a
-  # add guess pronunciations.
-  rows.map (a) ->
-    # add for each guess reading the number of other characters with this reading
-    alternatives = n_times 4, (n) -> random_element syllables
-    alternatives = delete_duplicates array_shuffle [a[1].split(",")[0]].concat alternatives
-    alternatives = alternatives.map (b) -> b + " (" + (syllable_count_index[b] || 1) + ")"
-    a.push alternatives.join " "
-    a
-  # add syllable counts
-  rows.map (a) ->
-    # must be run after add guess pronunciations.
-    # add for each possible reading the number of words with this character and reading
-    a[1] = a[1].split(", ").map((b) -> b + " (" + (reading_count_index[a[0] + b] || 1) + ")").join(", ")
-    a
+  add_example_words = (rows) ->
+    rows.map (a) ->
+      words = get_character_example_words(a[0], a[1])
+      a.push words.slice(1, 6).map((b) -> b[0]).join " "
+      a.push words.slice(0, 5).map((b) -> b.join(" ")).join "\n"
+      a
+  rows = add_example_words rows
+  add_guess_pronunciations = (rows) ->
+    syllable_count_index = get_character_syllables_tones_count_index()
+    rows.map (a) ->
+      # add for each guess reading the number of other characters with this reading
+      alternatives = n_times 4, (n) -> random_element syllables
+      alternatives = delete_duplicates array_shuffle [a[1]].concat alternatives
+      alternatives = alternatives.map (b) -> b + " (" + (syllable_count_index[b] || 1) + ")"
+      a.push alternatives.join " "
+      a
+  add_pronunciation_hint = (rows) ->
+    rows.map (a) ->
+      b = array_shuffle (character_by_reading_index[a[1]] || []).filter((b) -> a[0] != b)
+      a.push b.slice(0, 5).join ""
+      a
+  rows = add_pronunciation_hint rows
+  add_syllable_counts = (rows) ->
+    rows.map (a) ->
+      # must be run after add guess pronunciations.
+      # add for each possible reading the number of words with this character and reading
+      a[1] = a[1].split(", ").map((b) -> b + " (" + (reading_count_index[a[0] + b] || 1) + ")").join(", ")
+      a
   # add compositions
   rows.map (a) ->
     b = compositions_index[a[0]]
