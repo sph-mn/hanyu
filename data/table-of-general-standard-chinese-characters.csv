@@ -5,16 +5,16 @@
 丁 ding1 2
 厂 chang3 2
 七 qi1 2
-卜 "bo, bu3" 2
+卜 "bu3, bo" 2
 八 ba1 2
 人 ren2 2
 入 ru4 2
 儿 er2 2
 匕 bi3 2
-几 "ji1, ji3" 2
+几 "ji3, ji1" 2
 九 jiu3 2
 刁 diao1 2
-了 "le, liao3" 2
+了 "liao3, le" 2
 刀 dao1 2
 力 li4 2
 乃 nai3 2
@@ -32,8 +32,8 @@
 大 "da4, dai4" 3
 丈 zhang4 3
 与 "yu3, yu4" 4
-万 "mo4, wan4" 3
-上 "shang3, shang4" 3
+万 "wan4, mo4" 3
+上 "shang4, shang3" 3
 小 xiao3 3
 口 kou3 3
 山 shan1 3
@@ -42,7 +42,7 @@
 乞 qi3 3
 川 chuan1 3
 亿 yi4 3
-个 "ge3, ge4" 3
+个 "ge4, ge3" 3
 夕 xi1 3
 久 jiu3 3
 么 me 3
@@ -78,11 +78,11 @@
 天 tian1 4
 夫 fu1 4
 元 yuan2 4
-无 "mo2, wu2" 4
+无 "wu2, mo2" 4
 云 yun2 4
 专 zhuan1 4
 丐 gai4 4
-扎 "za1, zha1, zha2" 4
+扎 "zha1, za1, zha2" 4
 艺 yi4 4
 木 mu4 4
 五 wu3 4
@@ -91,7 +91,7 @@
 不 bu4 4
 犬 quan3 4
 太 tai4 4
-区 "ou1, qu1" 4
+区 "qu1, ou1" 4
 历 li4 4
 歹 dai3 4
 友 you3 4
@@ -104,7 +104,7 @@
 戈 ge1 4
 比 bi3 4
 互 hu4 4
-切 "qie1, qie4" 4
+切 "qie4, qie1" 4
 瓦 "wa3, wa4" 5
 止 zhi3 4
 少 "shao3, shao4" 4
@@ -124,11 +124,11 @@
 壬 ren2 4
 升 sheng1 4
 夭 yao1 4
-长 "chang2, zhang3" 4
+长 "zhang3, chang2" 4
 仁 ren2 4
 什 "shen2, shi2" 4
-片 "pian1, pian4" 4
-仆 "pu1, pu2" 4
+片 "pian4, pian1" 4
+仆 "pu2, pu1" 4
 化 hua4 4
 仇 "chou2, qiu2" 4
 币 bi4 4
@@ -163,7 +163,7 @@
 方 fang1 4
 火 huo3 4
 为 "wei2, wei4" 4
-斗 "dou3, dou4" 4
+斗 "dou4, dou3" 4
 忆 yi4 4
 计 ji4 4
 订 ding4 4
@@ -172,7 +172,7 @@
 冗 rong3 4
 讥 ji1 4
 心 xin1 4
-尺 "che3, chi3" 4
+尺 "chi3, che3" 4
 引 yin3 4
 丑 chou3 4
 巴 ba1 4
@@ -181,7 +181,7 @@
 办 ban4 4
 以 yi3 5
 允 yun3 4
-予 "yu2, yu3" 4
+予 "yu3, yu2" 4
 邓 deng4 5
 劝 quan4 4
 双 shuang1 4
@@ -193,9 +193,9 @@
 末 mo4 5
 示 shi4 5
 击 ji1 5
-打 "da2, da3" 5
+打 "da3, da2" 5
 巧 qiao3 5
-正 "zheng1, zheng4" 5
+正 "zheng4, zheng1" 5
 扑 pu1 5
 卉 hui4 5
 扒 "ba1, pa2" 5
@@ -206,14 +206,14 @@
 世 shi4 4
 艾 "ai4, yi4" 5
 古 gu3 5
-节 "jie1, jie2" 5
+节 "jie2, jie1" 5
 本 ben3 5
 术 "shu4, zhu2" 5
 可 "ke3, ke4" 5
 丙 bing3 5
 左 zuo3 5
 厉 li4 5
-石 "dan4, shi2" 5
+石 "shi2, dan4" 5
 右 you4 5
 布 bu4 5
 夯 hang1 5
@@ -225,7 +225,7 @@
 东 dong1 5
 卡 "ka3, qia3" 5
 北 bei3 5
-占 "zhan1, zhan4" 5
+占 "zhan4, zhan1" 5
 凸 tu1 5
 卢 lu2 5
 业 ye4 5
@@ -235,15 +235,15 @@
 旦 dan4 5
 目 mu4 5
 且 qie3 5
-叶 "xie2, ye4" 5
+叶 "ye4, xie2" 5
 甲 jia3 5
 申 shen1 5
 叮 ding1 5
 电 dian4 5
-号 "hao2, hao4" 5
+号 "hao4, hao2" 5
 田 tian2 5
 由 you2 5
-只 "zhi1, zhi3" 5
+只 "zhi3, zhi1" 5
 叭 ba1 5
 史 shi3 5
 央 yang1 5
@@ -270,7 +270,7 @@
 仗 zhang4 5
 代 dai4 5
 仙 xian1 5
-们 "men2, men5" 5
+们 "men5, men2" 5
 仪 yi2 5
 白 bai2 5
 仔 "zai3, zi3" 5
@@ -279,19 +279,19 @@
 瓜 gua1 5
 乎 hu1 5
 丛 cong2 5
-令 "ling2, ling3, ling4" 5
+令 "ling4, ling2, ling3" 5
 用 yong4 5
 甩 shuai3 5
 印 yin4 6
 尔 er3 5
 乐 "le4, yue4" 5
-句 "gou1, ju4" 5
+句 "ju4, gou1" 5
 匆 cong1 5
 册 ce4 5
 卯 mao3 5
 犯 fan4 5
 外 wai4 5
-处 "chu3, chu4" 5
+处 "chu4, chu3" 5
 冬 dong1 5
 鸟 niao3 5
 务 wu4 5
@@ -331,7 +331,7 @@
 辽 liao2 5
 奶 nai3 5
 奴 nu2 5
-召 "shao4, zhao4" 5
+召 "zhao4, shao4" 5
 加 jia1 5
 皮 pi2 5
 边 bian1 5
@@ -339,7 +339,7 @@
 发 "fa1, fa4" 5
 圣 sheng4 5
 对 dui4 5
-台 "tai1, tai2" 5
+台 "tai2, tai1" 5
 矛 mao2 5
 纠 jiu1 5
 母 mu3 5
@@ -363,8 +363,8 @@
 执 zhi2 6
 扩 kuo4 6
 扫 "sao3, sao4" 6
-地 "de, di4" 6
-场 "chang2, chang3" 6
+地 "di4, de" 6
+场 "chang3, chang2" 6
 扬 yang2 6
 耳 er3 6
 芋 yu4 6
@@ -373,10 +373,10 @@
 亚 ya4 6
 芝 zhi1 6
 朽 xiu3 6
-朴 "piao2, po4, pu3" 6
+朴 "pu3, piao2, po4" 6
 机 ji1 6
 权 quan2 6
-过 "guo1, guo4" 6
+过 "guo4, guo1" 6
 臣 chen2 6
 吏 li4 6
 再 zai4 6
@@ -399,12 +399,12 @@
 列 lie4 6
 死 si3 6
 成 cheng2 6
-夹 "ga1, jia1, jia2" 6
+夹 "jia1, ga1, jia2" 6
 夷 yi2 6
 轨 gui3 6
 邪 xie2 7
 尧 yao2 6
-划 "hua2, hua4" 6
+划 "hua4, hua2" 6
 迈 mai4 6
 毕 bi4 6
 至 zhi4 6
@@ -419,9 +419,9 @@
 早 zao3 6
 吁 "xu1, yu1, yu4" 6
 吐 "tu3, tu4" 6
-吓 "he4, xia4" 6
+吓 "xia4, he4" 6
 虫 chong2 6
-曲 "qu1, qu3" 6
+曲 "qu3, qu1" 6
 团 tuan2 6
 吕 lü3 6
 同 "tong2, tong4" 6
@@ -464,7 +464,7 @@
 延 yan2 8
 仲 zhong4 6
 件 jian4 6
-任 "ren2, ren4" 6
+任 "ren4, ren2" 6
 伤 shang1 6
 价 "jia4, jie5" 6
 伦 lun2 6
@@ -476,22 +476,22 @@
 伪 wei3 6
 自 zi4 6
 伊 yi1 6
-血 "xie3, xue4" 6
+血 "xue4, xie3" 6
 向 xiang4 6
-似 "shi4, si4" 7
+似 "si4, shi4" 7
 后 hou4 6
-行 "hang2, heng2, xing2" 6
+行 "xing2, hang2, heng2" 6
 舟 zhou1 6
 全 quan2 6
 会 "hui4, kuai4" 6
 杀 sha1 6
-合 "ge3, he2" 6
+合 "he2, ge3" 6
 兆 zhao4 6
 企 qi3 6
 众 zhong4 6
 爷 ye2 6
 伞 san3 6
-创 "chuang1, chuang4" 6
+创 "chuang4, chuang1" 6
 肌 ji1 6
 肋 lei4 6
 朵 duo3 6
@@ -528,12 +528,12 @@
 问 wen4 6
 闯 chuang3 6
 羊 yang2 6
-并 "bing1, bing4" 6
+并 "bing4, bing1" 6
 关 guan1 6
 米 mi3 6
 灯 deng1 6
 州 zhou1 6
-汗 "han2, han4" 6
+汗 "han4, han2" 6
 污 wu1 6
 江 jiang1 6
 汛 xun4 6
@@ -553,7 +553,7 @@
 讶 ya4 6
 许 xu3 6
 讹 e2 6
-论 "lun2, lun4" 6
+论 "lun4, lun2" 6
 讼 song4 6
 农 nong2 6
 讽 feng3 6
@@ -561,9 +561,9 @@
 访 fang3 6
 诀 jue2 6
 寻 xun2 6
-那 "na1, na4" 7
+那 "na4, na1" 7
 迅 xun4 6
-尽 "jin3, jin4" 6
+尽 "jin4, jin3" 6
 导 dao3 6
 异 yi4 6
 弛 chi2 6
@@ -588,16 +588,16 @@
 买 mai3 6
 红 hong2 6
 驮 "duo4, tuo2" 6
-纤 "qian4, xian1" 6
+纤 "xian1, qian4" 6
 驯 xun4 6
-约 "yao1, yue1" 6
+约 "yue1, yao1" 6
 级 ji2 6
-纪 "ji3, ji4" 6
+纪 "ji4, ji3" 6
 驰 chi2 6
 纫 ren4 6
 巡 xun2 6
 寿 shou4 7
-弄 "long4, nong4" 7
+弄 "nong4, long4" 7
 麦 mai4 7
 玖 jiu3 7
 玛 ma3 7
@@ -629,12 +629,12 @@
 坝 ba4 7
 攻 gong1 7
 赤 chi4 7
-折 "she2, zhe1, zhe2" 7
+折 "zhe2, she2, zhe1" 7
 抓 zhua1 7
 扳 ban1 7
 抡 lun1 7
 扮 ban4 7
-抢 "qiang1, qiang3" 7
+抢 "qiang3, qiang1" 7
 孝 xiao4 7
 坎 kan3 7
 均 jun1 7
@@ -664,7 +664,7 @@
 芽 ya2 7
 花 hua1 7
 芹 qin2 7
-芥 "gai4, jie4" 7
+芥 "jie4, gai4" 7
 芬 fen1 7
 苍 cang1 7
 芳 fang1 7
@@ -682,7 +682,7 @@
 村 cun1 7
 杖 zhang4 7
 杏 xing4 7
-杉 "sha1, shan1" 7
+杉 "shan1, sha1" 7
 巫 wu1 7
 极 ji2 7
 李 li3 7
@@ -696,12 +696,12 @@
 豆 dou4 7
 两 liang3 7
 酉 you3 7
-丽 "li2, li4" 7
+丽 "li4, li2" 7
 医 yi1 7
 辰 chen2 7
 励 li4 7
 否 "fou3, pi3" 7
-还 "hai2, huan2" 7
+还 "huan2, hai2" 7
 尬 ga4 7
 歼 jian1 7
 来 lai2 7
@@ -710,7 +710,7 @@
 步 bu4 7
 卤 lu3 7
 坚 jian1 7
-肖 "xiao1, xiao4" 7
+肖 "xiao4, xiao1" 7
 旱 han4 7
 盯 ding1 7
 呈 cheng2 7
@@ -732,7 +732,7 @@
 邮 you2 8
 男 nan2 7
 困 kun4 7
-吵 "chao1, chao3" 7
+吵 "chao3, chao1" 7
 串 chuan4 7
 员 "yuan2, yun4" 7
 呐 na4 7
@@ -743,7 +743,7 @@
 吻 wen3 7
 吹 chui1 7
 呜 wu1 7
-吭 "hang2, keng1" 7
+吭 "keng1, hang2" 7
 吧 "ba1, ba5" 7
 邑 yi4 7
 吼 hou3 7
@@ -751,7 +751,7 @@
 别 "bie2, bie4" 7
 吮 shun3 7
 岖 qu1 7
-岗 "gang1, gang3" 7
+岗 "gang3, gang1" 7
 帐 zhang4 7
 财 cai2 7
 针 zhen1 7
@@ -767,15 +767,15 @@
 每 mei3 7
 兵 bing1 7
 估 "gu1, gu4" 7
-体 "ti1, ti3" 7
+体 "ti3, ti1" 7
 何 he2 7
 佐 zuo3 7
 佑 you4 7
 但 dan4 7
 伸 shen1 7
 佃 dian4 7
-作 "zuo1, zuo4" 7
-伯 "bai3, bo2" 7
+作 "zuo4, zuo1" 7
+伯 "bo2, bai3" 7
 伶 ling2 7
 佣 "yong1, yong4" 7
 低 di1 7
@@ -802,7 +802,7 @@
 岔 cha4 7
 肝 gan1 7
 肛 gang1 7
-肚 "du3, du4" 7
+肚 "du4, du3" 7
 肘 zhou3 7
 肠 chang2 7
 龟 "gui1, jun1, qiu1" 7
@@ -822,7 +822,7 @@
 迎 ying2 7
 饭 fan4 7
 饮 "yin3, yin4" 7
-系 "ji4, xi4" 7
+系 "xi4, ji4" 7
 言 yan2 7
 冻 dong4 7
 状 zhuang4 7
@@ -833,7 +833,7 @@
 庇 bi4 7
 疗 liao2 7
 吝 lin4 7
-应 "ying1, ying4" 7
+应 "ying4, ying1" 7
 这 zhe4 7
 冷 leng3 7
 庐 lu2 7
@@ -845,7 +845,7 @@
 闰 run4 7
 闲 xian2 7
 间 "jian1, jian4" 7
-闷 "men1, men4" 7
+闷 "men4, men1" 7
 判 pan4 7
 兑 dui4 7
 灶 zao4 7
@@ -909,7 +909,7 @@
 张 zhang1 7
 忌 ji4 7
 际 ji4 8
-陆 "liu4, lu4" 8
+陆 "lu4, liu4" 8
 阿 "a1, e1" 8
 陈 chen2 8
 阻 zu3 8
@@ -950,11 +950,11 @@
 玫 mei2 8
 表 biao3 9
 规 gui1 8
-抹 "ma1, mo3, mo4" 8
+抹 "mo3, ma1, mo4" 8
 卦 gua4 8
 坷 "ke1, ke3" 8
 坯 pi1 8
-拓 "ta4, tuo4" 8
+拓 "tuo4, ta4" 8
 拢 long3 8
 拔 ba2 8
 坪 ping2 8
@@ -1010,9 +1010,9 @@
 范 fan4 8
 直 zhi2 8
 茁 zhuo2 8
-茄 "jia1, qie2" 8
+茄 "qie2, jia1" 8
 茎 jing1 8
-苔 "tai1, tai2" 8
+苔 "tai2, tai1" 8
 茅 mao2 8
 枉 wang3 8
 林 lin2 8
@@ -1031,12 +1031,12 @@
 杰 jie2 8
 述 shu4 8
 枕 zhen3 8
-丧 "sang1, sang4" 8
+丧 "sang4, sang1" 8
 或 huo4 8
 画 hua4 8
 卧 wo4 8
 事 shi4 8
-刺 "ci1, ci4" 8
+刺 "ci4, ci1" 8
 枣 zao3 8
 雨 yu3 8
 卖 mai4 8
@@ -1047,7 +1047,7 @@
 厕 ce4 8
 奈 nai4 8
 奔 "ben1, ben4" 8
-奇 "ji1, qi2" 8
+奇 "qi2, ji1" 8
 奋 fen4 8
 态 tai4 8
 欧 ou1 8
@@ -1099,12 +1099,12 @@
 呼 hu1 8
 鸣 ming2 8
 咏 yong3 8
-呢 "ne, ni2" 8
+呢 "ni2, ne" 8
 咄 duo1 8
 咖 "ga1, ka1" 8
 岸 an4 8
 岩 yan2 8
-帖 "tie1, tie3, tie4" 8
+帖 "tie3, tie1, tie4" 8
 罗 luo2 8
 帜 zhi4 8
 帕 pa4 8
@@ -1128,7 +1128,7 @@
 乖 guai1 8
 刮 gua1 8
 秆 gan3 8
-和 "he2, he4, hu2, huo2, huo4, huo5" 8
+和 "he2, he4, huo5, hu2, huo2, huo4" 8
 季 ji4 8
 委 wei3 8
 秉 bing3 8
@@ -1152,8 +1152,8 @@
 侈 chi3 8
 依 yi1 8
 卑 bei1 8
-的 "de, di1, di2, di4" 8
-迫 "pai3, po4" 8
+的 "di4, di1, de, di2" 8
+迫 "po4, pai3" 8
 质 zhi4 8
 欣 xin1 8
 征 zheng1 8
@@ -1164,7 +1164,7 @@
 所 suo3 8
 舍 "she3, she4" 8
 金 jin1 8
-刹 "cha4, sha1" 8
+刹 "sha1, cha4" 8
 命 ming4 8
 肴 yao2 8
 斧 fu3 8
@@ -1214,7 +1214,7 @@
 疙 ge1 8
 疚 jiu4 8
 剂 ji4 8
-卒 "cu4, zu2" 8
+卒 "zu2, cu4" 8
 郊 jiao1 9
 庚 geng1 8
 废 fei4 8
@@ -1229,7 +1229,7 @@
 郑 zheng4 9
 券 "quan4, xuan4" 8
 卷 "juan3, juan4" 8
-单 "chan2, dan1, shan4" 8
+单 "dan1, chan2, shan4" 8
 炬 ju4 8
 炒 chao3 8
 炊 chui1 8
@@ -1248,12 +1248,12 @@
 油 you2 8
 泊 "bo2, po1" 8
 沿 yan2 8
-泡 "pao1, pao4" 8
+泡 "pao4, pao1" 8
 注 zhu4 8
 泣 qi4 8
 泞 ning4 8
 泻 xie4 9
-泌 "bi4, mi4" 8
+泌 "mi4, bi4" 8
 泳 yong3 8
 泥 "ni2, ni4" 8
 沸 fei4 8
@@ -1331,7 +1331,7 @@
 迢 tiao2 8
 驾 jia4 8
 叁 san1 8
-参 "can1, cen1, shen1" 8
+参 "can1, shen1, cen1" 8
 艰 jian1 8
 线 xian4 8
 练 lian4 8
@@ -1383,12 +1383,12 @@
 括 kuo4 9
 垢 gou4 9
 拴 shuan1 9
-拾 "she4, shi2" 9
-挑 "tiao1, tiao3" 9
+拾 "shi2, she4" 9
+挑 "tiao3, tiao1" 9
 垛 "duo3, duo4" 9
 指 zhi3 9
 垫 dian4 9
-挣 "zheng1, zheng4" 9
+挣 "zheng4, zheng1" 9
 挤 ji3 9
 拼 pin1 9
 挖 wa1 9
@@ -1403,7 +1403,7 @@
 革 ge2 8
 茬 cha2 9
 荐 jian4 9
-巷 "hang4, xiang4" 9
+巷 "xiang4, hang4" 9
 带 dai4 9
 草 cao3 9
 茧 jian3 9
@@ -1419,7 +1419,7 @@
 胡 hu2 9
 荫 "yin1, yin4" 10
 荔 li4 9
-南 "na1, nan2" 9
+南 "nan2, na1" 9
 药 yao4 9
 标 biao1 9
 栈 zhan4 9
@@ -1430,7 +1430,7 @@
 相 "xiang1, xiang4" 9
 查 "cha2, zha1" 9
 柏 "bai3, bo2" 9
-栅 "shan1, zha4" 9
+栅 "zha4, shan1" 9
 柳 liu3 9
 柱 zhu4 9
 柿 shi4 8
@@ -1438,7 +1438,7 @@
 柠 ning2 9
 树 shu4 9
 勃 bo2 9
-要 "yao1, yao4" 9
+要 "yao4, yao1" 9
 柬 jian3 9
 咸 xian2 9
 威 wei1 9
@@ -1464,7 +1464,7 @@
 鸦 ya1 9
 皆 jie1 9
 韭 jiu3 9
-背 "bei1, bei4" 9
+背 "bei4, bei1" 9
 战 zhan4 9
 点 dian3 9
 虐 nüe4 9
@@ -1472,7 +1472,7 @@
 览 lan3 9
 竖 shu4 9
 省 "sheng3, xing3" 9
-削 "xiao1, xue1" 9
+削 "xue1, xiao1" 9
 尝 chang2 9
 昧 mei4 9
 盹 dun3 9
@@ -1481,13 +1481,13 @@
 眨 zha3 9
 哇 "wa1, wa5" 9
 哄 "hong1, hong3, hong4" 9
-哑 "ya1, ya3" 9
+哑 "ya3, ya1" 9
 显 xian3 9
 冒 mao4 9
 映 ying4 9
 星 xing1 9
 昨 zuo2 9
-咧 "lie1, lie3" 9
+咧 "lie3, lie1" 9
 昭 zhao1 9
 畏 wei4 9
 趴 pa1 9
@@ -1501,7 +1501,7 @@
 蚂 "ma3, ma4" 9
 虽 sui1 9
 品 pin3 9
-咽 "yan1, yan4, ye4" 9
+咽 "yan4, ye4, yan1" 9
 骂 ma4 9
 勋 xun1 9
 哗 "hua1, hua2" 9
@@ -1510,7 +1510,7 @@
 哈 "ha1, ha3, ha4" 9
 哆 duo1 9
 咬 yao3 9
-咳 "hai1, ke2" 9
+咳 "ke2, hai1" 9
 咪 "mi1, mi3" 9
 哪 "na3, na5, ne2" 10
 哟 "yo1, yo5" 9
@@ -1520,7 +1520,7 @@
 贱 jian4 9
 贴 tie1 9
 贻 yi2 9
-骨 "gu1, gu3" 10
+骨 "gu3, gu1" 10
 幽 you1 9
 钙 gai4 9
 钝 dun4 9
@@ -1535,8 +1535,8 @@
 钮 niu3 9
 卸 xie4 8
 缸 gang1 9
-拜 "bai2, bai4" 9
-看 "kan1, kan4" 9
+拜 "bai4, bai2" 9
+看 "kan4, kan1" 9
 矩 ju3 9
 毡 zhan1 9
 氢 qing1 9
@@ -1546,10 +1546,10 @@
 适 shi4 9
 秒 miao3 9
 香 xiang1 9
-种 "chong2, zhong3, zhong4" 9
+种 "zhong3, zhong4, chong2" 9
 秋 qiu1 9
 科 ke1 9
-重 "chong2, zhong4" 9
+重 "zhong4, chong2" 9
 复 fu4 9
 竿 gan1 9
 段 duan4 9
@@ -1577,7 +1577,7 @@
 追 zhui1 9
 俊 jun4 9
 盾 dun4 9
-待 "dai1, dai4" 9
+待 "dai4, dai1" 9
 徊 huai2 9
 衍 yan3 9
 律 lü4 9
@@ -1593,7 +1593,7 @@
 胆 dan3 9
 胜 sheng4 9
 胞 bao1 9
-胖 "pan2, pang4" 9
+胖 "pang4, pan2" 9
 脉 "mai4, mo4" 9
 胎 tai1 9
 勉 mian3 9
@@ -1614,7 +1614,7 @@
 饼 bing3 9
 峦 luan2 9
 弯 wan1 9
-将 "jiang1, jiang4" 10
+将 "jiang4, jiang1" 10
 奖 jiang3 9
 哀 ai1 9
 亭 ting2 9
@@ -1653,9 +1653,9 @@
 兹 "ci2, zi1" 9
 总 zong3 9
 炼 lian4 9
-炸 "zha2, zha4" 9
+炸 "zha4, zha2" 9
 烁 shuo4 9
-炮 "bao1, pao2, pao4" 9
+炮 "pao4, bao1, pao2" 9
 炫 xuan4 9
 烂 lan4 9
 剃 ti4 9
@@ -1675,7 +1675,7 @@
 染 ran3 9
 洛 luo4 9
 浏 liu2 9
-济 "ji3, ji4" 9
+济 "ji4, ji3" 9
 洋 yang2 9
 洲 zhou1 9
 浑 hun2 9
@@ -1691,7 +1691,7 @@
 恼 nao3 9
 恨 hen4 9
 举 ju3 9
-觉 "jiao4, jue2" 9
+觉 "jue2, jiao4" 9
 宣 xuan1 9
 宦 huan4 9
 室 shi4 9
@@ -1714,14 +1714,14 @@
 误 wu4 9
 诱 you4 9
 诲 hui4 9
-说 "shui4, shuo1" 9
+说 "shuo1, shui4" 9
 诵 song4 9
 垦 ken3 9
 退 tui4 9
 既 ji4 10
 屋 wu1 9
 昼 zhou4 9
-屏 "bing3, ping2" 9
+屏 "ping2, bing3" 9
 屎 shi3 9
 费 fei4 9
 陡 dou3 10
@@ -1751,14 +1751,14 @@
 垒 lei3 9
 绑 bang3 10
 绒 rong2 9
-结 "jie1, jie2" 9
+结 "jie2, jie1" 9
 绕 rao4 9
 骄 jiao1 9
 绘 hui4 9
 给 "gei3, ji3" 9
 绚 xuan4 9
 骆 luo4 9
-络 "lao4, luo4" 9
+络 "luo4, lao4" 9
 绝 jue2 9
 绞 jiao3 9
 骇 hai4 9
@@ -1784,7 +1784,7 @@
 埂 geng3 10
 捂 wu3 10
 振 zhen4 10
-载 "zai3, zai4" 10
+载 "zai4, zai3" 10
 赶 gan3 10
 起 qi3 10
 盐 yan2 10
@@ -1798,7 +1798,7 @@
 损 sun3 10
 袁 yuan2 10
 捌 ba1 10
-都 "dou1, du1" 11
+都 "du1, dou1" 11
 哲 zhe2 10
 逝 shi4 10
 捡 jian3 10
@@ -1826,7 +1826,7 @@
 荷 "he2, he4" 10
 获 huo4 10
 晋 jin4 10
-恶 "e3, e4, wu4" 10
+恶 "e4, wu4, e3" 10
 莹 ying2 10
 莺 ying1 10
 真 zhen1 10
@@ -1844,7 +1844,7 @@
 桃 tao2 10
 格 ge2 10
 桩 zhuang1 10
-校 "jiao4, xiao4" 10
+校 "xiao4, jiao4" 10
 核 "he2, hu2" 10
 样 yang4 10
 根 gen1 10
@@ -1890,7 +1890,7 @@
 哮 xiao4 10
 唠 "lao2, lao4" 10
 鸭 ya1 10
-晃 "huang3, huang4" 10
+晃 "huang4, huang3" 10
 哺 bu3 10
 晌 shang3 10
 剔 ti1 10
@@ -1945,8 +1945,8 @@
 积 ji1 10
 秧 yang1 10
 秩 zhi4 10
-称 "chen4, cheng1" 10
-秘 "bi4, mi4" 10
+称 "cheng1, chen4" 10
+秘 "mi4, bi4" 10
 透 tou4 10
 笔 bi3 10
 笑 xiao4 10
@@ -1959,7 +1959,7 @@
 倾 qing1 10
 倒 "dao3, dao4" 10
 倘 tang3 10
-俱 "ju1, ju4" 10
+俱 "ju4, ju1" 10
 倡 chang4 10
 候 hou4 10
 赁 lin4 10
@@ -1974,7 +1974,7 @@
 倔 "jue2, jue4" 10
 徒 tu2 10
 徐 xu2 10
-殷 "yan1, yin1" 10
+殷 "yin1, yan1" 10
 舰 jian4 10
 舱 cang1 10
 般 ban1 10
@@ -1995,7 +1995,7 @@
 脂 zhi1 10
 胸 xiong1 10
 胳 "ge1, ge2" 10
-脏 "zang1, zang4" 10
+脏 "zang4, zang1" 10
 脐 qi2 10
 胶 jiao1 10
 脑 nao3 10
@@ -2023,7 +2023,7 @@
 席 xi2 9
 准 zhun3 10
 座 zuo4 10
-症 "zheng1, zheng4" 10
+症 "zheng4, zheng1" 10
 病 bing4 10
 疾 ji2 10
 斋 zhai1 10
@@ -2069,7 +2069,7 @@
 酒 jiu3 10
 涉 she4 10
 消 xiao1 10
-涡 "guo1, wo1" 10
+涡 "wo1, guo1" 10
 浩 hao4 10
 海 hai3 10
 涂 tu2 10
@@ -2086,10 +2086,10 @@
 涨 "zhang3, zhang4" 10
 烫 tang4 10
 涩 se4 10
-涌 "chong1, yong3" 10
+涌 "yong3, chong1" 10
 悖 bei4 10
 悟 wu4 10
-悄 "qiao1, qiao3" 10
+悄 "qiao3, qiao1" 10
 悍 han4 10
 悔 hui3 10
 悯 min3 10
@@ -2109,8 +2109,8 @@
 朗 lang3 11
 诸 zhu1 10
 诺 nuo4 10
-读 "dou4, du2" 10
-扇 "shan1, shan4" 10
+读 "du2, dou4" 10
+扇 "shan4, shan1" 10
 诽 fei3 10
 袜 wa4 10
 袖 xiu4 10
@@ -2126,7 +2126,7 @@
 谆 zhun1 10
 谈 tan2 10
 谊 yi4 10
-剥 "bao1, bo1" 10
+剥 "bo1, bao1" 10
 恳 ken3 10
 展 zhan3 10
 剧 ju4 10
@@ -2176,7 +2176,7 @@
 掀 xian1 11
 授 shou4 11
 捻 nian3 11
-教 "jiao1, jiao4" 11
+教 "jiao4, jiao1" 11
 掏 tao1 11
 掐 qia1 11
 掠 lüe4 11
@@ -2186,7 +2186,7 @@
 掷 zhi4 12
 控 kong4 11
 探 tan4 11
-据 "ju1, ju4" 11
+据 "ju4, ju1" 11
 掘 jue2 11
 掺 chan1 11
 职 zhi2 11
@@ -2244,7 +2244,7 @@
 爽 shuang3 11
 聋 long2 11
 袭 xi2 11
-盛 "cheng2, sheng4" 11
+盛 "sheng4, cheng2" 11
 匾 bian3 11
 雪 xue3 11
 辅 fu3 11
@@ -2252,7 +2252,7 @@
 颅 lu2 11
 虚 xu1 11
 彪 biao1 11
-雀 "qiao1, qiao3, que4" 12
+雀 "que4, qiao1, qiao3" 12
 堂 tang2 11
 常 chang2 11
 眶 kuang4 11
@@ -2279,7 +2279,7 @@
 蛀 zhu4 11
 蛇 she2 11
 唬 hu3 11
-累 "lei2, lei3, lei4" 11
+累 "lei3, lei4, lei2" 11
 鄂 e4 12
 唱 chang4 11
 患 huan4 11
@@ -2299,7 +2299,7 @@
 崇 chong2 11
 崛 jue2 11
 婴 ying1 11
-圈 "juan1, juan4, quan1" 11
+圈 "quan1, juan4, juan1" 11
 铐 kao4 11
 铛 "cheng1, dang1" 11
 铝 lü3 11
@@ -2392,14 +2392,14 @@
 族 zu2 11
 旋 "xuan2, xuan4" 11
 望 wang4 11
-率 "lü4, shuai4" 11
+率 "shuai4, lü4" 11
 阎 yan2 11
 阐 chan3 11
-着 "zhao1, zhao2, zhe5, zhuo2" 12
+着 "zhe5, zhuo2, zhao2, zhao1" 12
 羚 ling2 11
 盖 "gai4, ge3" 11
 眷 juan4 11
-粘 "nian2, zhan1" 11
+粘 "zhan1, nian2" 11
 粗 cu1 11
 粒 li4 11
 断 duan4 11
@@ -2482,18 +2482,18 @@
 婶 shen3 11
 婉 wan3 11
 颇 po1 11
-颈 "geng3, jing3" 11
+颈 "jing3, geng3" 11
 绩 ji4 11
 绪 xu4 11
 续 xu4 11
 骑 qi2 11
-绰 "chao1, chuo4" 11
+绰 "chuo4, chao1" 11
 绳 sheng2 11
 维 wei2 11
 绵 mian2 11
 绷 "beng1, beng3, beng4" 11
 绸 chou2 11
-综 "zeng4, zong1" 11
+综 "zong1, zeng4" 11
 绽 zhan4 11
 绿 "lu4, lü4" 11
 缀 zhui4 11
@@ -2517,12 +2517,12 @@
 超 chao1 12
 揽 lan3 12
 堤 di1 12
-提 "di1, ti2" 12
+提 "ti2, di1" 12
 博 bo2 12
 揭 jie1 12
 喜 xi3 12
 彭 peng2 12
-揣 "chuai1, chuai3, chuai4" 12
+揣 "chuai3, chuai1, chuai4" 12
 插 cha1 12
 揪 jiu1 12
 搜 sou1 12
@@ -2532,18 +2532,18 @@
 裁 cai2 12
 搁 "ge1, ge2" 12
 搓 cuo1 13
-搂 "lou1, lou3" 12
+搂 "lou3, lou1" 12
 搅 jiao3 12
 壹 yi1 12
 握 wo4 12
 搔 sao1 13
 揉 rou2 12
 斯 si1 12
-期 "ji1, qi1" 12
+期 "qi1, ji1" 12
 欺 qi1 12
 联 lian2 12
 葫 hu2 12
-散 "san3, san4" 12
+散 "san4, san3" 12
 惹 re3 12
 葬 zang4 12
 募 mu4 12
@@ -2554,19 +2554,19 @@
 葱 cong1 12
 蒋 jiang3 13
 蒂 di4 12
-落 "la4, lao4, luo4" 12
+落 "luo4, la4, lao4" 12
 韩 han2 12
 朝 "chao2, zhao1" 12
 辜 gu1 12
 葵 kui2 12
 棒 bang4 12
-棱 "leng1, leng2, ling2" 12
+棱 "leng2, leng1, ling2" 12
 棋 qi2 12
 椰 ye1 13
 植 zhi2 12
 森 sen1 12
 焚 fen2 12
-椅 "yi1, yi3" 12
+椅 "yi3, yi1" 12
 椒 jiao1 12
 棵 ke1 13
 棍 gun4 12
@@ -2591,14 +2591,14 @@
 确 que4 12
 硫 liu2 12
 雁 yan4 12
-殖 "shi, zhi2" 12
+殖 "zhi2, shi" 12
 裂 lie4 12
 雄 xiong2 12
 颊 jia2 12
 雳 li4 12
 暂 zan4 12
 雅 ya3 12
-翘 "qiao2, qiao4" 12
+翘 "qiao4, qiao2" 12
 辈 bei4 12
 悲 bei1 12
 紫 zi3 12
@@ -2613,7 +2613,7 @@
 暑 shu3 12
 最 zui4 12
 晰 xi1 12
-量 "liang2, liang4" 13
+量 "liang4, liang2" 13
 鼎 ding3 13
 喷 "pen1, pen4" 12
 喳 "cha1, zha1" 12
@@ -2628,7 +2628,7 @@
 践 jian4 13
 跋 ba2 12
 跌 die1 12
-跑 "pao2, pao3" 12
+跑 "pao3, pao2" 12
 跛 bo3 12
 遗 yi2 12
 蛙 wa1 12
@@ -2684,7 +2684,7 @@
 筛 shai1 12
 筒 tong3 12
 筏 fa2 12
-答 "da1, da2" 12
+答 "da2, da1" 12
 筋 jin1 12
 筝 zheng1 12
 傲 ao4 13
@@ -2743,7 +2743,7 @@
 尊 zun1 12
 奠 dian4 12
 道 dao4 12
-遂 "sui2, sui4" 12
+遂 "sui4, sui2" 12
 曾 "ceng2, zeng1" 12
 焰 yan4 12
 港 gang3 12
@@ -2756,7 +2756,7 @@
 湿 shi1 12
 温 wen1 12
 渴 ke3 12
-溃 "hui4, kui4" 12
+溃 "kui4, hui4" 12
 溅 jian4 12
 滑 hua2 13
 湃 pai4 12
@@ -2799,7 +2799,7 @@
 犀 xi1 12
 属 shu3 12
 屡 lü3 12
-强 "jiang4, qiang2, qiang3" 12
+强 "qiang2, qiang3, jiang4" 12
 粥 zhou1 12
 疏 shu1 12
 隔 ge2 13
@@ -2856,13 +2856,13 @@
 蓄 xu4 13
 蒲 pu2 13
 蓉 rong2 13
-蒙 "meng1, meng2, meng3" 13
+蒙 "meng2, meng3, meng1" 13
 蒸 zheng1 13
 献 xian4 12
 椿 chun1 13
-禁 "jin1, jin4" 13
+禁 "jin4, jin1" 13
 楚 chu3 13
-楷 "jie1, kai3" 13
+楷 "kai3, jie1" 13
 榄 lan3 13
 想 xiang3 13
 槐 huai2 14
@@ -2879,7 +2879,7 @@
 碎 sui4 13
 碰 peng4 13
 碗 wan3 13
-碌 "liu4, lu4" 13
+碌 "lu4, liu4" 13
 尴 gan1 13
 雷 lei2 13
 零 ling2 13
@@ -2996,7 +2996,7 @@
 意 yi4 13
 誊 teng2 13
 粮 liang2 13
-数 "shu3, shu4, shuo4" 13
+数 "shu4, shu3, shuo4" 13
 煎 jian1 13
 塑 su4 13
 慈 ci2 13
@@ -3022,7 +3022,7 @@
 滩 tan1 13
 慎 shen4 13
 誉 yu4 13
-塞 "sai1, sai4, se4" 13
+塞 "se4, sai1, sai4" 13
 寞 mo4 13
 窥 kui1 13
 窟 ku1 13
@@ -3034,7 +3034,7 @@
 谬 miu4 13
 群 qun2 13
 殿 dian4 13
-辟 "bi4, pi4" 13
+辟 "pi4, bi4" 13
 障 zhang4 14
 媳 xi2 13
 嫉 ji2 13
@@ -3042,7 +3042,7 @@
 嫁 jia4 13
 叠 die2 13
 缚 fu4 13
-缝 "feng2, feng4" 13
+缝 "feng4, feng2" 13
 缠 chan2 13
 缤 bin1 13
 剿 jiao3 14
@@ -3050,7 +3050,7 @@
 碧 bi4 14
 璃 li2 15
 赘 zhui4 15
-熬 "ao1, ao2" 15
+熬 "ao2, ao1" 15
 墙 qiang2 14
 墟 xu1 14
 嘉 jia1 14
@@ -3066,7 +3066,7 @@
 慕 mu4 14
 暮 mu4 14
 摹 mo2 14
-蔓 "man2, man4, wan4" 14
+蔓 "man4, man2, wan4" 14
 蔑 mie4 14
 蔡 cai4 14
 蔗 zhe4 13
@@ -3160,7 +3160,7 @@
 潇 xiao1 14
 漆 qi1 14
 漱 shu4 14
-漂 "piao1, piao3, piao4" 14
+漂 "piao1, piao4, piao3" 14
 漫 man4 14
 滴 di1 14
 漾 yang4 14
@@ -3185,7 +3185,7 @@
 熊 xiong2 14
 凳 deng4 14
 骡 luo2 14
-缩 "su4, suo1" 14
+缩 "suo1, su4" 14
 慧 hui4 15
 撵 nian3 15
 撕 si1 15
@@ -3239,7 +3239,7 @@
 嘹 liao2 15
 影 ying3 15
 踢 ti1 15
-踏 "ta1, ta4" 15
+踏 "ta4, ta1" 15
 踩 cai3 15
 踪 zong1 15
 蝶 die2 14
@@ -3275,16 +3275,16 @@
 膛 tang2 15
 鲤 li3 16
 鲫 ji4 16
-熟 "shou2, shu2" 15
-摩 "ma1, mo2" 15
+熟 "shu2, shou2" 15
+摩 "mo2, ma1" 15
 褒 bao1 15
-瘪 "bie1, bie3" 15
+瘪 "bie3, bie1" 15
 瘤 liu2 15
 瘫 tan1 15
 凛 lin3 15
 颜 yan2 15
 毅 yi4 15
-糊 "hu1, hu2, hu4" 15
+糊 "hu2, hu1, hu4" 15
 遵 zun1 15
 憋 bie1 15
 潜 qian2 15
@@ -3323,7 +3323,7 @@
 薇 wei1 16
 擎 qing2 16
 薪 xin1 16
-薄 "bao2, bo2, bo4" 16
+薄 "bo2, bao2, bo4" 16
 颠 dian1 16
 翰 han4 16
 噩 e4 16
@@ -3429,9 +3429,9 @@
 糠 kang1 17
 燥 zao4 17
 懦 nuo4 17
-豁 "huo1, huo4" 17
+豁 "huo4, huo1" 17
 臀 tun2 17
-臂 "bei, bi4" 17
+臂 "bi4, bei" 17
 翼 yi4 17
 骤 zhou4 17
 藕 ou3 18
@@ -3445,7 +3445,7 @@
 翻 fan1 18
 鳍 qi2 18
 鹰 ying1 18
-瀑 "bao4, pu4" 18
+瀑 "pu4, bao4" 18
 襟 jin1 18
 璧 bi4 18
 戳 chuo1 18
@@ -3454,7 +3454,7 @@
 蘑 mo2 19
 藻 zao3 19
 攀 pan1 19
-曝 "bao4, pu4" 19
+曝 "pu4, bao4" 19
 蹲 dun1 19
 蹭 ceng4 19
 蹬 deng1 19
@@ -3463,7 +3463,7 @@
 簿 bu4 19
 蟹 xie4 19
 颤 chan4 19
-靡 "mi2, mi3" 19
+靡 "mi3, mi2" 19
 癣 xuan3 19
 瓣 ban4 19
 羹 geng1 19
@@ -3477,7 +3477,7 @@
 躁 zao4 20
 蠕 ru2 20
 嚼 "jiao2, jiao4, jue2" 21
-嚷 "rang1, rang3" 20
+嚷 "rang3, rang1" 20
 巍 wei1 21
 籍 ji2 20
 鳞 lin2 20
@@ -3487,13 +3487,13 @@
 譬 pi4 20
 蠢 chun3 21
 霸 ba4 21
-露 "lou4, lu4" 21
+露 "lu4, lou4" 21
 霹 pi1 21
 躏 lin4 21
 黯 an4 21
 髓 sui3 22
 赣 gan4 21
-囊 "nang1, nang2" 22
+囊 "nang2, nang1" 22
 镶 xiang1 22
 瓤 rang2 22
 罐 guan4 23
@@ -4146,7 +4146,7 @@
 栌 lu2 9
 柙 xia2 9
 枵 xiao1 9
-柚 "you2, you4" 9
+柚 "you4, you2" 9
 枳 zhi3 9
 柞 "zha4, zuo4" 9
 柝 tuo4 9
@@ -4227,7 +4227,7 @@
 哝 nong2 9
 哏 gen2 9
 哞 mou1 9
-峙 "shi4, zhi4" 9
+峙 "zhi4, shi4" 9
 峣 yao2 9
 罘 fu2 9
 帧 zhen1 9
@@ -4851,7 +4851,7 @@
 啷 lang1 12
 唳 li4 10
 唰 shua1 11
-啜 "chuai4, chuo4" 11
+啜 "chuo4, chuai4" 11
 帻 ze2 11
 崚 leng2 11
 崦 yan1 11
@@ -5225,7 +5225,7 @@
 舜 shun4 12
 貂 diao1 12
 腈 jing1 12
-腌 "a1, yan1" 12
+腌 "yan1, a1" 12
 腓 fei2 12
 腆 tian3 12
 腴 yu2 12
@@ -5665,7 +5665,7 @@
 槔 gao1 14
 榱 cui1 14
 槁 gao3 14
-槟 "bin1, bing1" 14
+槟 "bing1, bin1" 14
 槠 zhu1 14
 榷 que4 14
 僰 bo2 14
@@ -5712,7 +5712,7 @@
 蜿 wan1 14
 螂 lang2 15
 蜢 meng3 14
-嘘 "shi1, xu1" 14
+嘘 "xu1, shi1" 14
 嘡 tang1 14
 鹗 e4 14
 嘣 beng1 14
@@ -6365,7 +6365,7 @@
 邋 la1 18
 鬏 jiu1 19
 攉 huo1 19
-攒 "cuan2, zan3" 19
+攒 "zan3, cuan2" 19
 鞲 gou1 18
 鞴 bei4 18
 藿 huo4 19

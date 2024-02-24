@@ -8,7 +8,7 @@ path = require "path"
 pinyin_split = require "pinyin-split"
 pinyin_utils = require "pinyin-utils"
 #scraper = require "table-scraper"
-read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-8"), {delimiter: delimiter, relax_column_count: true}
+read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-8"), {delimiter: delimiter || " ", relax_column_count: true}
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
 on_error = (a) -> if a then console.error a
 delete_duplicates = (a) -> [...new Set(a)]
@@ -21,6 +21,10 @@ pinyin_split2 = (a) -> a.replace(/[0-5]/g, (a) -> a + " ").trim().split " "
 median = (a) -> a.slice().sort((a, b) -> a - b)[Math.floor(a.length / 2)]
 sum = (a) -> a.reduce ((a, b) -> a + b), 0
 mean = (a) -> sum(a) / a.length
+
+write_csv_file = (path, data) ->
+  csv = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
+  fs.writeFile path, csv, on_error
 
 delete_duplicates_stable = (a) ->
   result = []
@@ -133,8 +137,8 @@ cedict_filter_only = () ->
   frequency_array = array_from_newline_file "data/frequency.csv", "utf-8"
   frequency = {}
   frequency_array.forEach (a, i) -> frequency[a] = i
-  lines = cedict.split "\n"
-  data = lines.map (line) ->
+  rows = cedict.split "\n"
+  data = rows.map (line) ->
     if "#" is line[0] then return null
     line = line.trim()
     parsed = line.match(/^([^ ]+) ([^ ]+) \[([^\]]+)\] \/(.*)\//)
@@ -188,19 +192,19 @@ get_character_frequency_index = () ->
 
 get_all_characters_and_reading = () ->
   result = []
-  a = read_csv_file "data/frequency-pinyin.csv", " "
+  a = read_csv_file "data/frequency-pinyin.csv"
   a.forEach (a) ->
     chars = a[0].split ""
     pinyin = pinyin_split2 a[1]
     chars.forEach (a, i) -> result.push a, pinyin
-  a = read_csv_file "data/table-of-general-standard-chinese-characters.csv", " "
+  a = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
   a.forEach (a) -> a[1].split(", ").forEach (pinyin) -> result.push [a[0], pinyin]
   delete_duplicates_stable result
 
 get_frequency_characters_and_reading = () ->
   # with duplicates. use case: count character reading frequency
   result = []
-  a = read_csv_file "data/frequency-pinyin.csv", " "
+  a = read_csv_file "data/frequency-pinyin.csv"
   a.forEach (a) ->
     chars = a[0].split ""
     pinyin = pinyin_split2 a[1]
@@ -221,7 +225,7 @@ get_character_reading_frequency_index = () ->
 update_character_reading_count = () ->
   # counts how common different readings are for characters
   index = {}
-  result = []
+  rows = []
   chars = get_all_characters()
   chars_and_reading = get_frequency_characters_and_reading()
   chars.forEach (a) ->
@@ -232,10 +236,9 @@ update_character_reading_count = () ->
         else index[key] = 0
   Object.keys(index).forEach (a) ->
     count = index[a]
-    if count then result.push [a[0], a.slice(1), count]
-  result = result.sort (a, b) -> b[2] - a[2]
-  data = csv_stringify.stringify(result, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/character-reading-count.csv", data, on_error
+    if count then rows.push [a[0], a.slice(1), count]
+  rows = rows.sort (a, b) -> b[2] - a[2]
+  write_csv_file "data/character-reading-count.csv", rows
 
 sort_by_frequency = (frequency_index, word_key, pinyin_key, data) ->
   data = data.sort (a, b) ->
@@ -290,7 +293,7 @@ update_cedict_csv = () ->
     example2 = data.findIndex((a) => a[0] is "熊猫")
     throw "test failed" unless example1 < example2
   #test()
-  fs.writeFile "data/cedict.csv", csv_stringify.stringify(data), on_error
+  write_csv_file "data/cedict.csv", data
 
 dictionary_cedict_to_json = (data) ->
   JSON.stringify data.map (a) ->
@@ -298,7 +301,7 @@ dictionary_cedict_to_json = (data) ->
     a
 
 update_dictionary = () ->
-  words = read_csv_file "data/cedict.csv", ","
+  words = read_csv_file "data/cedict.csv"
   words = dictionary_cedict_to_json words
   js = fs.readFileSync "js/dictionary.js", "utf8"
   js = js.replace "__word_data__", words
@@ -318,8 +321,7 @@ update_hsk = () ->
   data = data.flat(1).map (a) ->
     pinyin = pinyin_split2(a[2]).map(pinyin_utils.markToNumber).join("").toLowerCase()
     [a[1], pinyin]
-  data = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/hsk.csv", data, on_error
+  write_csv_file "data/hsk.csv", data
 
 object_array_add = (object, key, value) ->
   if object[key] then object[key].push value else object[key] = [value]
@@ -344,7 +346,7 @@ dictionary_index_word_pinyin_f = () ->
 update_frequency_pinyin = () ->
   dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
   frequency = array_from_newline_file "data/frequency.csv", "utf-8"
-  hsk = read_csv_file "data/hsk.csv", " "
+  hsk = read_csv_file "data/hsk.csv"
   hsk_index = {}
   hsk.forEach (a) ->
     return if hsk_index[a[0]]
@@ -352,16 +354,14 @@ update_frequency_pinyin = () ->
     pinyin += "5" unless /[0-5]$/.test pinyin
     hsk_index[a[0]] = pinyin
   frequency_pinyin = frequency.map (a) -> [a, (hsk_index[a] || "")]
-  lines = frequency_pinyin.map (a) ->
+  rows = frequency_pinyin.map (a) ->
     translation = dictionary_lookup a[0], a[1]
     return [] unless translation
     [a[0], translation[0][1], translation[0][2]]
-  lines = lines.filter (a) -> 3 is a.length
-  data = csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/frequency-pinyin-translation.csv", data, on_error
-  lines = lines.map (a) -> [a[0], a[1]]
-  data = csv_stringify.stringify(lines, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/frequency-pinyin.csv", data, on_error
+  rows = rows.filter (a) -> 3 is a.length
+  write_csv_file "data/frequency-pinyin-translation.csv", rows
+  rows = rows.map (a) -> [a[0], a[1]]
+  write_csv_file "data/frequency-pinyin.csv", rows
 
 mark_to_number = (a) ->
   a.split(" ").map((a) -> pinyin_split2(a).map(pinyin_utils.markToNumber).join("")).join(" ")
@@ -399,7 +399,7 @@ find_multiple_word_matches = (a, lookup_index, translation_index, split_syllable
 
 dsv_add_translations_with_pinyin = (word_index, pinyin_index) ->
   dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
-  rows = read_csv_file(0, " ").map (a) ->
+  rows = read_csv_file(0).map (a) ->
     translations = dictionary_lookup a[word_index], a[pinyin_index]
     return a unless translations
     a.concat [translations[0][2]]
@@ -407,26 +407,25 @@ dsv_add_translations_with_pinyin = (word_index, pinyin_index) ->
 
 dsv_add_translations = (word_index) ->
   dictionary_lookup = dictionary_index_word_f()
-  rows = read_csv_file(0, " ").map (a) ->
+  rows = read_csv_file(0).map (a) ->
     translations = dictionary_lookup a[word_index]
     return a unless translations
     a.concat [translations[0][1], translations[0][2]]
   console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
 
 dsv_mark_to_number = (pinyin_index) ->
-  rows = read_csv_file(0, " ").map (a) ->
+  rows = read_csv_file(0).map (a) ->
     a[pinyin_index] = mark_to_number a[pinyin_index]
     a
   console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
 
 update_hsk_pinyin_translations = () ->
   dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
-  hsk = read_csv_file("data/hsk.csv", " ").map (a) ->
+  rows = read_csv_file("data/hsk.csv").map (a) ->
     translations = dictionary_lookup a[0], a[1]
     return a unless translations
     a.concat [translations[0][2]]
-  data = csv_stringify.stringify(hsk, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/hsk-pinyin-translation.csv", data, on_error
+  write_csv_file "data/hsk-pinyin-translation.csv", rows
 
 pinyin_to_hanzi = (a) ->
   a = a.replace(non_pinyin_regexp, " ").trim()
@@ -447,30 +446,29 @@ find_components = (a, decompositions) ->
 
 compositions_from_decompositions = () ->
   # old method of getting compositions from the decompositions file from wiktionary
-  chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
+  chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
   decompositions_csv = read_csv_file("data/decompositions.csv", "\t").sort (a, b) -> a[1] - b[1]
   decompositions = {}
   decompositions_csv.forEach (a) -> decompositions[a[0]] = [a[1], a[3], a[5]]
-  compositions = chars.map (a) -> [a].concat find_components(a, decompositions)
-  data = csv_stringify.stringify(compositions, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/compositions.csv", data, on_error
+  rows = chars.map (a) -> [a].concat find_components(a, decompositions)
+  write_csv_file "data/compositions.csv", rows
 
 dsv_process = (a, b) ->
   # add pinyin looked up from other file
   pronunciations = {}
-  read_csv_file(a, " ").forEach (a) -> pronunciations[a[0]] = a[1]
-  words = read_csv_file b, " "
+  read_csv_file(a).forEach (a) -> pronunciations[a[0]] = a[1]
+  words = read_csv_file b
   words = words.map (a) -> [a[0], pronunciations[a[0]]]
   console.log csv_stringify.stringify(words, {delimiter: " "}, on_error).trim()
   # filter characters
-  #chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
-  #rows = read_csv_file(0, " ").map (a) ->
+  #chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
+  #rows = read_csv_file(0).map (a) ->
   #  [a[0]].concat a.slice(1).filter (a) -> chars.includes a
 
 dsv_add_example_words = () ->
   dictionary = dictionary_index_word_pinyin_f 0, 1
-  words = read_csv_file "data/frequency-pinyin-translation.csv", " "
-  rows = read_csv_file(0, " ").map (a) ->
+  words = read_csv_file "data/frequency-pinyin-translation.csv"
+  rows = read_csv_file(0).map (a) ->
     char_words = words.filter((b) -> b[0].includes a[0])
     unless char_words.length
       char_words = dictionary(a[0], a[1]) || []
@@ -480,7 +478,7 @@ dsv_add_example_words = () ->
 
 get_character_reading_frequency_index = () ->
   index = {}
-  frequency = read_csv_file "data/frequency-pinyin.csv", " "
+  frequency = read_csv_file "data/frequency-pinyin.csv"
   frequency = frequency.forEach (a, i) ->
     pinyin_split2(a[1]).forEach (b, j) ->
       index[a[0][j] + b] = i unless index[a[0][j]]
@@ -488,7 +486,7 @@ get_character_reading_frequency_index = () ->
 
 update_characters_by_reading = () ->
   frequency_index = get_character_reading_frequency_index()
-  chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv", " "
+  chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
   by_reading = {}
   chars.forEach (a) ->
     b = a[1]
@@ -502,8 +500,7 @@ update_characters_by_reading = () ->
       else by_reading[b] = [a]
   rows = Object.keys(by_reading).map (a) -> [a, by_reading[a].join("")]
   rows = rows.sort (a, b) -> b[1].length - a[1].length
-  data = csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/characters-by-reading.csv", data, on_error
+  write_csv_file "data/characters-by-reading.csv", rows
 
 http_get = (url) ->
   new Promise (resolve, reject) ->
@@ -533,25 +530,23 @@ sort_by_array_with_index = (a, sorting, index) ->
   a.sort (a, b) -> sorting.indexOf(a[index]) - sorting.indexOf(b[index])
 
 update_compositions = () ->
-  compositions = read_csv_file("data/character-compositions.csv", " ", "utf-8")
-  radicals = read_csv_file("data/radicals.csv", " ", "utf-8").map (a) -> a[1]
+  compositions = read_csv_file "data/character-compositions.csv"
+  radicals = read_csv_file("data/radicals.csv").map (a) -> a[1]
   radical_compositions = compositions.filter (a) -> radicals.includes a[0]
   radical_compositions = await update_compositions_for_chars radicals, radical_compositions
   radical_compositions = sort_by_array_with_index radical_compositions, radicals, 0
-  data = csv_stringify.stringify(radical_compositions, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/radical-compositions.csv", data, on_error
-  standard = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> a[0]
+  write_csv_file "data/radical-compositions.csv", radical_compositions
+  standard = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
   standard_compositions = compositions.filter (a) -> standard.includes a[0]
   standard_compositions = await update_compositions_for_chars standard, standard_compositions
   standard_compositions = sort_by_array_with_index standard_compositions, standard, 0
-  data = csv_stringify.stringify(standard_compositions, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/standard-compositions.csv", data, on_error
+  write_csv_file "data/standard-compositions.csv", standard_compositions
 
 array_intersection = (a, b) -> a.filter (a) -> b.includes(a)
 
 get_stroke_count_index = (a) ->
   result = {}
-  strokes = read_csv_file "data/table-of-general-standard-chinese-characters.csv", " "
+  strokes = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
   previous_count = 0
   strokes.forEach (a) ->
     if a[2].length
@@ -564,7 +559,7 @@ get_stroke_count_index = (a) ->
 
 update_similar_characters = () ->
   stroke_count_index = get_stroke_count_index()
-  compositions = read_csv_file "data/character-compositions.csv", " "
+  compositions = read_csv_file "data/character-compositions.csv"
   #compositions = compositions.slice 0, 1000
   compositions = compositions.map (a) ->
     if a.length is 2
@@ -588,73 +583,89 @@ update_strokecounts = () ->
   counts = {}
   counts_csv = read_csv_file "data/decompositions.csv", "\t"
   counts_csv.forEach (a) -> counts[a[0]] = parseInt(a[1])
-  chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv", " "
+  chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
   chars.forEach (a) -> a.push counts[a[0]]
-  data = csv_stringify.stringify(chars, {delimiter: " "}, on_error).trim()
-  fs.writeFileSync "data/table-2.csv", data, on_error
+  write_csv_file "data/table-2.csv", chars
 
 get_character_reading_count_index = () ->
   result = {}
-  read_csv_file("data/character-reading-count.csv", " ").forEach (a) -> result[a[0] + a[1]] = parseInt a[2]
+  read_csv_file("data/character-reading-count.csv").forEach (a) -> result[a[0] + a[1]] = parseInt a[2]
   result
 
 get_character_syllables_tones_count_index = () ->
   result = {}
-  read_csv_file("data/syllables-tones-character-count.csv", " ").forEach (a) -> result[a[0]] = parseInt a[1]
+  read_csv_file("data/syllables-tones-character-count.csv").forEach (a) -> result[a[0]] = parseInt a[1]
   result
+
+get_character_example_words_f = () ->
+  dictionary = dictionary_index_word_pinyin_f 0, 1
+  words = read_csv_file "data/frequency-pinyin-translation.csv"
+  (char, pinyin) ->
+    char_word = words.find((b) -> b[0] is char) || dictionary(char, pinyin)
+    char_words = if char_word then [char_word] else []
+    char_words.concat words.filter (b) -> b[0].includes(char) && b[0] != char
+
+get_character_compositions_index = () ->
+  compositions = {}
+  read_csv_file("data/character-compositions.csv").forEach (a) -> compositions[a[0]] = a[1]
+  compositions
+
+sort_standard_character_readings = () ->
+  reading_count_index = get_character_reading_count_index()
+  path = "data/table-of-general-standard-chinese-characters.csv"
+  rows = read_csv_file(path).map (a) ->
+    char = a[0]
+    pinyin = a[1].split ", "
+    pinyin = pinyin.sort (a, b) -> (reading_count_index[char + b] || 0) - (reading_count_index[char + a] || 0)
+    a[1] = pinyin.join ", "
+    a
+  write_csv_file path, rows
 
 update_character_learning = () ->
   character_frequency_index = get_character_frequency_index()
-  add_example_words = (rows) ->
-    dictionary = dictionary_index_word_pinyin_f 0, 1
-    words = read_csv_file "data/frequency-pinyin-translation.csv", " "
-    rows.map (a) ->
-      char_word = words.find((b) -> b[0] is a[0]) || dictionary(a[0], a[1])
-      char_words = if char_word then [char_word] else []
-      char_words = char_words.concat words.filter (b) -> b[0].includes(a[0]) && b[0] != a[0]
-      a.push char_words.slice(0, 5).map((b) -> b.join(" ")).join("\n")
-      a
-  add_guess_pronunciations = (rows) ->
+  syllable_count_index = get_character_syllables_tones_count_index()
+  reading_count_index = get_character_reading_count_index()
+  dictionary = dictionary_index_word_pinyin_f 0, 1
+  get_character_example_words = get_character_example_words()
+  compositions_index = get_character_compositions_index()
+  rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1]]
+  rows = sort_by_character_frequency character_frequency_index, 0, rows
+  syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
+  # add example words
+  rows.map (a) ->
+    words = get_character_example_words(a[0], a[1]).slice(0, 5).map((b) -> b.join(" ")).join("\n")
+    a.push words
+    a
+  # add guess pronunciations.
+  rows.map (a) ->
     # add for each guess reading the number of other characters with this reading
-    reading_count_index = get_character_syllables_tones_count_index()
-    syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
-    rows.map (a) ->
-      alternatives = n_times 4, (n) -> random_element syllables
-      alternatives = delete_duplicates array_shuffle [a[1].split(",")[0]].concat alternatives
-      alternatives = alternatives.map (b) -> b + " (" + reading_count_index[b] + ")"
-      a.push alternatives.join " "
-      a
-  add_compositions = (rows) ->
-    compositions = {}
-    read_csv_file("data/character-compositions.csv", " ").forEach (a) -> compositions[a[0]] = a[1]
-    rows.map (a) ->
-      c = compositions[a[0]]
-      a.push c if c
-      a
-  add_sort_index = (rows) -> rows.map (a, i) ->
+    alternatives = n_times 4, (n) -> random_element syllables
+    alternatives = delete_duplicates array_shuffle [a[1].split(",")[0]].concat alternatives
+    alternatives = alternatives.map (b) -> b + " (" + (syllable_count_index[b] || 1) + ")"
+    a.push alternatives.join " "
+    a
+  # add syllable counts
+  rows.map (a) ->
+    # must be run after add guess pronunciations.
+    # add for each possible reading the number of words with this character and reading
+    a[1] = a[1].split(", ").map((b) -> b + " (" + (reading_count_index[a[0] + b] || 1) + ")").join(", ")
+    a
+  # add compositions
+  rows.map (a) ->
+    b = compositions_index[a[0]]
+    a.push b if b
+    a
+  # add sort index
+  rows.map (a, i) ->
     a.push i
     a
-  add_syllable_counts = (rows) ->
-    # must be run after add_guess_pronunciations
-    # add for each possible reading the number of words with this character and reading
-    reading_count_index = get_character_reading_count_index()
-    rows.map (a) ->
-      a[1] = a[1].split(", ").map((b) -> b + " (" + (reading_count_index[a[0] + b] || 1) + ")").join(", ")
-      a
-  a = read_csv_file("data/table-of-general-standard-chinese-characters.csv", " ").map (a) -> [a[0], a[1]]
-  # temp dev
-  a = sort_by_character_frequency character_frequency_index, 0, a
-  a = add_guess_pronunciations a
-  a = add_syllable_counts a
-  a = add_compositions a
-  a = add_example_words a
-  a = add_sort_index a
-  data = csv_stringify.stringify(a, {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/character-learning.csv", data, on_error
+  # write
+  write_csv_file "data/character-learning.csv", rows
+
 
 update_syllables_character_count = () ->
   # number of characters with the same reading
-  chars = read_csv_file("data/characters-by-reading.csv", " ").map (a) -> [a[0], a[1].length]
+  chars = read_csv_file("data/characters-by-reading.csv").map (a) -> [a[0], a[1].length]
   chars_without_tones = chars.map (a) -> [a[0].replace(/[0-5]/g, ""), a[1]]
   get_data = (chars) ->
     counts = {}
@@ -664,10 +675,8 @@ update_syllables_character_count = () ->
     chars = chars.map (a) -> a[0]
     chars = delete_duplicates_stable chars
     chars.map((a) -> [a, counts[a]]).sort (a, b) -> b[1] - a[1]
-  rows = csv_stringify.stringify(get_data(chars), {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/syllables-tones-character-count.csv", rows, on_error
-  rows = csv_stringify.stringify(get_data(chars_without_tones), {delimiter: " "}, on_error).trim()
-  fs.writeFile "data/syllables-character-count.csv", rows, on_error
+  write_csv_file "data/syllables-tones-character-count.csv", get_data(chars)
+  write_csv_file "data/syllables-character-count.csv", get_data(chars_without_tones)
 
 grade_text_files = (paths) ->
   paths.forEach (a) -> console.log grade_text(fs.readFileSync(a, "utf-8")) + " " + path.basename(a)
@@ -684,11 +693,12 @@ grade_text = (a) ->
 display_all_characters = () -> console.log get_all_characters().join("")
 
 run = () ->
+  sort_standard_character_readings()
   #update_syllables_character_count()
   #update_character_reading_count()
   #update_character_learning()
   #update_syllables_with_tones_by_reading()
-  update_similar_characters()
+  #update_similar_characters()
   #console.log "/" + hanzi_unicode_ranges_regexp + "/gu"
   #display_all_characters()
   #update_syllables_by_reading()
