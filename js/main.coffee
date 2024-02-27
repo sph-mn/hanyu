@@ -561,7 +561,7 @@ get_stroke_count_index = (a) ->
     result[a[0]] = count
   result
 
-update_similar_characters = () ->
+update_character_similarities = () ->
   stroke_count_index = get_stroke_count_index()
   compositions = read_csv_file "data/character-compositions.csv"
   #compositions = compositions.slice 0, 1000
@@ -572,15 +572,18 @@ update_similar_characters = () ->
   compositions = compositions.filter (a) -> a
   similarities = compositions.map (a) ->
     similarities = compositions.map (b) ->
+      a[1] = a[1].filter (a) -> stroke_count_index[a] > 2
+      b[1] = b[1].filter (a) -> stroke_count_index[a] > 2
       intersection = delete_duplicates(array_intersection(a[1], b[1]))
       stroke_count_difference = Math.abs stroke_count_index[b[0]] - stroke_count_index[a[0]]
       [a[0], b[0], intersection.length / a[1].length, stroke_count_difference, intersection.join(""), b[1].join("")]
-    similarities.filter ((b) -> b[2] > 0.4 && b[1] != a[0] && b[3] < 2)
+    similarities.filter ((b) -> b[2] > 0.4 && b[1] != a[0])
   similarities = similarities.filter (a) -> a.length
   similarities = similarities.map (a) -> a.sort (a, b) -> b[2] - a[2] || b[3] - a[3]
   similarities = similarities.map (a) ->
     b = a.map (a) -> a[1]
     a[0][0] + b.join("")
+  similarities = similarities.sort (a, b) -> b.length - a.length
   fs.writeFileSync "data/character-similarities.txt", similarities.join("\n")
 
 update_strokecounts = () ->
@@ -721,13 +724,13 @@ run = () ->
   #update_character_reading_count()
   #update_character_learning()
   #update_syllables_with_tones_by_reading()
-  #update_similar_characters()
   #console.log "/" + hanzi_unicode_ranges_regexp + "/gu"
   #display_all_characters()
   #update_syllables_by_reading()
   #update_compositions()
 
 module.exports = {
+  update_character_similarities
   update_compositions
   cedict_filter_only
   clean_frequency_list
