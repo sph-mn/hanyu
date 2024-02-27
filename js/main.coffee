@@ -36,6 +36,15 @@ delete_duplicates_stable = (a) ->
       result.push a
   result
 
+delete_duplicates_stable_with_key = (a, key) ->
+  result = []
+  existing = {}
+  a.forEach (a) ->
+    unless existing[a[key]]
+      existing[a[key]] = true
+      result.push a
+  result
+
 array_shuffle = (a) ->
   i = a.length
   while 0 < i
@@ -191,18 +200,19 @@ get_character_frequency_index = () ->
   chars.forEach (a, i) -> frequency_index[a] = i
   frequency_index
 
-get_all_characters_and_reading = () ->
+get_all_characters_and_pinyin = () ->
+  # sorted by frequency
   result = []
   a = read_csv_file "data/frequency-pinyin.csv"
   a.forEach (a) ->
     chars = a[0].split ""
     pinyin = pinyin_split2 a[1]
-    chars.forEach (a, i) -> result.push a, pinyin
+    chars.forEach (a, i) -> result.push [a + pinyin[i], a, pinyin[i]]
   a = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
-  a.forEach (a) -> a[1].split(", ").forEach (pinyin) -> result.push [a[0], pinyin]
-  delete_duplicates_stable result
+  a.forEach (a) -> a[1].split(", ").forEach (pinyin) -> result.push [a[0] + pinyin, a[0], pinyin]
+  delete_duplicates_stable_with_key(result, 0).map (a) -> [a[1], a[2]]
 
-get_frequency_characters_and_reading = () ->
+get_frequency_characters_and_pinyin = () ->
   # with duplicates. use case: count character reading frequency
   result = []
   a = read_csv_file "data/frequency-pinyin.csv"
@@ -212,12 +222,13 @@ get_frequency_characters_and_reading = () ->
     chars.forEach (a, i) -> result.push [a, pinyin[i]]
   result
 
-get_character_reading_frequency_index = () ->
-  chars = get_all_characters_and_reading()
+get_character_pinyin_frequency_index = () ->
+  # -> {character + pinyin: integer}
+  chars = get_all_characters_and_pinyin()
   result = {}
   index = 0
   chars.forEach (a) ->
-    key = a[0] + a[1]
+    key = a[0] + (a[1] || "")
     unless result[key]
       result[key] = index
       index += 1
@@ -228,9 +239,9 @@ update_character_reading_count = () ->
   index = {}
   rows = []
   chars = get_all_characters()
-  chars_and_reading = get_frequency_characters_and_reading()
+  chars_and_pinyin = get_frequency_characters_and_pinyin()
   chars.forEach (a) ->
-    chars_and_reading.forEach (b) ->
+    chars_and_pinyin.forEach (b) ->
       if a[0] is b[0]
         key = a[0] + b[1]
         if index[key] != undefined then index[key] += 1
@@ -409,13 +420,13 @@ dsv_add_translations = (word_index) ->
     translations = dictionary_lookup a[word_index]
     return a unless translations
     a.concat [translations[0][1], translations[0][2]]
-  console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
+  write_csv_file 0, rows
 
 dsv_mark_to_number = (pinyin_index) ->
   rows = read_csv_file(0).map (a) ->
     a[pinyin_index] = mark_to_number a[pinyin_index]
     a
-  console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
+  write_csv_file 0, rows
 
 update_hsk_pinyin_translations = () ->
   dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
@@ -457,7 +468,7 @@ dsv_process = (a, b) ->
   read_csv_file(a).forEach (a) -> pronunciations[a[0]] = a[1]
   words = read_csv_file b
   words = words.map (a) -> [a[0], pronunciations[a[0]]]
-  console.log csv_stringify.stringify(words, {delimiter: " "}, on_error).trim()
+  write_csv_file 0, words
   # filter characters
   #chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
   #rows = read_csv_file(0).map (a) ->
@@ -472,33 +483,15 @@ dsv_add_example_words = () ->
       char_words = dictionary(a[0], a[1]) || []
     a.push char_words.slice(0, 5).map((b) -> b.join(" ")).join("\n")
     a
-  console.log csv_stringify.stringify(rows, {delimiter: " "}, on_error).trim()
+  write_csv_file 0, rows
 
-get_character_reading_frequency_index = () ->
-  index = {}
-  frequency = read_csv_file "data/frequency-pinyin.csv"
-  frequency = frequency.forEach (a, i) ->
-    pinyin_split2(a[1]).forEach (b, j) ->
-      index[a[0][j] + b] = i unless index[a[0][j]]
-  index
-
-update_characters_by_reading = () ->
-  frequency_index = get_character_reading_frequency_index()
-  chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
-  by_reading = {}
-  chars.forEach (a) ->
-    b = a[1]
-    a = a[0]
-    if b.includes ", "
-      b = b.split ", "
-    else b = [b]
-    if 1 < b.length then b = b.filter (b) -> !b.endsWith "5"
-    b.forEach (b) ->
-      if by_reading[b] then by_reading[b].push a
-      else by_reading[b] = [a]
-  rows = Object.keys(by_reading).map (a) -> [a, by_reading[a].join("")]
+update_characters_by_pinyin = () ->
+  by_pinyin = {}
+  chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
+  rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
   rows = rows.sort (a, b) -> b[1].length - a[1].length
-  write_csv_file "data/characters-by-reading.csv", rows
+  write_csv_file "data/characters-by-pinyin.csv", rows
 
 http_get = (url) ->
   new Promise (resolve, reject) ->
@@ -642,7 +635,7 @@ update_character_learning = () ->
   add_example_words = (rows) ->
     rows.map (a) ->
       words = get_character_example_words(a[0], a[1])
-      a.push words.slice(1, 6).map((b) -> b[0]).join " "
+      a.push words.slice(1, 5).map((b) -> b[0]).join " "
       a.push words.slice(0, 5).map((b) -> b.join(" ")).join "\n"
       a
   rows = add_example_words rows
@@ -679,7 +672,6 @@ update_character_learning = () ->
   # write
   write_csv_file "data/character-learning.csv", rows
 
-
 update_syllables_character_count = () ->
   # number of characters with the same reading
   chars = read_csv_file("data/characters-by-reading.csv").map (a) -> [a[0], a[1].length]
@@ -707,10 +699,24 @@ grade_text = (a) ->
   rarity_score = median(frequencies.splice(-10)) / all_chars_count
   Math.max 1, Math.round(10 * (count_score + rarity_score))
 
+filter_common_characters = () ->
+  index = get_character_pinyin_frequency_index()
+  rows = read_csv_file(0).slice(0, 2).filter (a) ->
+    pinyin = a[0]
+    chars = a[1].split ""
+    chars = chars.filter (b) ->
+      frequency = index[b + pinyin]
+      #console.log b, pinyin, frequency
+      #frequency < 5000
+      b
+    chars.length && [a[0], chars]
+  #write_csv_file 1, rows
+
 display_all_characters = () -> console.log get_all_characters().join("")
 
 run = () ->
-  sort_standard_character_readings()
+  filter_common_characters()
+  #sort_standard_character_readings()
   #update_syllables_character_count()
   #update_character_reading_count()
   #update_character_learning()
@@ -738,7 +744,7 @@ module.exports = {
   hanzi_to_pinyin
   mark_to_number
   dsv_process
-  update_characters_by_reading
+  update_characters_by_pinyin
   update_character_learning
   grade_text
   grade_text_files
