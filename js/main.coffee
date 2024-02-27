@@ -492,6 +492,19 @@ update_characters_by_pinyin = () ->
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
   rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
   write_csv_file "data/characters-by-pinyin.csv", rows
+  # only common characters
+  index = get_character_pinyin_frequency_index()
+  char_count = chars.length
+  rows = rows.map (a) ->
+    pinyin = a[0]
+    chars = a[1].split ""
+    chars = chars.filter (b) ->
+      frequency = index[b + pinyin] || char_count
+      frequency < 4000
+    [a[0], chars.join("")]
+  rows = rows.filter (a) -> a[1].length
+  rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
+  write_csv_file "data/characters-by-pinyin-common.csv", rows
 
 http_get = (url) ->
   new Promise (resolve, reject) ->
@@ -699,22 +712,10 @@ grade_text = (a) ->
   rarity_score = median(frequencies.splice(-10)) / all_chars_count
   Math.max 1, Math.round(10 * (count_score + rarity_score))
 
-filter_common_characters = () ->
-  index = get_character_pinyin_frequency_index()
-  rows = read_csv_file("data/characters-by-pinyin.csv").map (a) ->
-    pinyin = a[0]
-    chars = a[1].split ""
-    chars = chars.filter (b) ->
-      frequency = index[b + pinyin] || 9000
-      frequency < 4000
-    [a[0], chars.join("")]
-  rows = rows.filter (a) -> a[1].length
-  write_csv_file "data/characters-by-pinyin-common.csv", rows
-
 display_all_characters = () -> console.log get_all_characters().join("")
 
 run = () ->
-  filter_common_characters()
+  #filter_common_characters()
   #sort_standard_character_readings()
   #update_syllables_character_count()
   #update_character_reading_count()
