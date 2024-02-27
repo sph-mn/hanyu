@@ -156,7 +156,7 @@ cedict_filter_only = () ->
     word = parsed[2]
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
-    pinyin = pinyin.split(" ").map (a) -> pinyin_utils.markToNumber(a)
+    pinyin = pinyin.split(" ").map (a) -> pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3")
     pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary(parsed[4]).join("/")
     line = [word_traditional, word, "[#{pinyin}]", "/#{glossary}/"].join(" ")
@@ -210,7 +210,7 @@ get_all_characters_and_pinyin = () ->
     chars.forEach (a, i) -> result.push [a + pinyin[i], a, pinyin[i]]
   a = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
   a.forEach (a) -> a[1].split(", ").forEach (pinyin) -> result.push [a[0] + pinyin, a[0], pinyin]
-  delete_duplicates_stable_with_key(result, 0).map (a) -> [a[1], a[2]]
+  delete_duplicates_stable_with_key(result, 0).map (a) -> [a[1], a[2].replace("u:", "ü")]
 
 get_frequency_characters_and_pinyin = () ->
   # with duplicates. use case: count character reading frequency
@@ -289,7 +289,7 @@ update_cedict_csv = () ->
     word = parsed[2]
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
-    pinyin = pinyin.split(" ").map (a) -> pinyin_utils.markToNumber(a)
+    pinyin = pinyin.split(" ").map (a) -> pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3")
     pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary parsed[4]
     unless glossary.length then return null
@@ -337,14 +337,14 @@ update_hsk = () ->
 
 dictionary_index_word_f = (lookup_index) ->
   dictionary = {}
-  read_csv_file("data/cedict.csv", ",").forEach (a) -> object_array_add dictionary, a[lookup_index], a
+  read_csv_file("data/cedict.csv").forEach (a) -> object_array_add dictionary, a[lookup_index], a
   (a) -> dictionary[a]
 
 dictionary_index_word_pinyin_f = () ->
   dictionary = {}
   word_index = 0
   pinyin_index = 1
-  words = read_csv_file "data/cedict.csv", ","
+  words = read_csv_file "data/cedict.csv"
   words.forEach (a) ->
     word = a[word_index]
     key = a[word_index] + a[pinyin_index]
@@ -490,7 +490,7 @@ update_characters_by_pinyin = () ->
   chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
   chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
-  rows = rows.sort (a, b) -> b[1].length - a[1].length
+  rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
   write_csv_file "data/characters-by-pinyin.csv", rows
 
 http_get = (url) ->
@@ -701,16 +701,15 @@ grade_text = (a) ->
 
 filter_common_characters = () ->
   index = get_character_pinyin_frequency_index()
-  rows = read_csv_file(0).slice(0, 2).filter (a) ->
+  rows = read_csv_file("data/characters-by-pinyin.csv").map (a) ->
     pinyin = a[0]
     chars = a[1].split ""
     chars = chars.filter (b) ->
-      frequency = index[b + pinyin]
-      #console.log b, pinyin, frequency
-      #frequency < 5000
-      b
-    chars.length && [a[0], chars]
-  #write_csv_file 1, rows
+      frequency = index[b + pinyin] || 9000
+      frequency < 4000
+    [a[0], chars.join("")]
+  rows = rows.filter (a) -> a[1].length
+  write_csv_file "data/characters-by-pinyin-common.csv", rows
 
 display_all_characters = () -> console.log get_all_characters().join("")
 
