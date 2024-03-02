@@ -22,6 +22,7 @@ median = (a) -> a.slice().sort((a, b) -> a - b)[Math.floor(a.length / 2)]
 sum = (a) -> a.reduce ((a, b) -> a + b), 0
 mean = (a) -> sum(a) / a.length
 object_array_add = (object, key, value) -> if object[key] then object[key].push value else object[key] = [value]
+array_intersection = (a, b) -> a.filter (a) -> b.includes(a)
 
 write_csv_file = (path, data) ->
   csv = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
@@ -514,7 +515,11 @@ http_get = (url) ->
       response.on "end", () -> resolve Buffer.concat(data).toString()
       response.on "error", (error) -> reject error
 
+sort_by_array_with_index = (a, sorting, index) ->
+  a.sort (a, b) -> sorting.indexOf(a[index]) - sorting.indexOf(b[index])
+
 update_compositions_for_chars = (chars, existing_rows) ->
+  # get data from wiktionary
   existing = {}
   existing_rows.forEach (a) -> existing[a[0]] = true
   for a in chars
@@ -530,9 +535,6 @@ update_compositions_for_chars = (chars, existing_rows) ->
     existing_rows.push [a, b[1]]
   existing_rows
 
-sort_by_array_with_index = (a, sorting, index) ->
-  a.sort (a, b) -> sorting.indexOf(a[index]) - sorting.indexOf(b[index])
-
 update_compositions = () ->
   compositions = read_csv_file "data/character-compositions.csv"
   radicals = read_csv_file("data/radicals.csv").map (a) -> a[1]
@@ -544,47 +546,92 @@ update_compositions = () ->
   standard_compositions = compositions.filter (a) -> standard.includes a[0]
   standard_compositions = await update_compositions_for_chars standard, standard_compositions
   standard_compositions = sort_by_array_with_index standard_compositions, standard, 0
-  write_csv_file "data/standard-compositions.csv", standard_compositions
+  write_csv_file "data/character-compositions.csv", standard_compositions
 
-array_intersection = (a, b) -> a.filter (a) -> b.includes(a)
+get_compositions = () ->
+  compositions = read_csv_file "data/radical-compositions.csv"
+  compositions = compositions.concat read_csv_file "data/character-compositions.csv"
+  compositions = compositions.filter (a) -> a.length is 2
+  compositions.map (a) ->
+    a1 = (a[1].split(" or ")[0].match(hanzi_regexp) || []).join("")
+    [a[0], a1]
+
+index_key_value = (a, key_key, value_key) ->
+  b = {}
+  a.forEach (a) -> b[a[key_key]] = a[value_key]
+  b
+
+get_compositions_index = () -> index_key_value get_compositions(), 0, 1
+
+decompose_f = (compositions_index) ->
+  decompose = (a) ->
+    parts = compositions_index[a]
+    if parts
+      parts = parts.split("")
+      [a].concat(parts).concat parts.map decompose
+    else [a]
+  (a) -> decompose(a).flat(Infinity)
+
+get_full_compositions = () ->
+  # also include compositions of components per entry
+  compositions_index = get_compositions_index()
+  decompose = decompose_f compositions_index
+  Object.keys(compositions_index).map (a) ->
+    parts = decompose a
+    [parts[0], delete_duplicates(parts.slice(1))]
 
 get_stroke_count_index = (a) ->
   result = {}
-  strokes = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
+  strokes = []
+  read_csv_file("data/radicals.csv").forEach (a) -> strokes.push [a[0], a[5]]
+  read_csv_file("data/table-of-general-standard-chinese-characters.csv").forEach (a) -> strokes.push [a[0], a[2]]
+  read_csv_file("data/extra-stroke-counts.csv").forEach (a) -> strokes.push [a[0], a[1]]
+  strokes = strokes.filter (a) -> a[1]
+  strokes = strokes.map (a) -> [a[0], parseInt(a[1], 10)]
+  strokes = strokes.sort (a, b) -> a[1] - b[1]
   previous_count = 0
   strokes.forEach (a) ->
-    if a[2].length
-      count = parseInt a[2]
-      previous_count = count
-    else
-      count = previous_count
-    result[a[0]] = count
+    if a[1] then previous_count = a[1]
+    else a[1] = previous_count
+    result[a[0]] = a[1] unless result[a[0]]
   result
 
-update_character_similarities = () ->
+update_character_overlap = () ->
+  config = {
+    min_overlap: 0.3
+    min_component_stroke_count: 1
+  }
   stroke_count_index = get_stroke_count_index()
-  compositions = read_csv_file "data/character-compositions.csv"
-  #compositions = compositions.slice 0, 1000
+  compositions = get_full_compositions()
+  #compositions = compositions.slice 500, 700
   compositions = compositions.map (a) ->
-    if a.length is 2
-      a1 = a[1].split(" or ")[0].match(hanzi_and_idc_regexp)
-      if a1 and a1.length > 1 then [a[0], a1]
-  compositions = compositions.filter (a) -> a
+    a1 = a[1].filter (a) -> (stroke_count_index[a] || 1) > config.min_component_stroke_count
+    [a[0], a1]
+  compositions = compositions.filter (a) -> a[1].length
   similarities = compositions.map (a) ->
+    #return [] unless a[0] == "早"
     similarities = compositions.map (b) ->
-      a[1] = a[1].filter (a) -> stroke_count_index[a] > 2
-      b[1] = b[1].filter (a) -> stroke_count_index[a] > 2
-      intersection = delete_duplicates(array_intersection(a[1], b[1]))
-      stroke_count_difference = Math.abs stroke_count_index[b[0]] - stroke_count_index[a[0]]
-      [a[0], b[0], intersection.length / a[1].length, stroke_count_difference, intersection.join(""), b[1].join("")]
-    similarities.filter ((b) -> b[2] > 0.4 && b[1] != a[0])
+      unless a[0] == b[0]
+        intersection = array_intersection a[1], b[1]
+        overlap = intersection.length / (a[1].length + b[1].length)
+        if overlap > config.min_overlap
+          #console.log a[0], b[0], overlap, a[1].join(""), b[1].join(""), intersection.length
+          [a[0], b[0], intersection.length]
+    similarities = similarities.filter (a) -> a
+    similarities.sort (a, b) ->
+      b[2] - a[2] || stroke_count_index[a[0]] - stroke_count_index[b[0]]
   similarities = similarities.filter (a) -> a.length
-  similarities = similarities.map (a) -> a.sort (a, b) -> b[2] - a[2] || b[3] - a[3]
   similarities = similarities.map (a) ->
     b = a.map (a) -> a[1]
-    a[0][0] + b.join("")
-  similarities = similarities.sort (a, b) -> b.length - a.length
-  fs.writeFileSync "data/character-similarities.txt", similarities.join("\n")
+    [a[0][0], b.join("")]
+  similarities = similarities.sort (a, b) -> b[1].length - a[1].length
+  write_csv_file "data/character-overlap.csv", similarities
+  character_frequency_index = get_character_frequency_index()
+  similarities_common = similarities.map (a) ->
+    [a[0], a[1].split("").filter((a) -> (character_frequency_index[a] || 9000) < 4000).join("")]
+  similarities_common = similarities_common.filter (a) -> a[1].length
+  similarities_common = similarities_common.sort (a, b) -> b[1].length - a[1].length
+  write_csv_file "data/character-overlap-common.csv", similarities_common
 
 update_strokecounts = () ->
   counts = {}
@@ -614,11 +661,6 @@ get_character_example_words_f = () ->
       char_word = char_word[0] if char_word
     char_words = if char_word then [char_word] else []
     char_words.concat words.filter (b) -> b[0].includes(char) && b[0] != char
-
-get_character_compositions_index = () ->
-  compositions = {}
-  read_csv_file("data/character-compositions.csv").forEach (a) -> compositions[a[0]] = a[1]
-  compositions
 
 sort_standard_character_readings = () ->
   reading_count_index = get_character_reading_count_index()
@@ -717,7 +759,36 @@ grade_text = (a) ->
 
 display_all_characters = () -> console.log get_all_characters().join("")
 
+get_stroke_counts = (data) ->
+  existing = {}
+  new_data = []
+  data.forEach (a) ->
+    a[1] = false if a[1] == 'undefined'
+    existing[a[0]] = true if a[1]
+  data.forEach (a) ->
+    return if existing[a[0]]
+    body = await http_get "https://en.wiktionary.org/wiki/#{a[0]}"
+    html = html_parser.parse body
+    b = html.querySelectorAll "p"
+    b = b.map (a) ->
+      strokes = a.textContent.match /(\d+) stroke/
+      if strokes then parseInt(strokes[1], 10)
+    stroke_count = b.filter (a) -> a
+    console.log a[0], stroke_count[0]
+
+update_extra_stroke_counts = () ->
+  data = read_csv_file "data/extra-components.csv"
+  data = data.sort (a, b) -> b.length - a.length
+  data = delete_duplicates_stable_with_key data, 0
+  data = data.filter (a) -> a.length > 1
+  data = data.map (a) -> [a[0], parseInt(a[1], 10)]
+  data = data.sort (a, b) -> a[1] - b[1]
+  write_csv_file "data/extra-stroke-counts.csv", data
+
 run = () ->
+  #get_full_compositions()
+  #data = delete_duplicates(data).sort((a, b) -> a.localeCompare(b))
+  #fs.writeFileSync("data/extra-components-new.csv", data.join("\n"))
   #filter_common_characters()
   #sort_standard_character_readings()
   #update_syllables_character_count()
@@ -730,7 +801,7 @@ run = () ->
   #update_compositions()
 
 module.exports = {
-  update_character_similarities
+  update_character_overlap
   update_compositions
   cedict_filter_only
   clean_frequency_list
