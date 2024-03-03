@@ -77,12 +77,6 @@ non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
 hanzi_and_idc_regexp = unicode_ranges_regexp hanzi_unicode_ranges.concat([["2FF0", "2FFF"]])
 non_pinyin_regexp = /[^a-z0-5]/g
 
-#character_list = () ->
-#  url = "https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters"
-#  scraper.get(url).then (tables) ->
-#    hanzi = tables.flat().map (a) -> a.Hanzi
-#    fs.writeFile "data/togscc.csv", hanzi.join("\n") + "\n", on_error
-
 cedict_glossary = (a) ->
   filter_regexp = [
     /^abbr\. for /
@@ -191,7 +185,10 @@ get_frequency_index = () ->
 
 get_all_characters = () ->
   # -> [string, ...]
-  a = fs.readFileSync("data/frequency-pinyin.csv", "utf-8") + fs.readFileSync("data/table-of-general-standard-chinese-characters.csv", "utf-8")
+  a = fs.readFileSync("data/frequency-pinyin.csv", "utf-8") +
+    fs.readFileSync("data/table-of-general-standard-chinese-characters.csv", "utf-8") +
+    fs.readFileSync("data/radical-compositions.csv", "utf-8") +
+    fs.readFileSync("data/character-compositions.csv", "utf-8")
   delete_duplicates_stable a.match hanzi_regexp
 
 get_character_frequency_index = () ->
@@ -454,15 +451,6 @@ find_components = (a, decompositions) ->
   c.push b[2] unless b[2] is "*" or a is b[2]
   c.concat(c.map (c) -> find_components(c, decompositions)).flat()
 
-compositions_from_decompositions = () ->
-  # old method of getting compositions from the decompositions file from wiktionary
-  chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
-  decompositions_csv = read_csv_file("data/decompositions.csv", "\t").sort (a, b) -> a[1] - b[1]
-  decompositions = {}
-  decompositions_csv.forEach (a) -> decompositions[a[0]] = [a[1], a[3], a[5]]
-  rows = chars.map (a) -> [a].concat find_components(a, decompositions)
-  write_csv_file "data/compositions.csv", rows
-
 dsv_process = (a, b) ->
   # add pinyin looked up from other file
   pronunciations = {}
@@ -518,24 +506,8 @@ http_get = (url) ->
 sort_by_array_with_index = (a, sorting, index) ->
   a.sort (a, b) -> sorting.indexOf(a[index]) - sorting.indexOf(b[index])
 
-update_compositions_for_chars = (chars, existing_rows) ->
-  # get data from wiktionary
-  existing = {}
-  existing_rows.forEach (a) -> existing[a[0]] = true
-  for a in chars
-    continue if existing[a]
-    body = await http_get "https://en.wiktionary.org/wiki/#{a}"
-    html = html_parser.parse body
-    b = html.querySelector "a[title=\"w:Chinese character description languages\"]"
-    unless b
-      existing_rows.push [a]
-      continue
-    b = b.parentNode.parentNode.textContent
-    b = b.match(/composition (.*)\)/)
-    existing_rows.push [a, b[1]]
-  existing_rows
-
 update_compositions = () ->
+  # deprecated
   compositions = read_csv_file "data/character-compositions.csv"
   radicals = read_csv_file("data/radicals.csv").map (a) -> a[1]
   radical_compositions = compositions.filter (a) -> radicals.includes a[0]
@@ -548,37 +520,29 @@ update_compositions = () ->
   standard_compositions = sort_by_array_with_index standard_compositions, standard, 0
   write_csv_file "data/character-compositions.csv", standard_compositions
 
-get_compositions = () ->
-  compositions = read_csv_file "data/radical-compositions.csv"
-  compositions = compositions.concat read_csv_file "data/character-compositions.csv"
-  compositions = compositions.filter (a) -> a.length is 2
-  compositions.map (a) ->
-    a1 = (a[1].split(" or ")[0].match(hanzi_regexp) || []).join("")
-    [a[0], a1]
-
 index_key_value = (a, key_key, value_key) ->
   b = {}
   a.forEach (a) -> b[a[key_key]] = a[value_key]
   b
 
-get_compositions_index = () -> index_key_value get_compositions(), 0, 1
+get_compositions_index = () ->
+  index_key_value read_csv_file("data/character-compositions.csv"), 0, 1
 
-decompose_f = (compositions_index) ->
+get_full_compositions = () ->
+  # also include compositions of components per entry
+  compositions_index = get_compositions_index()
   decompose = (a) ->
     parts = compositions_index[a]
     if parts
       parts = parts.split("")
       [a].concat(parts).concat parts.map decompose
     else [a]
-  (a) -> decompose(a).flat(Infinity)
-
-get_full_compositions = () ->
-  # also include compositions of components per entry
-  compositions_index = get_compositions_index()
-  decompose = decompose_f compositions_index
+  decompose = (a) -> decompose(a).flat(Infinity)
   Object.keys(compositions_index).map (a) ->
     parts = decompose a
     [parts[0], delete_duplicates(parts.slice(1))]
+
+get_full_compositions_index = () -> index_key_value get_full_compositions(), 0, 1
 
 get_stroke_count_index = (a) ->
   result = {}
@@ -598,12 +562,12 @@ get_stroke_count_index = (a) ->
 
 update_character_overlap = () ->
   config = {
-    min_overlap: 0.3
-    min_component_stroke_count: 1
+    min_overlap: 0.5
+    min_component_stroke_count: 0
   }
   stroke_count_index = get_stroke_count_index()
   compositions = get_full_compositions()
-  #compositions = compositions.slice 500, 700
+  compositions = compositions.slice 500, 1000
   compositions = compositions.map (a) ->
     a1 = a[1].filter (a) -> (stroke_count_index[a] || 1) > config.min_component_stroke_count
     [a[0], a1]
@@ -613,9 +577,9 @@ update_character_overlap = () ->
     similarities = compositions.map (b) ->
       unless a[0] == b[0]
         intersection = array_intersection a[1], b[1]
-        overlap = intersection.length / (a[1].length + b[1].length)
+        overlap = intersection.length / Math.max(a[1].length, b[1].length)
         if overlap > config.min_overlap
-          #console.log a[0], b[0], overlap, a[1].join(""), b[1].join(""), intersection.length
+          console.log a[0], b[0], overlap, a[1].join(""), b[1].join("")
           [a[0], b[0], intersection.length]
     similarities = similarities.filter (a) -> a
     similarities.sort (a, b) ->
@@ -759,22 +723,21 @@ grade_text = (a) ->
 
 display_all_characters = () -> console.log get_all_characters().join("")
 
-get_stroke_counts = (data) ->
-  existing = {}
-  new_data = []
-  data.forEach (a) ->
-    a[1] = false if a[1] == 'undefined'
-    existing[a[0]] = true if a[1]
-  data.forEach (a) ->
-    return if existing[a[0]]
-    body = await http_get "https://en.wiktionary.org/wiki/#{a[0]}"
-    html = html_parser.parse body
-    b = html.querySelectorAll "p"
-    b = b.map (a) ->
-      strokes = a.textContent.match /(\d+) stroke/
-      if strokes then parseInt(strokes[1], 10)
-    stroke_count = b.filter (a) -> a
-    console.log a[0], stroke_count[0]
+get_wiktionary_data = (char) ->
+  body = await http_get "https://en.wiktionary.org/wiki/#{char}"
+  html = html_parser.parse body
+  b = html.querySelectorAll "p"
+  b = b.map (a) ->
+    strokes = a.textContent.match /(\d+) stroke/
+    strokes = strokes && parseInt(strokes[1], 10)
+    composition = a.querySelector "a[title=\"w:Chinese character description languages\"]"
+    if composition
+      composition = composition.parentNode.parentNode.textContent
+      composition = composition.match(/composition (.*)\)/)[1]
+      composition = (composition.split(" or ")[0].match(hanzi_regexp) || []).join("")
+    [char, strokes, composition]
+  b = b.filter (a) -> a[1] || a[2]
+  b.flat()
 
 update_extra_stroke_counts = () ->
   data = read_csv_file "data/extra-components.csv"
@@ -785,7 +748,47 @@ update_extra_stroke_counts = () ->
   data = data.sort (a, b) -> a[1] - b[1]
   write_csv_file "data/extra-stroke-counts.csv", data
 
+find_missing_compositions = () ->
+  stroke_count_index = get_stroke_count_index()
+  compositions = read_csv_file "data/character-compositions.csv"
+  compositions_index = index_key_value compositions, 0, 1
+  chars = delete_duplicates(compositions.map((a) -> [a[0]].concat a[1].split("")).flat())
+  missing_stroke_count = chars.filter (a) -> !stroke_count_index[a]
+  missing_composition = chars.filter (a) -> stroke_count_index[a] > 1 && !compositions_index[a]
+  missing = delete_duplicates(missing_stroke_count.concat(missing_composition))
+  missing.forEach (a) ->
+    data = await get_wiktionary_data a
+    if data
+      console.log data.join(" ")
+
+merge_tables = () ->
+  standard = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], parseInt(a[2], 10), null]
+  compositions = read_csv_file("data/character-compositions.csv").map (a) -> [a[0], null, a[1]]
+  extra_strokes = read_csv_file("data/extra-stroke-counts.csv").map (a) -> [a[0], parseInt(a[1], 10), null]
+  new_data = read_csv_file("new-data").filter((a) -> a[0].length).map (a) -> [a[0], parseInt(a[1], 10), a[2]]
+  radicals = read_csv_file("data/radicals.csv").map (a) ->
+    alternative = a[1]
+    char = if 1 == a[2].length then a[2] else a[0]
+    char = char.split(" ")[0]
+    result = [[char, parseInt(a[5], 10), null]]
+    if alternative.length then result.push [alternative.split(" ")[0], null, null]
+    result
+  radicals = radicals.flat 1
+  all = standard.concat compositions, extra_strokes, new_data, radicals
+  all_index = {}
+  all.forEach (a) ->
+    if all_index[a[0]]
+      [char, strokes, compositions] = all_index[a[0]]
+      all_index[a[0]] = [char || a[0], strokes || a[1], compositions || a[2]]
+    else all_index[a[0]] = a
+  all = Object.values(all_index).sort (a, b) -> a[1] - b[1]
+  write_csv_file "data/character-strokes-composition.csv", all
+
 run = () ->
+  #merge_tables()
+  #find_missing_compositions()
+  #write_csv_file()
+  #find_missing_compositions()
   #get_full_compositions()
   #data = delete_duplicates(data).sort((a, b) -> a.localeCompare(b))
   #fs.writeFileSync("data/extra-components-new.csv", data.join("\n"))
