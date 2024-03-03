@@ -183,13 +183,8 @@ get_frequency_index = () ->
     frequency_index[a] = i unless frequency_index[a]
   frequency_index
 
-get_all_characters = () ->
-  # -> [string, ...]
-  a = fs.readFileSync("data/frequency-pinyin.csv", "utf-8") +
-    fs.readFileSync("data/table-of-general-standard-chinese-characters.csv", "utf-8") +
-    fs.readFileSync("data/radical-compositions.csv", "utf-8") +
-    fs.readFileSync("data/character-compositions.csv", "utf-8")
-  delete_duplicates_stable a.match hanzi_regexp
+get_all_characters = () -> read_csv_file("data/character-strokes-composition.csv").map (a) -> a[0]
+display_all_characters = () -> console.log get_all_characters().join("")
 
 get_character_frequency_index = () ->
   # -> {character: integer}
@@ -442,27 +437,6 @@ hanzi_to_pinyin = (a) ->
   a = a.replace(non_hanzi_regexp, " ").trim()
   find_multiple_word_matches a, 0, 1, (a) -> a.split ""
 
-find_components = (a, decompositions) ->
-  b = decompositions[a]
-  c = []
-  return c unless b
-  return c if b[1] is b[2]
-  c.push b[1] unless b[1] is "*" or a is b[1]
-  c.push b[2] unless b[2] is "*" or a is b[2]
-  c.concat(c.map (c) -> find_components(c, decompositions)).flat()
-
-dsv_process = (a, b) ->
-  # add pinyin looked up from other file
-  pronunciations = {}
-  read_csv_file(a).forEach (a) -> pronunciations[a[0]] = a[1]
-  words = read_csv_file b
-  words = words.map (a) -> [a[0], pronunciations[a[0]]]
-  write_csv_file 0, words
-  # filter characters
-  #chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
-  #rows = read_csv_file(0).map (a) ->
-  #  [a[0]].concat a.slice(1).filter (a) -> chars.includes a
-
 dsv_add_example_words = () ->
   dictionary = dictionary_index_word_pinyin_f 0, 1
   words = read_csv_file "data/frequency-pinyin-translation.csv"
@@ -506,27 +480,12 @@ http_get = (url) ->
 sort_by_array_with_index = (a, sorting, index) ->
   a.sort (a, b) -> sorting.indexOf(a[index]) - sorting.indexOf(b[index])
 
-update_compositions = () ->
-  # deprecated
-  compositions = read_csv_file "data/character-compositions.csv"
-  radicals = read_csv_file("data/radicals.csv").map (a) -> a[1]
-  radical_compositions = compositions.filter (a) -> radicals.includes a[0]
-  radical_compositions = await update_compositions_for_chars radicals, radical_compositions
-  radical_compositions = sort_by_array_with_index radical_compositions, radicals, 0
-  write_csv_file "data/radical-compositions.csv", radical_compositions
-  standard = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
-  standard_compositions = compositions.filter (a) -> standard.includes a[0]
-  standard_compositions = await update_compositions_for_chars standard, standard_compositions
-  standard_compositions = sort_by_array_with_index standard_compositions, standard, 0
-  write_csv_file "data/character-compositions.csv", standard_compositions
-
 index_key_value = (a, key_key, value_key) ->
   b = {}
   a.forEach (a) -> b[a[key_key]] = a[value_key]
   b
 
-get_compositions_index = () ->
-  index_key_value read_csv_file("data/character-compositions.csv"), 0, 1
+get_compositions_index = () -> index_key_value read_csv_file("data/character-strokes-composition.csv"), 0, 2
 
 get_full_compositions = () ->
   # also include compositions of components per entry
@@ -537,37 +496,20 @@ get_full_compositions = () ->
       parts = parts.split("")
       [a].concat(parts).concat parts.map decompose
     else [a]
-  decompose = (a) -> decompose(a).flat(Infinity)
   Object.keys(compositions_index).map (a) ->
-    parts = decompose a
+    parts = decompose(a).flat(Infinity)
     [parts[0], delete_duplicates(parts.slice(1))]
 
 get_full_compositions_index = () -> index_key_value get_full_compositions(), 0, 1
-
-get_stroke_count_index = (a) ->
-  result = {}
-  strokes = []
-  read_csv_file("data/radicals.csv").forEach (a) -> strokes.push [a[0], a[5]]
-  read_csv_file("data/table-of-general-standard-chinese-characters.csv").forEach (a) -> strokes.push [a[0], a[2]]
-  read_csv_file("data/extra-stroke-counts.csv").forEach (a) -> strokes.push [a[0], a[1]]
-  strokes = strokes.filter (a) -> a[1]
-  strokes = strokes.map (a) -> [a[0], parseInt(a[1], 10)]
-  strokes = strokes.sort (a, b) -> a[1] - b[1]
-  previous_count = 0
-  strokes.forEach (a) ->
-    if a[1] then previous_count = a[1]
-    else a[1] = previous_count
-    result[a[0]] = a[1] unless result[a[0]]
-  result
+get_stroke_count_index = (a) -> index_key_value read_csv_file("data/character-strokes-composition.csv"), 0, 1
 
 update_character_overlap = () ->
   config = {
-    min_overlap: 0.5
+    min_overlap: 0.8
     min_component_stroke_count: 0
   }
   stroke_count_index = get_stroke_count_index()
   compositions = get_full_compositions()
-  compositions = compositions.slice 500, 1000
   compositions = compositions.map (a) ->
     a1 = a[1].filter (a) -> (stroke_count_index[a] || 1) > config.min_component_stroke_count
     [a[0], a1]
@@ -579,7 +521,7 @@ update_character_overlap = () ->
         intersection = array_intersection a[1], b[1]
         overlap = intersection.length / Math.max(a[1].length, b[1].length)
         if overlap > config.min_overlap
-          console.log a[0], b[0], overlap, a[1].join(""), b[1].join("")
+          #console.log a[0], b[0], overlap, a[1].join(""), b[1].join("")
           [a[0], b[0], intersection.length]
     similarities = similarities.filter (a) -> a
     similarities.sort (a, b) ->
@@ -596,14 +538,6 @@ update_character_overlap = () ->
   similarities_common = similarities_common.filter (a) -> a[1].length
   similarities_common = similarities_common.sort (a, b) -> b[1].length - a[1].length
   write_csv_file "data/character-overlap-common.csv", similarities_common
-
-update_strokecounts = () ->
-  counts = {}
-  counts_csv = read_csv_file "data/decompositions.csv", "\t"
-  counts_csv.forEach (a) -> counts[a[0]] = parseInt(a[1])
-  chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
-  chars.forEach (a) -> a.push counts[a[0]]
-  write_csv_file "data/table-2.csv", chars
 
 get_character_reading_count_index = () ->
   result = {}
@@ -721,8 +655,6 @@ grade_text = (a) ->
   rarity_score = median(frequencies.splice(-10)) / all_chars_count
   Math.max 1, Math.round(10 * (count_score + rarity_score))
 
-display_all_characters = () -> console.log get_all_characters().join("")
-
 get_wiktionary_data = (char) ->
   body = await http_get "https://en.wiktionary.org/wiki/#{char}"
   html = html_parser.parse body
@@ -748,33 +680,17 @@ update_extra_stroke_counts = () ->
   data = data.sort (a, b) -> a[1] - b[1]
   write_csv_file "data/extra-stroke-counts.csv", data
 
-find_missing_compositions = () ->
-  stroke_count_index = get_stroke_count_index()
-  compositions = read_csv_file "data/character-compositions.csv"
-  compositions_index = index_key_value compositions, 0, 1
-  chars = delete_duplicates(compositions.map((a) -> [a[0]].concat a[1].split("")).flat())
-  missing_stroke_count = chars.filter (a) -> !stroke_count_index[a]
-  missing_composition = chars.filter (a) -> stroke_count_index[a] > 1 && !compositions_index[a]
-  missing = delete_duplicates(missing_stroke_count.concat(missing_composition))
-  missing.forEach (a) ->
-    data = await get_wiktionary_data a
-    if data
-      console.log data.join(" ")
+get_missing_data = () ->
+  chars = read_csv_file "data/character-strokes-composition.csv"
+  chars = chars.filter (a) -> (!(a[1] && a[2]) && "1" != a[1])
+  chars.forEach (a) ->
+    data = await get_wiktionary_data a[0]
+    if data then console.log data.join(" ")
 
 merge_tables = () ->
-  standard = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], parseInt(a[2], 10), null]
-  compositions = read_csv_file("data/character-compositions.csv").map (a) -> [a[0], null, a[1]]
-  extra_strokes = read_csv_file("data/extra-stroke-counts.csv").map (a) -> [a[0], parseInt(a[1], 10), null]
-  new_data = read_csv_file("new-data").filter((a) -> a[0].length).map (a) -> [a[0], parseInt(a[1], 10), a[2]]
-  radicals = read_csv_file("data/radicals.csv").map (a) ->
-    alternative = a[1]
-    char = if 1 == a[2].length then a[2] else a[0]
-    char = char.split(" ")[0]
-    result = [[char, parseInt(a[5], 10), null]]
-    if alternative.length then result.push [alternative.split(" ")[0], null, null]
-    result
-  radicals = radicals.flat 1
-  all = standard.concat compositions, extra_strokes, new_data, radicals
+  chars = read_csv_file("data/character-strokes-composition.csv")
+  new_data = read_csv_file("new-data").filter((a) -> a[0].length)
+  all = chars.concat new_data
   all_index = {}
   all.forEach (a) ->
     if all_index[a[0]]
@@ -782,11 +698,11 @@ merge_tables = () ->
       all_index[a[0]] = [char || a[0], strokes || a[1], compositions || a[2]]
     else all_index[a[0]] = a
   all = Object.values(all_index).sort (a, b) -> a[1] - b[1]
-  write_csv_file "data/character-strokes-composition.csv", all
+  write_csv_file "data/character-strokes-composition-new.csv", all
 
 run = () ->
   #merge_tables()
-  #find_missing_compositions()
+  #get_missing_data()
   #write_csv_file()
   #find_missing_compositions()
   #get_full_compositions()
@@ -805,7 +721,6 @@ run = () ->
 
 module.exports = {
   update_character_overlap
-  update_compositions
   cedict_filter_only
   clean_frequency_list
   dsv_add_translations
@@ -820,7 +735,6 @@ module.exports = {
   pinyin_to_hanzi
   hanzi_to_pinyin
   mark_to_number
-  dsv_process
   update_characters_by_pinyin
   update_character_learning
   grade_text
