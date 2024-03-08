@@ -507,14 +507,14 @@ get_stroke_count_index = (a) -> index_key_value read_csv_file("data/character-st
 update_character_overlap = () ->
   # 大犬太 草早旱
   config = {
-    min_overlap: 0.8
+    min_overlap: 0.7
     min_component_stroke_count: 0
     max_stroke_count_difference: 1
   }
   stroke_count_index = get_stroke_count_index()
   compositions = get_full_compositions()
   compositions = compositions.map (a) ->
-    a1 = a[1].filter (a) -> (stroke_count_index[a] || 1) > config.min_component_stroke_count && a.match(hanzi_and_idc_regexp)
+    a1 = a[1].filter (a) -> (stroke_count_index[a] || 1) > config.min_component_stroke_count && a.match(hanzi_regexp)
     [a[0], a1]
   compositions = compositions.filter (a) -> a[1].length
   similarities = compositions.map (a) ->
