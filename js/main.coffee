@@ -493,39 +493,45 @@ get_full_compositions = () ->
   decompose = (a) ->
     parts = compositions_index[a]
     if parts
-      parts = parts.split("")
-      [a].concat(parts).concat parts.map decompose
+      parts = [...parts]
+      [a].concat(parts, parts.map(decompose))
     else [a]
   Object.keys(compositions_index).map (a) ->
     parts = decompose(a).flat(Infinity)
     [parts[0], delete_duplicates(parts.slice(1))]
+    #[parts[0], parts.slice(1)]
 
 get_full_compositions_index = () -> index_key_value get_full_compositions(), 0, 1
 get_stroke_count_index = (a) -> index_key_value read_csv_file("data/character-strokes-composition.csv"), 0, 1
 
 update_character_overlap = () ->
+  # 大犬太 草早旱
   config = {
     min_overlap: 0.8
     min_component_stroke_count: 0
+    max_stroke_count_difference: 1
   }
   stroke_count_index = get_stroke_count_index()
   compositions = get_full_compositions()
   compositions = compositions.map (a) ->
-    a1 = a[1].filter (a) -> (stroke_count_index[a] || 1) > config.min_component_stroke_count
+    a1 = a[1].filter (a) -> (stroke_count_index[a] || 1) > config.min_component_stroke_count && a.match(hanzi_and_idc_regexp)
     [a[0], a1]
   compositions = compositions.filter (a) -> a[1].length
   similarities = compositions.map (a) ->
-    #return [] unless a[0] == "早"
+    #return [] unless a[0] == "大"
     similarities = compositions.map (b) ->
       unless a[0] == b[0]
-        intersection = array_intersection a[1], b[1]
-        overlap = intersection.length / Math.max(a[1].length, b[1].length)
-        if overlap > config.min_overlap
-          #console.log a[0], b[0], overlap, a[1].join(""), b[1].join("")
-          [a[0], b[0], intersection.length]
+        b_compositions = b[1].filter (b) -> a[0] != b
+        intersection = array_intersection a[1], b_compositions
+        overlap = intersection.length / Math.max(a[1].length, b_compositions.length)
+        a_strokes = stroke_count_index[a[0]]
+        b_strokes = stroke_count_index[b[0]]
+        stroke_difference = Math.abs(b_strokes - a_strokes) / Math.max(a_strokes, b_strokes)
+        if overlap > config.min_overlap && stroke_difference < config.max_stroke_count_difference
+          #console.log a[0], b[0], overlap, stroke_difference, a[1].join(""), b_compositions.join("")
+          [a[0], b[0], overlap, stroke_difference]
     similarities = similarities.filter (a) -> a
-    similarities.sort (a, b) ->
-      b[2] - a[2] || stroke_count_index[a[0]] - stroke_count_index[b[0]]
+    similarities.sort (a, b) -> b[2] - a[2] || a[3] - b[3]
   similarities = similarities.filter (a) -> a.length
   similarities = similarities.map (a) ->
     b = a.map (a) -> a[1]
