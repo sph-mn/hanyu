@@ -468,7 +468,7 @@ update_characters_by_pinyin = () ->
       frequency < 4000
     [a[0], chars.join("")]
   rows = rows.filter (a) -> a[1].length
-  rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
+  rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
   write_csv_file "data/characters-by-pinyin-common.csv", rows
 
 http_get = (url) ->
@@ -511,7 +511,7 @@ update_character_overlap = () ->
   config = {
     min_overlap: 0.7
     min_component_stroke_count: 0
-    max_stroke_count_difference: 1
+    max_stroke_count_difference: 0.6
   }
   stroke_count_index = get_stroke_count_index()
   compositions = get_full_compositions()
@@ -521,6 +521,7 @@ update_character_overlap = () ->
   compositions = compositions.filter (a) -> a[1].length
   similarities = compositions.map (a) ->
     #return [] unless a[0] == "大"
+    #return [] unless a[0] == "草"
     similarities = compositions.map (b) ->
       unless a[0] == b[0]
         b_compositions = b[1].filter (b) -> a[0] != b
@@ -528,9 +529,10 @@ update_character_overlap = () ->
         overlap = intersection.length / Math.max(a[1].length, b_compositions.length)
         a_strokes = stroke_count_index[a[0]]
         b_strokes = stroke_count_index[b[0]]
-        stroke_difference = Math.abs(b_strokes - a_strokes) / Math.max(a_strokes, b_strokes)
-        if overlap > config.min_overlap && stroke_difference < config.max_stroke_count_difference
-          #console.log a[0], b[0], overlap, stroke_difference, a[1].join(""), b_compositions.join("")
+        stroke_difference = Math.abs(b_strokes - a_strokes)
+        stroke_difference_ratio = stroke_difference / a_strokes
+        if overlap > config.min_overlap && (stroke_difference < 4 || stroke_difference_ratio < config.max_stroke_count_difference)
+          #console.log a[0], b[0], overlap, stroke_difference_ratio, a[1].join(""), b_compositions.join("")
           [a[0], b[0], overlap, stroke_difference]
     similarities = similarities.filter (a) -> a
     similarities.sort (a, b) -> b[2] - a[2] || a[3] - b[3]
