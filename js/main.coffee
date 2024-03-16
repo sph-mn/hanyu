@@ -56,8 +56,10 @@ array_shuffle = (a) ->
     a[random_index] = temp
   a
 
-# https://en.wikipedia.org/wiki/CJK_Unified_Ideographs
+# https://en.wiktionary.org/wiki/Appendix:Unicode
 hanzi_unicode_ranges = [
+  ["2E80", "2EFF"]
+  ["31C0", "31EF"]
   ["4E00", "9FFF"]
   ["3400", "4DBF"]
   ["20000", "2A6DF"]
@@ -672,7 +674,7 @@ get_wiktionary_data = (char) ->
     if composition
       composition = composition.parentNode.parentNode.textContent
       composition = composition.match(/composition (.*)\)/)[1]
-      composition = (composition.split(" or ")[0].match(hanzi_regexp) || []).join("")
+      composition = (composition.split(" or ")[0].match(hanzi_and_idc_regexp) || []).join("")
     [char, strokes, composition]
   b = b.filter (a) -> a[1] || a[2]
   b.flat()
@@ -686,29 +688,38 @@ update_extra_stroke_counts = () ->
   data = data.sort (a, b) -> a[1] - b[1]
   write_csv_file "data/extra-stroke-counts.csv", data
 
-get_missing_data = () ->
+update_compositions = (start_index, end_index) ->
   chars = read_csv_file "data/character-strokes-composition.csv"
-  chars = chars.filter (a) -> (!(a[1] && a[2]) && "1" != a[1])
-  chars.forEach (a) ->
+  chars = chars.filter (a) -> "1" != a[1]
+  result = []
+  for a, i in chars.slice(start_index, end_index)
     data = await get_wiktionary_data a[0]
-    if data then console.log data.join(" ")
+    unless data[1] is parseInt(a[1], 10) and data[2] is a[2]
+      a[1] = data[1]
+      a[2] = data[2]
+      console.log a.join " "
+    result.push a
+  #write_csv_file "data/character-strokes-composition-updated.csv", result
 
-merge_tables = () ->
+add_new_data = () ->
   chars = read_csv_file("data/character-strokes-composition.csv")
-  new_data = read_csv_file("new-data").filter((a) -> a[0].length)
+  new_data = read_csv_file("new-data").filter (a) -> a[0].length
   all = chars.concat new_data
   all_index = {}
-  all.forEach (a) ->
-    if all_index[a[0]]
-      [char, strokes, compositions] = all_index[a[0]]
-      all_index[a[0]] = [char || a[0], strokes || a[1], compositions || a[2]]
-    else all_index[a[0]] = a
-  all = Object.values(all_index).sort (a, b) -> a[1] - b[1]
+  all.forEach (a) -> all_index[a[0]] = a
+  all = Object.values(all_index).sort (a, b) -> a[1] - b[1] || a[0].localeCompare(b[0])
   write_csv_file "data/character-strokes-composition-new.csv", all
 
+sort_data = () ->
+  chars = read_csv_file("data/character-strokes-composition.csv")
+  chars = chars.sort (a, b) -> a[1] - b[1] || a[0].localeCompare(b[0])
+  write_csv_file "data/character-strokes-composition-new.csv", chars
+
 run = () ->
-  #merge_tables()
-  #get_missing_data()
+  #console.log non_hanzi_regexp
+  sort_data()
+  #add_new_data()
+  #update_compositions 8000, 9000
   #write_csv_file()
   #find_missing_compositions()
   #get_full_compositions()
