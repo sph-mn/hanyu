@@ -457,7 +457,7 @@ update_characters_by_pinyin = () ->
   chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
   chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
-  rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
+  rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
   write_csv_file "data/characters-by-pinyin.csv", rows
   # only common characters
   index = get_character_pinyin_frequency_index()
@@ -737,7 +737,7 @@ find_component_repetitions = () ->
 
 run = () ->
   #console.log "コ刂".match hanzi_regexp
-  find_component_repetitions()
+  #find_component_repetitions()
   #console.log non_hanzi_regexp
   #sort_data()
   #add_new_data()
