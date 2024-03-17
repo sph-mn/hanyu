@@ -7,13 +7,14 @@ dictionary that sorts results by word frequency and character count. it is a sin
 see under data/
 * frequency-pinyin-translation.csv: words with pinyin and translation sorted by frequency
 * cedict.csv: filtered csv version of cedict with one translation per line
-* character-compositions.csv: characters split into components
+* character-strokes-composition.csv: characters with stroke count and composition
 * table-of-general-standard-chinese-characters.csv: the official character list including pronunciations
-* characters-by-reading.txt
+* characters-by-pinyin.csv
 * words-by-type/: separated by verb, noun, adjective, and so on
 * hsk.csv and hsk-pinyin-translations.csv
 * character-learning.csv: characters sorted by frequency, with readings and number of words with this reading, false pronunciations for guessing and syllable commonness among all characters, compositions, character meaning, and example words
-* character-similarities.txt: each character followed by the most similar characters based on the number of shared components, structure, and stroke count
+* character-overlap.csv: characters and characters with the most shared components
+* characters-repeated-components.csv: characters that consist of a repetition of another character
 * ... and more
 
 # data sources

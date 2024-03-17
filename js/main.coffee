@@ -12,6 +12,7 @@ read_csv_file = (path, delimiter) -> csv_parse.parse fs.readFileSync(path, "utf-
 array_from_newline_file = (path) -> fs.readFileSync(path).toString().trim().split("\n")
 on_error = (a) -> if a then console.error a
 delete_duplicates = (a) -> [...new Set(a)]
+split_chars = (a) -> [...a]
 random_integer = (min, max) -> Math.floor(Math.random() * (max - min + 1)) + min
 random_element = (a) -> a[random_integer 0, a.length - 1]
 n_times = (n, f) -> [...Array(n).keys()].map f
@@ -58,6 +59,7 @@ array_shuffle = (a) ->
 
 # https://en.wiktionary.org/wiki/Appendix:Unicode
 hanzi_unicode_ranges = [
+  ["30A0", "30FF"]  # katakana used as components
   ["2E80", "2EFF"]
   ["31C0", "31EF"]
   ["4E00", "9FFF"]
@@ -200,7 +202,7 @@ get_all_characters_and_pinyin = () ->
   result = []
   a = read_csv_file "data/frequency-pinyin.csv"
   a.forEach (a) ->
-    chars = a[0].split ""
+    chars = split_chars a[0]
     pinyin = pinyin_split2 a[1]
     chars.forEach (a, i) -> result.push [a + pinyin[i], a, pinyin[i]]
   a = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
@@ -212,7 +214,7 @@ get_frequency_characters_and_pinyin = () ->
   result = []
   a = read_csv_file "data/frequency-pinyin.csv"
   a.forEach (a) ->
-    chars = a[0].split ""
+    chars = split_chars a[0]
     pinyin = pinyin_split2 a[1]
     chars.forEach (a, i) -> result.push [a, pinyin[i]]
   result
@@ -437,7 +439,7 @@ pinyin_to_hanzi = (a) ->
 
 hanzi_to_pinyin = (a) ->
   a = a.replace(non_hanzi_regexp, " ").trim()
-  find_multiple_word_matches a, 0, 1, (a) -> a.split ""
+  find_multiple_word_matches a, 0, 1, split_chars
 
 dsv_add_example_words = () ->
   dictionary = dictionary_index_word_pinyin_f 0, 1
@@ -462,7 +464,7 @@ update_characters_by_pinyin = () ->
   char_count = chars.length
   rows = rows.map (a) ->
     pinyin = a[0]
-    chars = a[1].split ""
+    chars = split_chars a[1]
     chars = chars.filter (b) ->
       frequency = index[b + pinyin] || char_count
       frequency < 4000
@@ -544,7 +546,7 @@ update_character_overlap = () ->
   write_csv_file "data/character-overlap.csv", similarities
   character_frequency_index = get_character_frequency_index()
   similarities_common = similarities.map (a) ->
-    [a[0], a[1].split("").filter((a) -> (character_frequency_index[a] || 9000) < 4000).join("")]
+    [a[0], split_chars(a[1]).filter((a) -> (character_frequency_index[a] || 9000) < 4000).join("")]
   similarities_common = similarities_common.filter (a) -> a[1].length
   similarities_common = similarities_common.sort (a, b) -> b[1].length - a[1].length
   write_csv_file "data/character-overlap-common.csv", similarities_common
@@ -693,18 +695,26 @@ update_extra_stroke_counts = () ->
 update_compositions = (start_index, end_index) ->
   chars = read_csv_file "data/character-strokes-composition.csv"
   chars = chars.filter (a) -> "1" != a[1]
-  result = []
-  for a, i in chars.slice(start_index, end_index)
-    data = await get_wiktionary_data a[0]
-    unless data[1] is parseInt(a[1], 10) and data[2] is a[2]
-      a[1] = data[1]
-      a[2] = data[2]
-      console.log a.join " "
-    result.push a
-  #write_csv_file "data/character-strokes-composition-updated.csv", result
+  chars = chars.slice start_index, end_index
+  batch_size = 10
+  batches_count = Math.ceil chars.length / batch_size
+  batches = []
+  i = 0
+  while i < batches_count
+    batches.push chars.slice i * batch_size, (i + 1) * batch_size
+    i += 1
+  batches.forEach (a) ->
+    requests = Promise.all a.map (b) -> get_wiktionary_data b[0]
+    requests.then (b) ->
+      b.forEach (b, i) ->
+        c = a[i]
+        if (b[1] && b[1] != parseInt(c[1], 10)) || (b[2] && b[2].length >= c[2].length && b[2] != c[2])
+          c[1] = b[1]
+          c[2] = b[2]
+          console.log c.join " "
 
 add_new_data = () ->
-  chars = read_csv_file("data/character-strokes-composition.csv")
+  chars = read_csv_file "data/character-strokes-composition.csv"
   new_data = read_csv_file("new-data").filter (a) -> a[0].length
   all = chars.concat new_data
   all_index = {}
@@ -713,15 +723,25 @@ add_new_data = () ->
   write_csv_file "data/character-strokes-composition-new.csv", all
 
 sort_data = () ->
-  chars = read_csv_file("data/character-strokes-composition.csv")
+  chars = read_csv_file "data/character-strokes-composition.csv"
   chars = chars.sort (a, b) -> a[1] - b[1] || a[0].localeCompare(b[0])
   write_csv_file "data/character-strokes-composition-new.csv", chars
 
+find_component_repetitions = () ->
+  chars = read_csv_file "data/character-strokes-composition.csv"
+  chars = chars.forEach (a) ->
+    if a[2]
+      b = a[2].replace non_hanzi_regexp, ""
+      if 1 == delete_duplicates(split_chars(b)).length
+        console.log a[0], b
+
 run = () ->
+  #console.log "コ刂".match hanzi_regexp
+  find_component_repetitions()
   #console.log non_hanzi_regexp
-  sort_data()
+  #sort_data()
   #add_new_data()
-  #update_compositions 8000, 9000
+  #update_compositions 7000, 9000
   #write_csv_file()
   #find_missing_compositions()
   #get_full_compositions()
