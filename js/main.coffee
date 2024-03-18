@@ -155,7 +155,8 @@ cedict_filter_only = () ->
     word = parsed[2]
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
-    pinyin = pinyin.split(" ").map (a) -> pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3")
+    pinyin = pinyin.split(" ").map (a) ->
+      pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3").replace("45", "4").replace("25", "2")
     pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary(parsed[4]).join("/")
     line = [word_traditional, word, "[#{pinyin}]", "/#{glossary}/"].join(" ")
@@ -190,13 +191,6 @@ get_frequency_index = () ->
 get_all_characters = () -> read_csv_file("data/character-strokes-composition.csv").map (a) -> a[0]
 display_all_characters = () -> console.log get_all_characters().join("")
 
-get_character_frequency_index = () ->
-  # -> {character: integer}
-  chars = get_all_characters()
-  frequency_index = {}
-  chars.forEach (a, i) -> frequency_index[a] = i
-  frequency_index
-
 get_all_characters_and_pinyin = () ->
   # sorted by frequency
   result = []
@@ -219,9 +213,19 @@ get_frequency_characters_and_pinyin = () ->
     chars.forEach (a, i) -> result.push [a, pinyin[i]]
   result
 
+get_all_characters_sorted_by_frequency = () ->
+  delete_duplicates_stable get_all_characters_and_pinyin().map (a) -> split_chars(a[0])[0]
+
+get_character_frequency_index = () ->
+  # -> {character: integer}
+  chars = get_all_characters_sorted_by_frequency()
+  frequency_index = {}
+  chars.forEach (a, i) -> frequency_index[a] = i
+  frequency_index
+
 get_character_pinyin_frequency_index = () ->
   # -> {character + pinyin: integer}
-  chars = get_all_characters_and_pinyin()
+  chars = get_frequency_characters_and_pinyin()
   result = {}
   index = 0
   chars.forEach (a) ->
@@ -286,7 +290,8 @@ update_cedict_csv = () ->
     word = parsed[2]
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
-    pinyin = pinyin.split(" ").map (a) -> pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3")
+    pinyin = pinyin.split(" ").map (a) ->
+      pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3").replace("45", "4").replace("25", "2")
     pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary parsed[4]
     unless glossary.length then return null
@@ -454,7 +459,7 @@ dsv_add_example_words = () ->
 
 update_characters_by_pinyin = () ->
   by_pinyin = {}
-  chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars = get_frequency_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
   chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
   rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
@@ -577,7 +582,7 @@ sort_standard_character_readings = () ->
   path = "data/table-of-general-standard-chinese-characters.csv"
   rows = read_csv_file(path).map (a) ->
     char = a[0]
-    pinyin = a[1].split ", "
+    pinyin = a[1].split(", ").map (a) -> if a.match(/[0-5]$/) then a else a + "5"
     pinyin = pinyin.sort (a, b) -> (reading_count_index[char + b] || 0) - (reading_count_index[char + a] || 0)
     a[1] = pinyin.join ", "
     a
@@ -596,13 +601,13 @@ update_character_learning = () ->
   character_by_reading_index = get_character_by_reading_index()
   dictionary = dictionary_index_word_pinyin_f 0, 1
   get_character_example_words = get_character_example_words_f()
-  compositions_index = get_character_compositions_index()
+  compositions_index = get_compositions_index()
   rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
   rows = sort_by_character_frequency character_frequency_index, 0, rows
   syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
   add_example_words = (rows) ->
     rows.map (a) ->
-      words = get_character_example_words(a[0], a[1])
+      words = get_character_example_words a[0], a[1]
       a.push words.slice(1, 5).map((b) -> b[0]).join " "
       a.push words.slice(0, 5).map((b) -> b.join(" ")).join "\n"
       a
@@ -639,6 +644,8 @@ update_character_learning = () ->
     a
   # write
   write_csv_file "data/character-learning.csv", rows
+  rows = rows.map (a) -> [a[0], a[1], a[2], a[4], a[5], a[6]]
+  write_csv_file "data/character-learning-without-translations.csv", rows
 
 update_syllables_character_count = () ->
   # number of characters with the same reading
@@ -748,7 +755,7 @@ run = () ->
   #data = delete_duplicates(data).sort((a, b) -> a.localeCompare(b))
   #fs.writeFileSync("data/extra-components-new.csv", data.join("\n"))
   #filter_common_characters()
-  #sort_standard_character_readings()
+  sort_standard_character_readings()
   #update_syllables_character_count()
   #update_character_reading_count()
   #update_character_learning()
