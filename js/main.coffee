@@ -459,22 +459,18 @@ dsv_add_example_words = () ->
 
 update_characters_by_pinyin = () ->
   by_pinyin = {}
-  chars = get_frequency_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
   chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
   rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
   write_csv_file "data/characters-by-pinyin.csv", rows
   # only common characters
-  index = get_character_pinyin_frequency_index()
-  char_count = chars.length
-  rows = rows.map (a) ->
-    pinyin = a[0]
-    chars = split_chars a[1]
-    chars = chars.filter (b) ->
-      frequency = index[b + pinyin] || char_count
-      frequency < 4000
-    [a[0], chars.join("")]
-  rows = rows.filter (a) -> a[1].length
+  common_limit = 2000
+  by_pinyin = {}
+  chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars = chars.slice(0, common_limit)
+  chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
+  rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
   rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
   write_csv_file "data/characters-by-pinyin-common.csv", rows
 
@@ -649,7 +645,8 @@ update_character_learning = () ->
 
 update_syllables_character_count = () ->
   # number of characters with the same reading
-  chars = read_csv_file("data/characters-by-reading.csv").map (a) -> [a[0], a[1].length]
+  chars = read_csv_file("data/characters-by-pinyin.csv").map (a) -> [a[0], a[1].length]
+  chars_common = read_csv_file("data/characters-by-pinyin-common.csv").map (a) -> [a[0], a[1].length]
   chars_without_tones = chars.map (a) -> [a[0].replace(/[0-5]/g, ""), a[1]]
   get_data = (chars) ->
     counts = {}
@@ -661,6 +658,7 @@ update_syllables_character_count = () ->
     chars.map((a) -> [a, counts[a]]).sort (a, b) -> b[1] - a[1]
   write_csv_file "data/syllables-tones-character-count.csv", get_data(chars)
   write_csv_file "data/syllables-character-count.csv", get_data(chars_without_tones)
+  write_csv_file "data/syllables-tones-character-count-common.csv", get_data(chars_common)
 
 grade_text_files = (paths) ->
   paths.forEach (a) -> console.log grade_text(fs.readFileSync(a, "utf-8")) + " " + path.basename(a)
@@ -755,8 +753,8 @@ run = () ->
   #data = delete_duplicates(data).sort((a, b) -> a.localeCompare(b))
   #fs.writeFileSync("data/extra-components-new.csv", data.join("\n"))
   #filter_common_characters()
-  sort_standard_character_readings()
-  #update_syllables_character_count()
+  #sort_standard_character_readings()
+  update_syllables_character_count()
   #update_character_reading_count()
   #update_character_learning()
   #update_syllables_with_tones_by_reading()
