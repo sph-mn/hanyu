@@ -48,13 +48,11 @@ delete_duplicates_stable_with_key = (a, key) ->
   result
 
 array_shuffle = (a) ->
-  i = a.length
-  while 0 < i
-    random_index = Math.floor(Math.random() * i)
-    i -= 1
-    temp = a[i]
-    a[i] = a[random_index]
-    a[random_index] = temp
+  n = a.length
+  while n > 0
+    i = Math.floor Math.random() * n
+    n -= 1
+    [a[n], a[i]] = [a[i], a[n]]
   a
 
 # https://en.wiktionary.org/wiki/Appendix:Unicode
@@ -591,11 +589,43 @@ get_character_by_reading_index = () ->
     object_array_add result, pinyin, a[0]
   result
 
+update_pinyin_learning = () ->
+  # pinyin, word_choices -> word, translation
+  options =
+    words_per_char: 3
+    word_choices: 5
+  character_frequency_index = get_character_frequency_index()
+  get_character_example_words = get_character_example_words_f()
+  standard_chars = read_csv_file("data/table-of-general-standard-chinese-characters.csv")
+  chars = standard_chars.map (a) -> [a[0], a[1].split(", ")[0]]
+  chars = sort_by_character_frequency character_frequency_index, 0, chars
+  rows = for a in chars
+    a = get_character_example_words(a[0], a[1])
+    if 1 < a.length then a = a.slice 1, options.words_per_char + 1
+    [b[1], b[0], b[2]] for b in a
+  rows = rows.flat 1
+  add_sort_field = (rows) ->
+    a.push i for a, i in rows
+    rows
+  add_word_choices = (rows) ->
+    rows.map (a) ->
+      tries = 30
+      alternatives = [a[1]]
+      while tries && alternatives.length < options.word_choices
+        alternative = random_element rows
+        if a[1].length == alternative[1].length && a[0] != alternative[0] && !alternatives.includes(alternative[1])
+          alternatives.push alternative[1]
+        tries -= 1
+      a.push array_shuffle(alternatives).join(" ")
+      a
+  rows = add_word_choices rows
+  rows = add_sort_field rows
+  write_csv_file "data/pinyin-learning.csv", rows
+
 update_character_learning = () ->
   character_frequency_index = get_character_frequency_index()
   reading_count_index = get_character_reading_count_index()
   character_by_reading_index = get_character_by_reading_index()
-  dictionary = dictionary_index_word_pinyin_f 0, 1
   get_character_example_words = get_character_example_words_f()
   compositions_index = get_compositions_index()
   rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
@@ -781,6 +811,7 @@ module.exports = {
   mark_to_number
   update_characters_by_pinyin
   update_character_learning
+  update_pinyin_learning
   grade_text
   grade_text_files
   run

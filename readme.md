@@ -12,8 +12,9 @@ see under data/
 * characters-by-pinyin.csv
 * words-by-type/: separated by verb, noun, adjective, and so on
 * hsk.csv and hsk-pinyin-translations.csv
-* character-learning.csv: characters sorted by frequency, with readings and number of words with this reading, false pronunciations for guessing and syllable commonness among all characters, compositions, character meaning, and example words
-* character-overlap.csv: characters and characters with the most shared components
+* character-learning.csv: characters sorted by frequency, with readings and number of words with this reading, false pronunciations for guessing and syllable commonness among all characters, compositions, character meaning, and example words. suitable as the basis for an anki deck
+* pinyin-learning.csv: a reverse version of character-learning that maps word pinyin and choices to word and translation
+* character-overlap.csv: characters and characters with the most shared strokes in any order
 * characters-repeated-components.csv: characters that consist of a repetition of another character
 * ... and more
 
