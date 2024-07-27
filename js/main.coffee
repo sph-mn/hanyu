@@ -55,6 +55,15 @@ array_shuffle = (a) ->
     [a[n], a[i]] = [a[i], a[n]]
   a
 
+array_deduplicate_key = (a, get_key) ->
+  existing = {}
+  a.filter (a) ->
+    key = get_key a
+    if existing[key] then false
+    else
+      existing[key] = true
+      true
+
 # https://en.wiktionary.org/wiki/Appendix:Unicode
 hanzi_unicode_ranges = [
   ["30A0", "30FF"]  # katakana used as components
@@ -589,6 +598,10 @@ get_character_by_reading_index = () ->
     object_array_add result, pinyin, a[0]
   result
 
+add_sort_field = (rows) ->
+  a.push i for a, i in rows
+  rows
+
 update_pinyin_learning = () ->
   # pinyin, word_choices -> word, translation
   options =
@@ -604,9 +617,7 @@ update_pinyin_learning = () ->
     if 1 < a.length then a = a.slice 1, options.words_per_char + 1
     [b[1], b[0], b[2]] for b in a
   rows = rows.flat 1
-  add_sort_field = (rows) ->
-    a.push i for a, i in rows
-    rows
+  rows = array_deduplicate_key rows, (a) -> a[1]
   add_word_choices = (rows) ->
     rows.map (a) ->
       tries = 30
@@ -618,8 +629,7 @@ update_pinyin_learning = () ->
         tries -= 1
       a.push array_shuffle(alternatives).join(" ")
       a
-  rows = add_word_choices rows
-  rows = add_sort_field rows
+  rows = add_sort_field add_word_choices rows
   write_csv_file "data/pinyin-learning.csv", rows
 
 update_character_learning = () ->
@@ -629,6 +639,7 @@ update_character_learning = () ->
   get_character_example_words = get_character_example_words_f()
   compositions_index = get_compositions_index()
   rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
+  rows = array_deduplicate_key rows, (a) -> a[0]
   rows = sort_by_character_frequency character_frequency_index, 0, rows
   syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
   add_example_words = (rows) ->
@@ -664,10 +675,7 @@ update_character_learning = () ->
     b = compositions_index[a[0]]
     a.push b if b
     a
-  # add sort index
-  rows.map (a, i) ->
-    a.push i
-    a
+  rows = add_sort_field rows
   # write
   write_csv_file "data/character-learning.csv", rows
   rows = rows.map (a) -> [a[0], a[1], a[2], a[4], a[5], a[6]]

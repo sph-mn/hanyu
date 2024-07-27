@@ -16,6 +16,7 @@ see under data/
 * pinyin-learning.csv: a reverse version of character-learning that maps word pinyin and choices to word and translation
 * character-overlap.csv: characters and characters with the most shared strokes in any order
 * characters-repeated-components.csv: characters that consist of a repetition of another character
+* hanzi.apkg, pinyin.apkg: anki decks based on character-learning.csv and pinyin-learning.csv
 * ... and more
 
 # data sources
