@@ -66,7 +66,7 @@ array_deduplicate_key = (a, get_key) ->
 
 # https://en.wiktionary.org/wiki/Appendix:Unicode
 hanzi_unicode_ranges = [
-  ["30A0", "30FF"]  # katakana used as components
+  ["30A0", "30FF"]  # katakana used for some components
   ["2E80", "2EFF"]
   ["31C0", "31EF"]
   ["4E00", "9FFF"]
@@ -642,31 +642,28 @@ update_character_learning = () ->
   rows = array_deduplicate_key rows, (a) -> a[0]
   rows = sort_by_character_frequency character_frequency_index, 0, rows
   syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
-  add_example_words = (rows) ->
-    rows.map (a) ->
-      words = get_character_example_words a[0], a[1]
-      a.push words.slice(1, 5).map((b) -> b[0]).join " "
-      a.push words.slice(0, 5).map((b) -> b.join(" ")).join "\n"
-      a
-  rows = add_example_words rows
-  add_guess_pronunciations = (rows) ->
+  add_guess_readings = (rows) ->
+    # example: "kan3 (5) chui1 (2) lun3 (2) hong1 (6) tang4 (2) du1 (5) xie3 (2) fan2 (16)"
     syllable_count_index = get_character_syllables_tones_count_index()
+    max_guess_readings = 5
     rows.map (a) ->
       # add for each guess reading the number of other characters with this reading
-      alternatives = n_times 4, (n) -> random_element syllables
+      alternatives = n_times max_guess_readings - 1, (n) -> random_element syllables
       alternatives = delete_duplicates array_shuffle [a[1]].concat alternatives
       alternatives = alternatives.map (b) -> b + " (" + (syllable_count_index[b] || 1) + ")"
       a.push alternatives.join " "
       a
-  add_pronunciation_hint = (rows) ->
+  #rows = add_guess_readings rows
+  add_same_reading_characters = (rows) ->
+    max_same_reading_characters = 10
     rows.map (a) ->
       b = array_shuffle (character_by_reading_index[a[1]] || []).filter((b) -> a[0] != b)
-      a.push b.slice(0, 5).join ""
+      a.push b.slice(0, max_same_reading_characters).join ""
       a
-  rows = add_pronunciation_hint rows
+  rows = add_same_reading_characters rows
   add_syllable_counts = (rows) ->
     rows.map (a) ->
-      # must be run after add guess pronunciations.
+      # must be run after add_guess_readings.
       # add for each possible reading the number of words with this character and reading
       a[1] = a[1].split(", ").map((b) -> b + " (" + (reading_count_index[a[0] + b] || 1) + ")").join(", ")
       a
@@ -677,9 +674,15 @@ update_character_learning = () ->
     a
   rows = add_sort_field rows
   # write
-  write_csv_file "data/character-learning.csv", rows
-  rows = rows.map (a) -> [a[0], a[1], a[2], a[4], a[5], a[6]]
   write_csv_file "data/character-learning-without-translations.csv", rows
+  add_example_words = (rows) ->
+    rows.map (a) ->
+      words = get_character_example_words a[0], a[1]
+      a.push words.slice(1, 5).map((b) -> b[0]).join " "
+      a.push words.slice(0, 5).map((b) -> b.join(" ")).join "\n"
+      a
+  rows = add_example_words rows
+  write_csv_file "data/character-learning.csv", rows
 
 update_syllables_character_count = () ->
   # number of characters with the same reading
