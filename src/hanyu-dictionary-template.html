@@ -1,13 +1,14 @@
 <!doctype html>
 <html lang="zh-Hans">
   <head>
+    <link rel="icon" href="data:," />
     <meta charset="utf-8"/>
     <meta name="viewport" content="initial-scale=1"/>
     <title>chinese dictionary</title>
     <style>
       @font-face {
-        font-family: 'Noto Sans SC';
-        src: url('data:font/ttf;base64,{{font}}') format('truetype');
+        font-family: "Noto Sans SC";
+        src: url("data:font/ttf;base64,{{font}}") format("truetype");
         font-weight: normal;font-style: normal;
       }
       html,input,button{font-family:"Noto Sans"; font-size:24px}
@@ -27,10 +28,10 @@
       ul,input,body{margin:0}
       input[type=checkbox]{margin-right:5px}
       @media (max-width: 700px) {
-          input{height:30px;margin:5px}
-          button{padding:10px;margin:5px}
-          body > *{margin-top:0}
-          #results{font-size:1.5em}
+        input{height:30px;margin:5px}
+        button{padding:10px;margin:5px}
+        body > *{margin-top:0}
+        #results{font-size:1.5em}
       }
     </style>
   </head>
@@ -39,14 +40,16 @@
       <h1>chinese to english dictionary</h1><div id="about-link">about</div>
       <div id="about" class="hidden">
         <ul>
-          <li>search results are sorted by word frequency and word length</li>
-          <li>for latin character input, searches in pinyin and optionally in translations if the checkbox translations is checked. the split checkbox has no effect</li>
-          <li>for chinese character input, searches for partial matches. if the checkbox split is checked, split into words and searches for exact matches. the checkbox translations has no effect</li>
-          <li>supports regexp syntax except for chinese characters wit the checkbox split checked. for example, ^word for searching at the beginning, word$ for searching at the end, or . for wildcards</li>
-          <li>result word length is limited based on the length of input</li>
-          <li>results can be directly copied and saved as a machine-readable space-separated dsv file that can be opened as a spreadsheet</li>
-          <li>word frequency from <a href="https://github.com/ernop/anki-chinese-word-frequency/" target="_blank">ernop/anki-chinese-word-frequency</a></li>
-          <li>translations from <a href="https://www.mdbg.net/chinese/dictionary?page=cc-cedict" target="_blank">cc-cedict</a></li>
+          <li>simplified characters only</li>
+          <li>certain non-essential word types, including regional dialects, archaic terms, and religious vocabulary, are not included</li>
+          <li>search results are sorted by word frequency and length</li>
+          <li>for latin character input, searches are performed in pinyin and optionally in translations if the 'translations' checkbox is checked. the 'split' checkbox has no effect in these cases</li>
+          <li>searches partial matches for chinese character input. if the 'split' checkbox is checked, input is split into words and exact matches are searched. the 'translations' checkbox has no effect in these cases</li>
+          <li>supports regular expressions, except when the 'split' checkbox is checked for chinese characters. for example, '^word' searches at the beginning of entries, 'word$' searches at the end, and '.' can be used as a wildcard</li>
+          <li>result word length may be limited based on the input length</li>
+          <li>result lines can be copied and saved directly as a machine-readable space-separated dsv file, which can then be opened as a spreadsheet</li>
+          <li>word frequency data is sourced from <a href="https://github.com/ernop/anki-chinese-word-frequency/" target="_blank">ernop/anki-chinese-word-frequency</a></li>
+          <li>translations are sourced from <a href="https://www.mdbg.net/chinese/dictionary?page=cc-cedict" target="_blank">cc-cedict</a></li>
           <li><a href="https://github.com/sph-mn/hanyu" target="_blank">project homepage</a></li>
         </ul>
       </div>

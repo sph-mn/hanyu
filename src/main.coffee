@@ -10,6 +10,7 @@ pinyin_utils = require "pinyin-utils"
 #scraper = require "table-scraper"
 read_text_file = (a) -> fs.readFileSync a, "utf8"
 read_csv_file = (path, delimiter) -> csv_parse.parse read_text_file(path), {delimiter: delimiter || " ", relax_column_count: true}
+replace_placeholders = (text, mapping) -> text.replace /{{(.*?)}}/g, (_, k) -> mapping[k] or ""
 array_from_newline_file = (path) -> read_text_file(path).toString().trim().split("\n")
 on_error = (a) -> if a then console.error a
 delete_duplicates = (a) -> [...new Set(a)]
@@ -323,18 +324,13 @@ dictionary_cedict_to_json = (data) ->
     a
 
 update_dictionary = () ->
-  words = read_csv_file "data/cedict.csv"
-  words = dictionary_cedict_to_json words
-  js = read_text_file "src/dictionary.js"
-  js = js.replace "__word_data__", words
-  #font2 = read_text_file "src/ZhouFangRiMingTi-2.otf.base64"
-  #font = read_text_file "src/KeHeiTi-2.ttf.base64"
+  word_data = read_csv_file "data/cedict.csv"
+  word_data = dictionary_cedict_to_json word_data
+  script = replace_placeholders read_text_file("src/dictionary.js"), {word_data}
   font = read_text_file "src/NotoSansSC-Light.ttf.base64"
   html = read_text_file "src/hanyu-dictionary-template.html"
-  html = html.replace "{{script}}", js.trim()
-  html = html.replace "{{font}}", font.trim()
-  #html = html.replace "{{font2}}", font2.trim()
-  fs.writeFile "compiled/hanyu-dictionary.html", html, on_error
+  html = replace_placeholders html, {font, script}
+  fs.writeFileSync "compiled/hanyu-dictionary.html", html
 
 clean_frequency_list = () ->
   frequency_array = array_from_newline_file "data/frequency.csv"

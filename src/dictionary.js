@@ -7,7 +7,7 @@ function word_search_init() {
     results: document.getElementById("results")
   }
 
-  const word_data = __word_data__;
+  const word_data = {{word_data}};
   const result_limit = 150
 
   function make_result_line(data) {
