@@ -2,7 +2,7 @@
 fs = require "fs"
 commander = require "commander"
 path = require "node:path"
-main = require "../js/main"
+main = require "../src/main"
 commander
   .name("hanzi-convert")
   .description("convert chinese text. reads from standard input and writes to standard output")

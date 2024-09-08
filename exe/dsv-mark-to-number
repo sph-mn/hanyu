@@ -1,3 +1,3 @@
 #!/usr/bin/coffee
-main = require "../js/main"
+main = require "../src/main"
 main.dsv_mark_to_number process.argv[2]

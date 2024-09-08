@@ -1,4 +1,4 @@
 #!/usr/bin/coffee
-main = require "../js/main"
+main = require "../src/main"
 word_index = process.argv[2]
 main.dsv_add_translations word_index
