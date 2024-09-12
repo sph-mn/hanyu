@@ -6,32 +6,28 @@
     <meta name="viewport" content="initial-scale=1"/>
     <title>chinese dictionary</title>
     <style>
-      @font-face {
-        font-family: "Noto Sans SC";
-        src: url("data:font/ttf;base64,{{font}}") format("truetype");
-        font-weight: normal;font-style: normal;
-      }
       html,input,button{font-family:"Noto Sans"; font-size:24px}
-      #results > span{font-size:1.5em;font-weight:100;font-family:"Noto Sans SC"}
       body{background-color:#000;color:#ddd}
       body a{color:#ddd}
-      body > div + div{margin-top:10px}
+      body > div + div{margin-top:4px}
       h1{display:inline-block;margin:0;font-size:1em}
-      #filter input{border:0;background-color:#eee}
-      #input-clear + input{margin-left:5px}
-      #results{font-size:1.5em;margin-top:20px}
-      #about-link{cursor:pointer;display:inline-block;margin-left:20px;float:right}
+      input, button{border:0;background-color:#eee;vertical-align:middle}
+      button:active{background-color:#ccc}
+      #results{margin-top:10px}
+      #results > span{font-size:1.5em;font-weight:100;font-family:"Noto Sans SC"}
+      #about-link{cursor:pointer;display:inline-block;margin-left:20px;position:absolute;top:0;right:0;font-size:0.75em}
       #about{margin-bottom:20px}
       #about.hidden{display:none}
       #filter .row{display:inline-block}
       #filter label{white-space:nowrap}
       ul,input,body{margin:0}
-      input[type=checkbox]{margin-right:5px}
+      input[type=checkbox]{margin-right:4px}
       @media (max-width: 700px) {
-        input{height:30px;margin:5px}
-        button{padding:10px;margin:5px}
+        html,input,button{font-size:0.75em}
+        input{height:30px;margin:4px}
+        button{padding:4px;margin:4px}
         body > *{margin-top:0}
-        #results{font-size:1.5em}
+        #results{font-size:1.5em;margin-top:10px}
       }
     </style>
   </head>
@@ -56,12 +52,19 @@
     </div>
     <div id="filter">
       <div class="row">
-        <button id="input-clear">clear</button><input id="input" placeholder="word search..."/>
+        <button id="input-clear">clear</button> <input id="input" placeholder="word search..."/>
         <label title="search inside translations for latin character input"><input id="search-translations" type="checkbox"/>translations</label>
         <label title="search partial matches for chinese character input"><input id="search-split" type="checkbox"/>split</label>
       </div>
     </div>
     <div id="results"></div>
+    <style>
+      @font-face {
+        font-family: "Noto Sans SC";
+        src: url("data:font/ttf;base64,{{font}}") format("truetype");
+        font-weight: normal;font-style: normal;
+      }
+    </style>
     <script>
       {{script}}
     </script>

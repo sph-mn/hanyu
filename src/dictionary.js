@@ -11,11 +11,8 @@ function word_search_init() {
   const result_limit = 150
 
   function make_result_line(data) {
-    const row = ["<span>" + data[0] + "</span>", data[1]]
-    let glossary = data[2].join("; ")
-    glossary = "\"" + glossary.replace(/\"/g, "'") + "\""
-    row.push(glossary)
-    return row.join(" ")
+    const glossary = "\"" + data[2].join("; ").replace(/\"/g, "'") + "\""
+    return "<span>" + data[0] + "</span> " + data[1] + " " + glossary + "</br>"
   }
 
   function on_filter() {
@@ -63,8 +60,7 @@ function word_search_init() {
         if (matcher(word_data[i])) matches.push(make_result_line(word_data[i]))
       })
     }
-    dom.results.innerHTML = matches.join("<br/>")
-    if (0 == matches.length) dom.results.innerHTML = "no word results"
+    dom.results.innerHTML = 0 == matches.length ? "no word results" : matches.join("")
   }
   function on_reset() {
     dom.input.value = ""
