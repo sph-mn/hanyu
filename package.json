@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "license": "cc-by-sa",
   "dependencies": {
+    "@luncheon/simplify-svg-path": "^0.2.0",
+    "canvas": "^2.11.2",
     "coffeescript": "*",
     "commander": ">=11",
     "csv": "*",
@@ -12,6 +14,9 @@
     "node-html-parser": "*",
     "pinyin-split": "*",
     "pinyin-utils": "*",
-    "table-scraper": "*"
+    "skeleton-tracing-js": "^1.0.4",
+    "svg-path-parser": "^1.1.0",
+    "table-scraper": "*",
+    "xmldom": "*"
   }
 }

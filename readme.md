@@ -1,13 +1,13 @@
 # chinese language data and dictionary
 
 # dictionary
-dictionary that sorts results by word frequency and character count. it is a single file, html/hanyu-dictionary.html, and needs to be served via http for the javascript to run in the browser. also hosted [here](http://sph.mn/other/chinese/hanyu-dictionary.html).
+dictionary that sorts results by word frequency and character count. the application is contained in a single file under compiled/ and also works offline. it is also hosted [here](http://sph.mn/other/chinese/hanyu-dictionary.html).
 
 # data files
 see under data/
 * frequency-pinyin-translation.csv: words with pinyin and translation sorted by frequency
 * cedict.csv: filtered csv version of cedict with one translation per line
-* character-strokes-composition.csv: characters with stroke count and composition
+* character-strokes-decomposition.csv: characters with stroke count and composition
 * table-of-general-standard-chinese-characters.csv: the official character list including pronunciations
 * characters-by-pinyin.csv
 * words-by-type/: separated by verb, noun, adjective, and so on
@@ -34,11 +34,19 @@ creative commons share-alike
 * the main code file is js/main.coffee
 
 # hanzi-convert
-a command-line utility to convert text.
+a command-line utility to convert text. at this point, some of the conversions might be quite slow.
 
-convert marks to numbers:
+convert from pinyin to hanzi:
 ~~~
-echo fāshāo shì yīn | ./exe/hanzi-convert --numbers
+echo fa1shao1 shi4 yin1 | ./exe/hanzi-convert --hanzi
+发烧 是/事/试/市/式/室/世/仕/侍/势/嗜/噬/士/奭/弑/忕/恃/戺/拭/揓/柿/栻/氏/澨/示/筮/舐/莳/螫/视/誓/谥/贳/轼/逝/适/释/铈/饰/𬤊 因/阴/喑/垔/堙/姻/愔/慇/殷/氤/洇/瘖/禋/筃/茵/裀/铟/音/骃/𬘡/𬮱
+~~~
+
+alternatives are sorted by word frequency.
+
+convert from hanzi to pinyin:
+~~~
+echo 发烧试音 | ./exe/hanzi-convert --pinyin
 fa1shao1 shi4 yin1
 ~~~
 
@@ -48,16 +56,8 @@ echo 發燒試音 | ./exe/hanzi-convert --simplify
 发烧试音
 ~~~
 
-convert from hanzi to pinyin:
+convert marks to numbers:
 ~~~
-echo 发烧试音 | ./exe/hanzi-convert --pinyin
+echo fāshāo shì yīn | ./exe/hanzi-convert --numbers
 fa1shao1 shi4 yin1
 ~~~
-
-convert from pinyin to hanzi:
-~~~
-echo fa1shao1 shi4 yin1 | ./exe/hanzi-convert --hanzi
-发烧 是/事/试/市/式/室/世/仕/侍/势/嗜/噬/士/奭/弑/忕/恃/戺/拭/揓/柿/栻/氏/澨/示/筮/舐/莳/螫/视/誓/谥/贳/轼/逝/适/释/铈/饰/𬤊 因/阴/喑/垔/堙/姻/愔/慇/殷/氤/洇/瘖/禋/筃/茵/裀/铟/音/骃/𬘡/𬮱
-~~~
-
-alternatives, like basically every output of this project, sorted by frequency.

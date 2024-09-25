@@ -1,5 +1,6 @@
 csv_parse = require "csv-parse/sync"
 csv_stringify = require "csv-stringify/sync"
+coffee = require "coffeescript"
 fs = require "fs"
 hanzi_tools = require "hanzi-tools"
 html_parser = require "node-html-parser"
@@ -7,10 +8,11 @@ http =  require "https"
 path = require "path"
 pinyin_split = require "pinyin-split"
 pinyin_utils = require "pinyin-utils"
+{DOMParser, XMLSerializer} = require "xmldom"
 #scraper = require "table-scraper"
 read_text_file = (a) -> fs.readFileSync a, "utf8"
 read_csv_file = (path, delimiter) -> csv_parse.parse read_text_file(path), {delimiter: delimiter || " ", relax_column_count: true}
-replace_placeholders = (text, mapping) -> text.replace /{{(.*?)}}/g, (_, k) -> mapping[k] or ""
+replace_placeholders = (text, mapping) -> text.replace /__(.*?)__/g, (_, k) -> mapping[k] or ""
 array_from_newline_file = (path) -> read_text_file(path).toString().trim().split("\n")
 on_error = (a) -> if a then console.error a
 delete_duplicates = (a) -> [...new Set(a)]
@@ -197,7 +199,7 @@ get_frequency_index = () ->
     frequency_index[a] = i unless frequency_index[a]
   frequency_index
 
-get_all_characters = () -> read_csv_file("data/character-strokes-composition.csv").map (a) -> a[0]
+get_all_characters = () -> read_csv_file("data/character-strokes-decomposition.csv").map (a) -> a[0]
 display_all_characters = () -> console.log get_all_characters().join("")
 
 get_all_characters_and_pinyin = () ->
@@ -326,11 +328,22 @@ dictionary_cedict_to_json = (data) ->
 update_dictionary = () ->
   word_data = read_csv_file "data/cedict.csv"
   word_data = dictionary_cedict_to_json word_data
-  script = replace_placeholders read_text_file("src/dictionary.js"), {word_data}
+  script = read_text_file "src/dictionary.coffee"
+  script = coffee.compile(script, bare: true).trim()
+  script = replace_placeholders script, {word_data}
   font = read_text_file "src/NotoSansSC-Light.ttf.base64"
   html = read_text_file "src/hanyu-dictionary-template.html"
   html = replace_placeholders html, {font, script}
   fs.writeFileSync "compiled/hanyu-dictionary.html", html
+
+update_characters = () ->
+  character_data = read_text_file "data/characters.json"
+  script = read_text_file "src/characters.coffee"
+  script = coffee.compile(script, bare: true).trim()
+  script = replace_placeholders script, {character_data}
+  html = read_text_file "src/hanyu-characters-template.html"
+  html = replace_placeholders html, {script}
+  fs.writeFileSync "compiled/hanyu-characters.html", html
 
 clean_frequency_list = () ->
   frequency_array = array_from_newline_file "data/frequency.csv"
@@ -499,42 +512,42 @@ index_key_value = (a, key_key, value_key) ->
   a.forEach (a) -> b[a[key_key]] = a[value_key]
   b
 
-get_compositions_index = () -> index_key_value read_csv_file("data/character-strokes-composition.csv"), 0, 2
+get_decompositions_index = () -> index_key_value read_csv_file("data/character-strokes-decomposition.csv"), 0, 2
 
-get_full_compositions = () ->
-  # also include compositions of components per entry
-  compositions_index = get_compositions_index()
+get_full_decompositions = () ->
+  # also include decompositions of components per entry
+  decompositions_index = get_decompositions_index()
   decompose = (a) ->
-    parts = compositions_index[a]
+    parts = decompositions_index[a]
     if parts
       parts = [...parts]
       [a].concat(parts, parts.map(decompose))
     else [a]
-  Object.keys(compositions_index).map (a) ->
+  Object.keys(decompositions_index).map (a) ->
     parts = decompose(a).flat(Infinity)
     [parts[0], delete_duplicates(parts.slice(1))]
     #[parts[0], parts.slice(1)]
 
-get_full_compositions_index = () -> index_key_value get_full_compositions(), 0, 1
-get_stroke_count_index = (a) -> index_key_value read_csv_file("data/character-strokes-composition.csv"), 0, 1
+get_full_decompositions_index = () -> index_key_value get_full_decompositions(), 0, 1
+get_stroke_count_index = (a) -> index_key_value read_csv_file("data/character-strokes-decomposition.csv"), 0, 1
 
 update_character_overlap = () ->
   # 大犬太 草早旱
   stroke_count_index = get_stroke_count_index()
-  compositions_index = get_compositions_index()
-  words = Object.keys(compositions_index)
+  decompositions_index = get_decompositions_index()
+  words = Object.keys(decompositions_index)
   character_frequency_index = get_character_frequency_index()
   similarities = words.map (a) ->
     #return [] unless a[0] == "大"
     #return [] unless a == "口"
     #return [] unless a[0] == "草"
-    aa = compositions_index[a]?.split("").filter((a) -> a.match hanzi_regexp)
+    aa = decompositions_index[a]?.split("").filter((a) -> a.match hanzi_regexp)
     a_strokes = parseInt stroke_count_index[a]
     return unless aa
     similarities = words.map (b) ->
       #return [] unless b == "哩"
       return if a == b
-      bb = compositions_index[b]?.split("").filter (a) -> a.match hanzi_regexp
+      bb = decompositions_index[b]?.split("").filter (a) -> a.match hanzi_regexp
       return unless bb
       inclusion = bb.includes a
       if inclusion
@@ -635,7 +648,7 @@ update_character_learning = () ->
   reading_count_index = get_character_reading_count_index()
   character_by_reading_index = get_character_by_reading_index()
   get_character_example_words = get_character_example_words_f()
-  compositions_index = get_compositions_index()
+  decompositions_index = get_decompositions_index()
   rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
   rows = array_deduplicate_key rows, (a) -> a[0]
   rows = sort_by_character_frequency character_frequency_index, 0, rows
@@ -665,9 +678,9 @@ update_character_learning = () ->
       # add for each possible reading the number of words with this character and reading
       a[1] = a[1].split(", ").map((b) -> b + " (" + (reading_count_index[a[0] + b] || 1) + ")").join(", ")
       a
-  # add compositions
+  # add decompositions
   rows.map (a) ->
-    b = compositions_index[a[0]]
+    b = decompositions_index[a[0]]
     a.push b if b
     a
   rows = add_sort_field rows
@@ -718,12 +731,12 @@ get_wiktionary_data = (char) ->
   b = b.map (a) ->
     strokes = a.textContent.match /(\d+) stroke/
     strokes = strokes && parseInt(strokes[1], 10)
-    composition = a.querySelector "a[title=\"w:Chinese character description languages\"]"
-    if composition
-      composition = composition.parentNode.parentNode.textContent
-      composition = composition.match(/composition (.*)\)/)[1]
-      composition = (composition.split(" or ")[0].match(hanzi_and_idc_regexp) || []).join("")
-    [char, strokes, composition]
+    decomposition = a.querySelector "a[title=\"w:Chinese character description languages\"]"
+    if decomposition
+      decomposition = decomposition.parentNode.parentNode.textContent
+      decomposition = decomposition.match(/decomposition (.*)\)/)[1]
+      decomposition = (decomposition.split(" or ")[0].match(hanzi_and_idc_regexp) || []).join("")
+    [char, strokes, decomposition]
   b = b.filter (a) -> a[1] || a[2]
   b.flat()
 
@@ -736,8 +749,8 @@ update_extra_stroke_counts = () ->
   data = data.sort (a, b) -> a[1] - b[1]
   write_csv_file "data/extra-stroke-counts.csv", data
 
-update_compositions = (start_index, end_index) ->
-  chars = read_csv_file "data/character-strokes-composition.csv"
+update_decompositions = (start_index, end_index) ->
+  chars = read_csv_file "data/character-strokes-decomposition.csv"
   chars = chars.filter (a) -> "1" != a[1]
   chars = chars.slice start_index, end_index
   batch_size = 10
@@ -758,34 +771,124 @@ update_compositions = (start_index, end_index) ->
           console.log c.join " "
 
 add_new_data = () ->
-  chars = read_csv_file "data/character-strokes-composition.csv"
+  chars = read_csv_file "data/character-strokes-decomposition.csv"
   new_data = read_csv_file("new-data").filter (a) -> a[0].length
   all = chars.concat new_data
   all_index = {}
   all.forEach (a) -> all_index[a[0]] = a
   all = Object.values(all_index).sort (a, b) -> a[1] - b[1] || a[0].localeCompare(b[0])
-  write_csv_file "data/character-strokes-composition-new.csv", all
+  write_csv_file "data/character-strokes-decomposition-new.csv", all
 
 sort_data = () ->
-  chars = read_csv_file "data/character-strokes-composition.csv"
+  chars = read_csv_file "data/character-strokes-decomposition.csv"
   chars = chars.sort (a, b) -> a[1] - b[1] || a[0].localeCompare(b[0])
-  write_csv_file "data/character-strokes-composition-new.csv", chars
+  write_csv_file "data/character-strokes-decomposition-new.csv", chars
 
 find_component_repetitions = () ->
-  chars = read_csv_file "data/character-strokes-composition.csv"
+  chars = read_csv_file "data/character-strokes-decomposition.csv"
   chars = chars.forEach (a) ->
     if a[2]
       b = a[2].replace non_hanzi_regexp, ""
       if 1 == delete_duplicates(split_chars(b)).length
         console.log a[0], b
 
+process_animcjk_svg = (input_file, output_file) ->
+  svg_content = fs.readFileSync input_file, "utf8"
+  parser = new DOMParser()
+  svg_doc = parser.parseFromString svg_content, "image/svg+xml"
+  svg_root = svg_doc.documentElement
+
+  remove_unnecessary_elements = (parent) ->
+    child = parent.firstChild
+    while child
+      next_sibling = child.nextSibling
+      if child.nodeType == 1 # Element node
+        node_name = child.nodeName
+        if node_name == "style" or node_name == "defs" or node_name == "clipPath"
+          parent.removeChild child
+        else if node_name == "path" and (child.getAttribute "clip-path" or child.getAttribute "style")
+          parent.removeChild child
+        else remove_unnecessary_elements child
+      else if child.nodeType == 8  # Comment node
+        parent.removeChild child
+      child = next_sibling
+
+  remove_unnecessary_elements svg_doc
+
+  output_paths = []
+  output_texts = []
+
+  stroke_paths = []
+  all_paths = svg_root.getElementsByTagName "path"
+  for i in [0...all_paths.length]
+    path_element = all_paths[i]
+    id_attr = path_element.getAttribute "id"
+    if id_attr? and /^z\d+d\d+$/.test id_attr
+      path_element.removeAttribute "id"
+      stroke_paths.push path_element
+
+  for index, stroke_path of stroke_paths
+    stroke_number = parseInt(index, 10) + 1
+    # Extract starting point from the "d" attribute
+    d_attr = stroke_path.getAttribute "d"
+    output_paths.push d_attr
+
+    match = /M\s*(\d+)\s*(\d+)/.exec d_attr
+    if match
+      x = parseInt(match[1], 10)
+      y = parseInt(match[2], 10)
+    else
+      x = 0
+      y = 0
+    # Adjust position slightly
+    x += 10
+    y -= 10
+    output_texts.push x, y
+  [output_paths, output_texts]
+
+get_compositions_index = ->
+  decompositions = get_full_decompositions()
+  compositions = {}
+  for a in decompositions
+    [char, a] = a
+    for component in a
+      c = compositions[component]
+      if c
+        unless c.includes char
+          c.push char
+          compositions[component] = c
+      else compositions[component] = [char]
+  compositions
+
+update_compositions = ->
+  rows = ([a, b.join("")] for a, b of get_compositions_index())
+  write_csv_file "data/character-composition.csv", rows
+
+update_characters_data = ->
+  character_data = read_csv_file "data/character-strokes-decomposition.csv"
+  compositions_index = get_compositions_index()
+  result = {}
+  for a, i in character_data
+    [char, strokes, decomposition] = a
+    strokes = parseInt strokes, 10
+    codepoint = char.charCodeAt 0
+    path = "data/svgsZhHans/#{codepoint}.svg"
+    if fs.existsSync path
+      [paths, texts] = process_animcjk_svg path
+      svg = paths.join(",") + ";" + texts.join(",")
+    else svg = ""
+    compositions = compositions_index[char] || []
+    result[char] = [strokes, decomposition || "", compositions.join(""), svg]
+  fs.writeFileSync "data/characters.json", JSON.stringify result
+
 run = () ->
+  #update_compositions()
+  update_characters_data()
   #console.log "コ刂".match hanzi_regexp
   #find_component_repetitions()
   #console.log non_hanzi_regexp
   #sort_data()
   #add_new_data()
-  #update_compositions 7000, 9000
   #write_csv_file()
   #find_missing_compositions()
   #get_full_compositions()
@@ -793,14 +896,13 @@ run = () ->
   #fs.writeFileSync("data/extra-components-new.csv", data.join("\n"))
   #filter_common_characters()
   #sort_standard_character_readings()
-  update_syllables_character_count()
+  #update_syllables_character_count()
   #update_character_reading_count()
   #update_character_learning()
   #update_syllables_with_tones_by_reading()
   #console.log "/" + hanzi_unicode_ranges_regexp + "/gu"
   #display_all_characters()
   #update_syllables_by_reading()
-  #update_compositions()
 
 module.exports = {
   update_character_overlap
@@ -811,6 +913,7 @@ module.exports = {
   dsv_mark_to_number
   update_cedict_csv
   update_dictionary
+  update_characters
   update_frequency_pinyin
   update_hsk
   update_hsk_pinyin_translations
