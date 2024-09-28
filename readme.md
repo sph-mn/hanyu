@@ -25,6 +25,7 @@ see under data/
 * [hsk3 word list](https://github.com/krmanik/HSK-3.0-words-list/tree/main)
 * [table of general standard chinese characters](https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters)
 * [character decompositions](https://en.wiktionary.org)
+* [character graphics](https://github.com/skishore/makemeahanzi)
 
 # license
 creative commons share-alike

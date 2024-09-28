@@ -14,6 +14,7 @@
     "node-html-parser": "*",
     "pinyin-split": "*",
     "pinyin-utils": "*",
+    "rbush": "^4.0.1",
     "skeleton-tracing-js": "^1.0.4",
     "svg-path-parser": "^1.1.0",
     "table-scraper": "*",
