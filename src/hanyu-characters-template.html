@@ -14,27 +14,28 @@
      button:active{background-color:#ccc}
      ul,input,body{margin:0}
      #about_link{cursor:pointer;display:inline-block;position:absolute;top:0;right:0;font-size:0.75em}
+     #about_link:hover{text-decoration:underline}
      #about{margin-bottom:20px}
-     #result{display:flex}
-     #result svg{width:200px;height:200px}
-     #result svg path{stroke-width:5;stroke:#fff;fill:none}
-     #result svg xtext{visibility:hidden}
-     #result > xdiv:hover svg text{visibility:visible;fill:grey;font-size:100px}
-     #result svg text{visibility:visible;fill:#aaa;font-size:160px}
+     #result{display:flex;flex-wrap:wrap;font-size:3rem}
+     #result svg{width:16rem;height:16rem}
+     #result svg > path{stroke-width:8;stroke:#fff;fill:none}
+     #result svg > text{visibility:hidden;fill:#aaa}
+     #result > div:hover > svg > text{visibility:visible;fill:grey;font-size:3rem}
+     .hidden{display:none}
      @media (max-width: 700px) {
        html,input,button{font-size:0.75em}
        input{height:30px;margin:4px}
        button{padding:4px;margin:4px}
-       #result{font-size:1.5em}
+       #result{font-size:1.5rem}
      }
     </style>
   </head>
   <body>
     <div class="header">
-      <h1>chinese character lookup</h1><div id="about-link">about</div>
+      <h1>chinese character lookup</h1><div id="about_link">about</div>
       <ul id="about" class="hidden">
         <li>simplified characters only</li>
-        <li>graphics are sourced from <a href="http://gooo.free.fr/animCJK/official/" target="_blank">animCJK</a></li>
+        <li>graphics are sourced from <a href="https://github.com/skishore/makemeahanzi" target="_blank">make me a hanzi</a></li>
       </ul>
     </div>
     <div id="filter">

@@ -8,7 +8,25 @@ read_text_file = (a) -> fs.readFileSync a, "utf8"
 array_from_newline_file = (path) -> read_text_file(path).toString().trim().split("\n")
 canvas_to_png_file = (canvas, path) -> fs.writeFileSync path, canvas.toBuffer "image/png"
 canvas_context_draw_svg_path = (ctx, path) -> canvas_context_draw_svg_commands ctx, SVGPathParser.parseSVG path
-centerline_from_canvas = (canvas) -> extract_longest_path TraceSkeleton.fromCanvas(canvas).polylines
+centerline_from_canvas = (canvas) -> extract_longest_path remove_short_paths(TraceSkeleton.fromCanvas(canvas).polylines, 40)
+flip_vertical = (polyline, height) -> [x, height - y] for [x, y] in polyline
+
+calculate_polyline_length = (polyline) ->
+  length = 0
+  for i in [0...polyline.length - 1]
+    x1 = polyline[i][0]
+    y1 = polyline[i][1]
+    x2 = polyline[i + 1][0]
+    y2 = polyline[i + 1][1]
+    dx = x2 - x1
+    dy = y2 - y1
+    length += Math.sqrt dx * dx + dy * dy
+  length
+
+remove_short_paths = (polylines, limit) ->
+  for a in polylines
+    continue if limit > calculate_polyline_length a
+    a
 
 extract_longest_path = (polylines) ->
   return polylines[0] if 1 == polylines.length
@@ -116,8 +134,7 @@ canvas_context_draw_svg_commands = (ctx, commands) ->
   ctx.fill()
 
 paths_to_svg = (paths, stroke_width, width, height) ->
-  next_gray_shade true
-  paths = ("<path d=\"#{a}\" fill=\"none\" stroke-linecap=\"round\" stroke-width=\"#{stroke_width}\" stroke=\"#{next_gray_shade()}\"/>" for a in paths).join "\n"
+  paths = ("<path d=\"#{a}\" fill=\"none\" stroke-linecap=\"round\" stroke-width=\"#{stroke_width}\"/>" for a in paths).join "\n"
   "<svg width=\"#{width}\" height=\"#{height}\">\n<rect width=\"100%\" height=\"100%\" fill=\"#000\"/>\n#{paths}\n</svg>"
 
 paths_to_svg_file = (path, paths, stroke_width, width, height) -> fs.writeFileSync path, paths_to_svg(paths, stroke_width, width, height)
@@ -142,7 +159,7 @@ scale_by_centroids = (polylines, factor) ->
     [x + dx, y + dy] for [x, y] in polyline
 
 simplify_to_svg = (polylines) ->
-  error = 5.0
+  error = 400.0
   svg_paths = []
   for polyline in polylines
     beziers = fit_curve polyline, error
@@ -162,28 +179,26 @@ simplify_to_svg = (polylines) ->
     svg_paths.push path_data
   svg_paths
 
-flip_vertical = (polyline, height) -> [x, height - y] for [x, y] in polyline
-
-simplify_paths = () ->
-  characters = (JSON.parse a for a in array_from_newline_file("data/svg-graphics.txt"))
+simplify_paths = (start, end) ->
+  characters = (JSON.parse a for a in array_from_newline_file("data/svg-graphics.txt").slice(start, end))
   canvas_width = canvas_height = 1024
   stroke_width = 8
   canvas = createCanvas canvas_width, canvas_height
   ctx = canvas.getContext "2d"
   result = {}
   for character in characters
-    #continue unless "义" == character.character
+    continue unless "㔾" == character.character
     polylines = for path in character.strokes
       ctx.clearRect 0, 0, canvas_width, canvas_height
       canvas_context_draw_svg_path ctx, path
       flip_vertical centerline_from_canvas(canvas), canvas_height
-    character_paths = simplify_to_svg scale_by_centroids(polylines, 0.9)
+    character_paths = simplify_to_svg scale_by_centroids(polylines, 0.85)
     result[character.character] = character_paths
     #median_paths = simplify_to_svg polylines
     #original_median_paths = simplify_to_svg (flip_vertical polyline, canvas_height for polyline in character.medians)
     #paths_to_svg_file "#{character.character}.svg", character_paths, stroke_width, canvas_width, canvas_height
     #paths_to_svg_file "#{character.character}-median.svg", median_paths, stroke_width, canvas_width, canvas_height
     #paths_to_svg_file "#{character.character}-original-median.svg", original_median_paths, stroke_width, canvas_width, canvas_height
-  fs.writeFileSync "svg-graphics-simple.txt", JSON.stringify(result)
+  fs.writeFileSync "tmp/svg-graphics-simple-#{start}-#{end}.json", JSON.stringify(result)
 
-simplify_paths()
+simplify_paths.apply @, process.argv[2..]

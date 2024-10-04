@@ -792,60 +792,6 @@ find_component_repetitions = () ->
       if 1 == delete_duplicates(split_chars(b)).length
         console.log a[0], b
 
-process_animcjk_svg = (input_file, output_file) ->
-  svg_content = fs.readFileSync input_file, "utf8"
-  parser = new DOMParser()
-  svg_doc = parser.parseFromString svg_content, "image/svg+xml"
-  svg_root = svg_doc.documentElement
-
-  remove_unnecessary_elements = (parent) ->
-    child = parent.firstChild
-    while child
-      next_sibling = child.nextSibling
-      if child.nodeType == 1 # Element node
-        node_name = child.nodeName
-        if node_name == "style" or node_name == "defs" or node_name == "clipPath"
-          parent.removeChild child
-        else if node_name == "path" and (child.getAttribute "clip-path" or child.getAttribute "style")
-          parent.removeChild child
-        else remove_unnecessary_elements child
-      else if child.nodeType == 8  # Comment node
-        parent.removeChild child
-      child = next_sibling
-
-  remove_unnecessary_elements svg_doc
-
-  output_paths = []
-  output_texts = []
-
-  stroke_paths = []
-  all_paths = svg_root.getElementsByTagName "path"
-  for i in [0...all_paths.length]
-    path_element = all_paths[i]
-    id_attr = path_element.getAttribute "id"
-    if id_attr? and /^z\d+d\d+$/.test id_attr
-      path_element.removeAttribute "id"
-      stroke_paths.push path_element
-
-  for index, stroke_path of stroke_paths
-    stroke_number = parseInt(index, 10) + 1
-    # Extract starting point from the "d" attribute
-    d_attr = stroke_path.getAttribute "d"
-    output_paths.push d_attr
-
-    match = /M\s*(\d+)\s*(\d+)/.exec d_attr
-    if match
-      x = parseInt(match[1], 10)
-      y = parseInt(match[2], 10)
-    else
-      x = 0
-      y = 0
-    # Adjust position slightly
-    x += 10
-    y -= 10
-    output_texts.push x, y
-  [output_paths, output_texts]
-
 get_compositions_index = ->
   decompositions = get_full_decompositions()
   compositions = {}
@@ -865,6 +811,7 @@ update_compositions = ->
   write_csv_file "data/character-composition.csv", rows
 
 update_characters_data = ->
+  graphics_data = JSON.parse read_text_file "data/svg-graphics-simple.json"
   character_data = read_csv_file "data/character-strokes-decomposition.csv"
   compositions_index = get_compositions_index()
   result = {}
@@ -872,13 +819,9 @@ update_characters_data = ->
     [char, strokes, decomposition] = a
     strokes = parseInt strokes, 10
     codepoint = char.charCodeAt 0
-    path = "data/svgsZhHans/#{codepoint}.svg"
-    if fs.existsSync path
-      [paths, texts] = process_animcjk_svg path
-      svg = paths.join(",") + ";" + texts.join(",")
-    else svg = ""
+    svg_paths = graphics_data[char] || ""
     compositions = compositions_index[char] || []
-    result[char] = [strokes, decomposition || "", compositions.join(""), svg]
+    result[char] = [strokes, decomposition || "", compositions.join(""), svg_paths]
   fs.writeFileSync "data/characters.json", JSON.stringify result
 
 run = () ->

@@ -1,0 +1,38 @@
+#!./node_modules/coffeescript/bin/coffee
+fs = require "fs"
+{spawn} = require "child_process"
+read_text_file = (a) -> fs.readFileSync a, "utf8"
+
+update_results = ->
+  total = read_text_file("data/svg-graphics.txt").split("\n").length
+  max_processes = 28
+  batch_size = Math.ceil total / max_processes
+  active_processes = []
+  call_script = (start, end, callback) ->
+    child = spawn "coffee", ["src/svg-graphics-simple.coffee", start, end]
+    child.stdout.on "data", (data) -> console.log "#{start}/#{end}: #{data.toString().trim()}"
+    child.stderr.on "data", (data) -> console.error "#{start}/#{end}: #{data}"
+    active_processes -= 1
+    process_queue()
+  process_queue = () ->
+    while tasks.length > 0 and active_processes < max_processes
+      {start, end} = tasks.shift()
+      active_processes += 1
+      call_script start, end
+  tasks = for i in [0...(total / batch_size)]
+    start = i * batch_size
+    end = start + batch_size
+    {start, end}
+  process_queue tasks
+
+merge_results = ->
+  files = fs.readdirSync "tmp"
+  result = {}
+  for file in files
+    continue unless file.endsWith ".json"
+    Object.assign result, JSON.parse(read_text_file "tmp/" + file)
+  fs.writeFileSync "data/svg-graphics-simple.json", JSON.stringify(result)
+
+args = process.argv[2..]
+if args.length then merge_results()
+else update_results()
