@@ -2,6 +2,7 @@
 
 # dictionary
 dictionary that sorts results by word frequency and character count. the application is contained in a single file under compiled/ and also works offline. it is also hosted [here](http://sph.mn/other/chinese/hanyu-dictionary.html).
+a similar application for character lookup is hosted [here](http://sph.mn/other/chinese/hanyu-characters.html).
 
 # data files
 see under data/

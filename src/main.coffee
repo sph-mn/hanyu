@@ -27,6 +27,9 @@ median = (a) -> a.slice().sort((a, b) -> a - b)[Math.floor(a.length / 2)]
 sum = (a) -> a.reduce ((a, b) -> a + b), 0
 mean = (a) -> sum(a) / a.length
 object_array_add = (object, key, value) -> if object[key] then object[key].push value else object[key] = [value]
+object_array_add_unique = (object, key, value) ->
+  if object[key] then object[key].push value unless object[key].includes value
+  else object[key] = [value]
 array_intersection = (a, b) -> a.filter (a) -> b.includes(a)
 
 write_csv_file = (path, data) ->
@@ -814,19 +817,23 @@ update_characters_data = ->
   graphics_data = JSON.parse read_text_file "data/svg-graphics-simple.json"
   character_data = read_csv_file "data/character-strokes-decomposition.csv"
   compositions_index = get_compositions_index()
-  result = {}
+  dictionary_lookup = dictionary_index_word_f 0
+  result = []
   for a, i in character_data
     [char, strokes, decomposition] = a
     strokes = parseInt strokes, 10
-    codepoint = char.charCodeAt 0
     svg_paths = graphics_data[char] || ""
     compositions = compositions_index[char] || []
-    result[char] = [strokes, decomposition || "", compositions.join(""), svg_paths]
+    entries = dictionary_lookup char
+    if entries and entries.length
+      entry = entries[0]
+      pinyin = entry[1]
+    else pinyin = ""
+    result.push [char, strokes, pinyin, decomposition || "", compositions.join(""), svg_paths]
   fs.writeFileSync "data/characters.json", JSON.stringify result
 
 run = () ->
   #update_compositions()
-  update_characters_data()
   #console.log "コ刂".match hanzi_regexp
   #find_component_repetitions()
   #console.log non_hanzi_regexp
@@ -857,6 +864,7 @@ module.exports = {
   update_cedict_csv
   update_dictionary
   update_characters
+  update_characters_data
   update_frequency_pinyin
   update_hsk
   update_hsk_pinyin_translations

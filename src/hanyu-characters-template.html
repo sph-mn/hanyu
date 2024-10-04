@@ -6,7 +6,7 @@
     <meta name="viewport" content="initial-scale=1"/>
     <title>chinese character lookup</title>
     <style>
-     html,input,button{font-family:"Noto Sans"; font-size:24px}
+     html,input,button{font-family:"Noto Sans";font-size:24px}
      body{background-color:#000;color:#ddd}
      a{color:#ddd}
      h1{display:inline-block;margin:0;font-size:1em}
@@ -16,11 +16,17 @@
      #about_link{cursor:pointer;display:inline-block;position:absolute;top:0;right:0;font-size:0.75em}
      #about_link:hover{text-decoration:underline}
      #about{margin-bottom:20px}
-     #result{display:flex;flex-wrap:wrap;font-size:3rem}
+     #result{display:flex;flex-wrap:wrap}
      #result svg{width:16rem;height:16rem}
      #result svg > path{stroke-width:8;stroke:#fff;fill:none}
      #result svg > text{visibility:hidden;fill:#aaa}
-     #result > div:hover > svg > text{visibility:visible;fill:grey;font-size:3rem}
+     #result > div.svg > svg ~ *{text-align:center;visibility:hidden}
+     #result > div.nosvg > .char{font-size: 12rem;font-weight:lighter}
+     #result > div.nosvg > .char ~ *{text-align:center;visibility:hidden}
+     #result > div .pinyin{color:#888}
+     #result > div.svg:hover svg > text{visibility:visible;fill:grey;font-size:3rem}
+     #result > div.svg:hover > svg ~ *{visibility:visible}
+     #result > div.nosvg:hover > .char ~ *{visibility:visible}
      .hidden{display:none}
      @media (max-width: 700px) {
        html,input,button{font-size:0.75em}
@@ -35,7 +41,11 @@
       <h1>chinese character lookup</h1><div id="about_link">about</div>
       <ul id="about" class="hidden">
         <li>simplified characters only</li>
+        <li>supports search by character and pinyin, numeric tone marks only</li>
+        <li>comma separates multiple queries</li>
+        <li>the containing and contained checkboxes have no effect for latin character values</li>
         <li>graphics are sourced from <a href="https://github.com/skishore/makemeahanzi" target="_blank">make me a hanzi</a></li>
+        <li><a href="https://github.com/sph-mn/hanyu" target="_blank">project homepage</a></li>
       </ul>
     </div>
     <div id="filter">

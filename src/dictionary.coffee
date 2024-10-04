@@ -13,7 +13,7 @@ class app_class
     return unless values.length
     matches = []
     regexps = values.map((value) ->
-      if /[a-z]/.test(value)
+      if /[a-z0-9]/.test(value)
         if dom.search_translations.checked
           if value.length > 2
             regexp = new RegExp value.replace(/u/g, "(u|ü)")
@@ -23,12 +23,10 @@ class app_class
           regexp = new RegExp("\\b" + value)
           return (entry) ->
             length_limit >= entry[1].length and (regexp.test(entry[1]) or regexp.test(entry[1].replace(/[0-4]/g, "")))
-
       else if !dom.search_translations.checked
         regexp = undefined
-        # hanzi split
         if dom.search_split.checked
-          characters = value.replace(/[^\u4E00-\u9FA5]/ig, "").split ""
+          characters = Array.from value.replace(/[^\u4E00-\u9FA5]/ig, "")
           words = []
           i = 0
           while i < characters.length
