@@ -1,3 +1,0 @@
-#!./node_modules/coffeescript/bin/coffee
-main = require "../src/main"
-main.update_characters()

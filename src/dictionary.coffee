@@ -1,17 +1,189 @@
 dom = {}; (dom[a.id] = a for a in document.querySelectorAll("[id]"))
 
-class app_class
+debounce = (func, wait, immediate = false) ->
+  timeout = null
+  ->
+    context = this
+    args = arguments
+    later = ->
+      timeout = null
+      func.apply(context, args) unless immediate
+    call_now = immediate and not timeout
+    clearTimeout(timeout)
+    timeout = setTimeout(later, wait)
+    func.apply(context, args) if call_now
+
+class trie_node_class
+  constructor: ->
+    @children = {}
+    @is_end_of_word = false
+
+class trie_class
+  constructor: -> @root = new trie_node_class()
+  insert: (word) ->
+    node = @root
+    for char in word
+      node = node.children[char] ?= new trie_node_class()
+    node.is_end_of_word = true
+  search: (word) ->
+    node = @root
+    for char in word
+      return false unless node.children[char]?
+      node = node.children[char]
+    node.is_end_of_word
+
+class character_search_class
+  character_data: __character_data__
+  default_matches_limit: 20
+  is_syllable: (a) -> @syllable_trie.search a
+  reset: ->
+    dom.character_input.value = ""
+    dom.character_results.innerHTML = ""
+  make_svg: (svg_paths) ->
+    result = '<svg viewbox="0 0 1024 1024">'
+    result += "<path d=\"#{a}\"/>" for a in svg_paths
+    # create text elements while ensuring that they do not overlap with each other
+    min_distance = 5
+    placed_positions = []
+    for path, index in svg_paths
+      match = /M\s*(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/.exec path
+      continue unless match
+      x = parseFloat match[1]
+      y = parseFloat match[2]
+      x += 3
+      y -= 3
+      is_overlapping = (current_x, current_y) ->
+        for pos in placed_positions
+          dx = current_x - pos[0]
+          dy = current_y - pos[1]
+          distance = Math.sqrt dx * dx + dy * dy
+          return true if distance < min_distance
+        false
+      original_y = y
+      offset_step = 10  # pixels to move vertically each attempt
+      max_attempts = 10
+      attempt = 0
+      while is_overlapping(x, y) and attempt < max_attempts
+        y += offset_step  # move the text down by offset_step pixels
+        attempt += 1
+      continue if is_overlapping x, y
+      result += "<text x=\"#{x}\" y=\"#{y}\">#{index + 1}</text>"
+      placed_positions.push [x, y]
+    result + "</svg>"
+  filter: =>
+    dom.character_results.innerHTML = ""
+    values = dom.character_input.value.split(",").map (a) -> a.trim()
+    latin_values = []
+    hanzi_values = []
+    for a in values
+      continue unless 0 < a.length
+      if /[a-z0-9]/.test a
+        if 1 < a.length && @is_syllable a.replace(/[0-9]$/, "")
+          latin_values.push a
+      else
+        if 1 < a.length then hanzi_values = hanzi_values.concat Array.from a
+        else hanzi_values.push a
+    return unless latin_values.length or hanzi_values.length
+    console.log latin_values, hanzi_values
+    matches = []
+    for value in latin_values
+      for data in @character_data
+        matches.push data if data[2].startsWith value
+    for value in hanzi_values
+      data = @character_index[value]
+      continue unless data
+      [char, stroke_count, pinyin, compositions, decompositions, svg] = data
+      unless dom.search_containing.checked || dom.search_contained.checked
+        matches.push data
+        continue
+      if dom.search_containing.checked
+        for decomposition in Array.from decompositions
+          data = @character_index[decomposition]
+          matches.push data if data
+      if dom.search_contained.checked
+        for composition in Array.from compositions
+          data = @character_index[composition]
+          matches.push data if data
+    html = ""
+    if matches.length
+      for data in matches.slice 0, @matches_limit
+        [char, stroke_count, pinyin, compositions, decompositions, svg] = data
+        if svg
+          graphic = @make_svg svg
+          html += "<div>#{graphic}<div class=\"text_char\">#{char}</div><div class=\"pinyin\">#{pinyin}</div></div>"
+        else
+          html += "<div><div class=\"text-char nosvg\">#{char}</div><div class=\"stroke_count\">#{stroke_count}</div><div class=\"pinyin\">#{pinyin}</div></div>"
+      if @matches_limit < matches.length
+        html += "<div id=\"character_show_remaining\" class=\"link\">show #{matches.length - @matches_limit} more</div>"
+      @matches_limit = @default_matches_limit
+    dom.character_results.innerHTML = html || "no character results"
+  constructor: (app) ->
+    @matches_limit = @default_matches_limit
+    filter_debounced = debounce @filter, 250
+    dom.character_reset.addEventListener "click", @reset
+    dom.character_input.addEventListener "keyup", filter_debounced
+    dom.character_input.addEventListener "change", @filter
+    dom.search_contained.addEventListener "change", @filter
+    dom.search_containing.addEventListener "change", @filter
+    param_input = app.url_params.get "character_input"
+    dom.character_input.value = param_input if param_input
+    @character_index = {}
+    @character_index[data[0]] = data for data in @character_data
+    dom.character_results.addEventListener "click", (event) =>
+      # make a word search when clicking on character
+      target = event.target
+      if "character_show_remaining" == target.id
+        @matches_limit = 1024
+        @filter()
+        return
+      char = ""
+      if target.classList.contains "nosvg" then char = target.innerHTML
+      else
+        target = target.closest "svg"
+        char = target.nextSibling.innerHTML if target
+      unless !char || dom.word_input.value.includes char
+        dom.word_input.value = char
+        app.word_search.filter()
+    syllables = [
+      "a","ai","an","ang","ao","ba","bai","ban","bang","bao","bei","ben","beng","bi","bian","biang","biao","bie","bin","bing","bo","bu",
+      "ca","cai","can","cang","cao","ce","cei","cen","ceng","cha","chai","chan","chang","chao","che","chen","cheng","chi","chong",
+      "chou","chu","chua","chuai","chuan","chuang","chui","chun","chuo","ci","cong","cou","cu","cuan","cui","cun","cuo","da","dai","dan",
+      "dang","dao","de","dei","den","deng","di","dian","diao","die","ding","diu","dong","dou","du","duan","dui","dun","duo","e","ei","en","eng","er",
+      "fa","fan","fang","fei","fen","feng","fo","fou","fu","ga","gai","gan","gang","gao","ge","gei","gen","geng","gong","gou","gu","gua","guai",
+      "guan","guang","gui","gun","guo","ha","hai","han","hang","hao","he","hei","hen","heng","hong","hou","hu","hua","huai","huan","huang",
+      "hui","hun","huo","ji","jia","jian","jiang","jiao","jie","jin","jing","jiong","jiu","ju","juan","jue","jun","ka","kai","kan","kang",
+      "kao","ke","kei","ken","keng","kong","kou","ku","kua","kuai","kuan","kuang","kui","kun","kuo","la","lai","lan","lang","lao","le","lei","leng",
+      "li","lia","lian","liang","liao","lie","lin","ling","liu","lo","long","lou","lu","luan","lun","luo","lü","lüe","ma","mai","man","mang","mao",
+      "me","mei","men","meng","mi","mian","miao","mie","min","ming","miu","mo","mou","mu","na","nai","nan","nang","nao","ne","nei","nen","neng","ni",
+      "nian","niang","niao","nie","nin","ning","niu","nong","nou","nu","nuan","nuo","nü","nüe","o","ou","pa","pai","pan","pang","pao","pei","pen","peng",
+      "pi","pian","piao","pie","pin","ping","po","pou","pu","qi","qia","qian","qiang","qiao","qie","qin","qing","qiong","qiu","qu","quan","que","qun",
+      "ran","rang","rao","re","ren","reng","ri","rong","rou","ru","rua","ruan","rui","run","ruo","sa","sai","san","sang","sao","se","sen","seng",
+      "sha","shai","shan","shang","shao","she","shei","shen","sheng","shi","shou","shu","shua","shuai","shuan","shuang","shui","shun",
+      "shuo","si","song","sou","su","suan","sui","sun","suo","ta","tai","tan","tang","tao","te","teng","ti","tian","tiao","tie","ting","tong","tou",
+      "tu","tuan","tui","tun","tuo","wa","wai","wan","wang","wei","wen","weng","wo","wu","xi","xia","xian","xiang","xiao","xie","xin","xing","xiong",
+      "xiu","xu","xuan","xue","xun","ya","yan","yang","yao","ye","yi","yin","ying","yong","you","yu","yuan","yue","yun","za","zai","zan","zang",
+      "zao","ze","zei","zen","zeng","zha","zhai","zhan","zhang","zhao","zhe","zhei","zhen","zheng","zhi","zhong","zhou","zhu","zhua","zhuai",
+      "zhuan","zhuang","zhui","zhun","zhuo","zi","zong","zou","zu","zuan","zui","zun","zuo"
+    ]
+    @syllable_trie = new trie_class()
+    @syllable_trie.insert a for a in syllables
+    @filter()
+
+class word_search_class
   word_data: __word_data__
   result_limit: 150
-  make_result_line: (data) ->
-    glossary = '"' + data[2].join('; ').replace(/\"/g, '\'') + '"'
-    "<span>#{data[0]}</span> #{data[1]} #{glossary}</br>"
+  make_result_html: (data) ->
+    glossary = data[2].join("; ").replace /\"/g, "'"
+    attributes = (if 1 == data[0].length then " class=\"single\"" else "")
+    "<div><div#{attributes}>#{data[0]}</div> #{data[1]} \"#{glossary}\"</div>"
+  reset: ->
+    dom.word_input.value = ""
+    dom.word_results.innerHTML = ""
   filter: =>
-    dom.results.innerHTML = ""
-    values = dom.input.value.split(",").map (a) -> a.trim()
+    dom.word_results.innerHTML = ""
+    values = dom.word_input.value.split(",").map (a) -> a.trim()
     values = values.filter (a) -> a.length > 0
     return unless values.length
-    matches = []
     regexps = values.map((value) ->
       if /[a-z0-9]/.test(value)
         if dom.search_translations.checked
@@ -39,20 +211,39 @@ class app_class
         else regexp = new RegExp value
         (entry) -> regexp.test entry[0]
     ).filter((a) -> a)
+    html = ""
+    matches_count = 0
     for entry in @word_data
-      break unless matches.length < @result_limit
+      break unless matches_count < @result_limit
       for matcher in regexps
-        matches.push @make_result_line entry if matcher entry
-    dom.results.innerHTML = if 0 == matches.length then "no word results" else matches.join ""
-  reset: ->
-    dom.input.value = ""
-    dom.results.innerHTML = ""
-  constructor: ->
-    dom.reset.addEventListener "click", @reset
-    dom.input.addEventListener "keyup", @filter
-    dom.input.addEventListener "change", @filter
+        if matcher entry
+          html += @make_result_html entry
+          matches_count += 1
+    dom.word_results.innerHTML = html || "no word results"
+  constructor: (app) ->
+    param_input = app.url_params.get "word_input"
+    dom.character_input.value = param_input if param_input
+    filter_debounced = debounce @filter, 150
+    dom.word_reset.addEventListener "click", @reset
+    dom.word_input.addEventListener "keyup", filter_debounced
+    dom.word_input.addEventListener "change", @filter
     dom.search_translations.addEventListener "change", @filter
     dom.search_split.addEventListener "change", @filter
+    dom.word_results.addEventListener "click", (event) ->
+      # make a character search when clicking on single character words
+      target = event.target
+      if target.classList.contains "single"
+        char = target.innerHTML
+        unless dom.character_input.value.includes char
+          dom.character_input.value = char
+          app.character_search.filter()
+    @filter
+
+class app_class
+  constructor: ->
     dom.about_link.addEventListener "click", -> dom.about.classList.toggle "hidden"
+    @url_params = new URLSearchParams window.location.search
+    @character_search = new character_search_class @
+    @word_search = new word_search_class @
 
 new app_class()

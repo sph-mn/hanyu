@@ -331,22 +331,14 @@ dictionary_cedict_to_json = (data) ->
 update_dictionary = () ->
   word_data = read_csv_file "data/cedict.csv"
   word_data = dictionary_cedict_to_json word_data
+  character_data = read_text_file "data/characters.json"
   script = read_text_file "src/dictionary.coffee"
   script = coffee.compile(script, bare: true).trim()
-  script = replace_placeholders script, {word_data}
+  script = replace_placeholders script, {word_data, character_data}
   font = read_text_file "src/NotoSansSC-Light.ttf.base64"
   html = read_text_file "src/hanyu-dictionary-template.html"
   html = replace_placeholders html, {font, script}
   fs.writeFileSync "compiled/hanyu-dictionary.html", html
-
-update_characters = () ->
-  character_data = read_text_file "data/characters.json"
-  script = read_text_file "src/characters.coffee"
-  script = coffee.compile(script, bare: true).trim()
-  script = replace_placeholders script, {character_data}
-  html = read_text_file "src/hanyu-characters-template.html"
-  html = replace_placeholders html, {script}
-  fs.writeFileSync "compiled/hanyu-characters.html", html
 
 clean_frequency_list = () ->
   frequency_array = array_from_newline_file "data/frequency.csv"
@@ -863,7 +855,6 @@ module.exports = {
   dsv_mark_to_number
   update_cedict_csv
   update_dictionary
-  update_characters
   update_characters_data
   update_frequency_pinyin
   update_hsk
