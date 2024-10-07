@@ -6,8 +6,9 @@
     <meta name="viewport" content="initial-scale=1"/>
     <title>chinese dictionary</title>
     <style>
+     html,input,button{font-family:"Noto Sans";font-size:22px}
      h1{display:inline-block;margin:0;font-size:1em}
-     html,input,button{font-family:"Noto Sans"; font-size:24px}
+     input{max-width:10ch}
      input, button{border:0;background-color:#eee;vertical-align:middle}
      label > input[type=checkbox]{margin-left:4px}
      body{background-color:#000;color:#ddd}
@@ -15,38 +16,36 @@
      ul,input,body{margin:0}
      button:active{background-color:#ccc}
      .hidden{display:none}
-     #about_link{cursor:pointer;display:inline-block;margin-left:20px;position:absolute;top:0;right:0;font-size:0.75em}
-     #about_link:hover{text-decoration:underline}
+     #about_link{text-decoration:underline;cursor:pointer;display:inline-block;margin-left:20px;position:absolute;top:0;right:0;font-size:0.75em}
+     #about_link:hover{text-decoration:none}
      #about{margin-bottom:20px}
      #word_results{margin-top:10px}
      #word_results > div > :nth-child(1){font-size:1.5em;font-weight:100;font-family:"Noto Sans SC";display:inline-block}
      #word_results > div > .single:nth-child(1){cursor:pointer}
      #filter label{white-space:nowrap}
-     #filter{display:flex;flex-wrap:wrap;row-gap:20px;column-gap:10px}
+     #filter{display:flex;flex-wrap:wrap}
      #character_results{display:flex;flex-wrap:wrap;align-items:center}
-     #character_results > * > *{display:inline-block}
-     #character_results > * > svg{width:16rem;height:16rem}
+     #character_results > * > svg{width:8rem;height:8rem}
      #character_results > * > svg > path{stroke-width:8;stroke:#fff;fill:none}
-     #character_results > * > svg > text{visibility:hidden;fill:#aaa}
-     #character_results > * > svg ~ *{text-align:center;visibility:hidden;position:relative;top:-6rem}
-     #character_results > :hover > svg > text{visibility:visible;fill:grey;font-size:3rem}
-     #character_results > :hover > svg ~ *{visibility:visible}
-     #character_results > * > .text-char.nosvg{font-size: 12rem;font-weight:lighter}
-     #character_results > * > .text-char.nosvg ~ *{text-align:center;visibility:hidden}
-     #character_results > :hover > .text-char.nosvg ~ *{visibility:visible}
+     #character_results > * > svg > text{fill:#aaa;font-size:5rem}
+     #character_results > * > svg ~ *{text-align:center;display:none;position:relative}
+     #character_results > :hover > svg ~ *{display:block}
+     #character_results > * > .text_char.nosvg{font-size:6rem;font-weight:lighter}
+     #character_results > * > .text_char:hover{cursor:pointer}
+     #character_results > * > .nosvg ~ *{position:relative;text-align:center}
+     #character_results > * > .nosvg + .stroke_count ~ *{display:none}
+     #character_results > :hover > .text_char.nosvg ~ *{display:block}
      #character_results > * > .pinyin{color:#888;margin-left:1ch}
+     .link{cursor:pointer;text-decoration:underline}
+     .link:hover{text-decoration:none}
      @media (max-width: 700px) {
-       html,input,button{font-size:0.75em}
-       input{height:30px;margin:4px}
-       button{padding:4px;margin:4px}
-       body > *{margin-top:0}
-       #word_results{font-size:1.5em;margin-top:10px}
+       html{font-size:16px}
      }
     </style>
   </head>
   <body>
     <div class="header">
-      <h1>chinese to english dictionary and character stroke order lookup</h1>
+      <h1>chinese-english dictionary</h1>
       <div id="about_link">about</div>
       <div id="about" class="hidden">
           word search
@@ -78,12 +77,12 @@
     </div>
     <div id="filter">
       <div>
-        <button id="character_reset">clear</button> <input id="character_input" placeholder="character search..."/>
+        <button id="character_reset">clear</button> <input id="character_input" placeholder="character..."/>
         <label title="show characters that contain the given characters"><input id="search_containing" type="checkbox"/>containing</label>
         <label title="show characters that are contained in the given characters"><input id="search_contained" type="checkbox"/>contained</label>
       </div>
       <div>
-        <button id="word_reset">clear</button> <input id="word_input" placeholder="word search..."/>
+        <button id="word_reset">clear</button> <input id="word_input" placeholder="word..."/>
         <label title="search inside translations for latin character input"><input id="search_translations" type="checkbox"/>translations</label>
         <label title="search partial matches for chinese character input"><input id="search_split" type="checkbox"/>split</label>
       </div>

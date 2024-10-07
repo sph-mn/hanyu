@@ -3,15 +3,36 @@ dom = {}; (dom[a.id] = a for a in document.querySelectorAll("[id]"))
 debounce = (func, wait, immediate = false) ->
   timeout = null
   ->
-    context = this
+    context = @
     args = arguments
     later = ->
       timeout = null
-      func.apply(context, args) unless immediate
+      func.apply context, args unless immediate
     call_now = immediate and not timeout
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-    func.apply(context, args) if call_now
+    clearTimeout timeout
+    timeout = setTimeout later, wait
+    func.apply context, args if call_now
+
+hanzi_unicode_ranges = [
+  ["30A0", "30FF"]  # katakana used for some components
+  ["2E80", "2EFF"]
+  ["31C0", "31EF"]
+  ["4E00", "9FFF"]
+  ["3400", "4DBF"]
+  ["20000", "2A6DF"]
+  ["2A700", "2B73F"]
+  ["2B740", "2B81F"]
+  ["2B820", "2CEAF"]
+  ["2CEB0", "2EBEF"]
+  ["30000", "3134F"]
+  ["31350", "323AF"]
+  ["2EBF0", "2EE5F"]
+]
+
+unicode_ranges_pattern = (a, is_reject) -> "[" + (if is_reject then "^" else "") + a.map((a) -> a.map((b) -> "\\u{#{b}}").join("-")).join("") + "]"
+unicode_ranges_regexp = (a, is_reject, regexp_flags) -> new RegExp unicode_ranges_pattern(a, is_reject), "u" + (regexp_flags || "")
+non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
+pinyin_regexp = /([a-z]+)([0-5])?$/
 
 class trie_node_class
   constructor: ->
@@ -77,18 +98,21 @@ class character_search_class
     hanzi_values = []
     for a in values
       continue unless 0 < a.length
-      if /[a-z0-9]/.test a
-        if 1 < a.length && @is_syllable a.replace(/[0-9]$/, "")
-          latin_values.push a
+      if non_hanzi_regexp.test a
+        continue unless 1 < a.length
+        syllable = a.match pinyin_regexp
+        continue unless syllable
+        [_, syllable, tone] = syllable
+        if @is_syllable syllable
+          latin_values.push new RegExp syllable + (tone || "[0-5]")
       else
         if 1 < a.length then hanzi_values = hanzi_values.concat Array.from a
         else hanzi_values.push a
     return unless latin_values.length or hanzi_values.length
-    console.log latin_values, hanzi_values
     matches = []
     for value in latin_values
       for data in @character_data
-        matches.push data if data[2].startsWith value
+        matches.push data if value.test data[2]
     for value in hanzi_values
       data = @character_index[value]
       continue unless data
@@ -112,7 +136,7 @@ class character_search_class
           graphic = @make_svg svg
           html += "<div>#{graphic}<div class=\"text_char\">#{char}</div><div class=\"pinyin\">#{pinyin}</div></div>"
         else
-          html += "<div><div class=\"text-char nosvg\">#{char}</div><div class=\"stroke_count\">#{stroke_count}</div><div class=\"pinyin\">#{pinyin}</div></div>"
+          html += "<div><div class=\"text_char nosvg\">#{char}</div><div class=\"stroke_count\">#{stroke_count}</div><div class=\"pinyin\">#{pinyin}</div></div>"
       if @matches_limit < matches.length
         html += "<div id=\"character_show_remaining\" class=\"link\">show #{matches.length - @matches_limit} more</div>"
       @matches_limit = @default_matches_limit
@@ -136,12 +160,9 @@ class character_search_class
         @matches_limit = 1024
         @filter()
         return
-      char = ""
-      if target.classList.contains "nosvg" then char = target.innerHTML
-      else
-        target = target.closest "svg"
-        char = target.nextSibling.innerHTML if target
-      unless !char || dom.word_input.value.includes char
+      if target.classList.contains("text_char") && !target.classList.contains("nosvg")
+        char = target.innerHTML
+        return if dom.word_input.value.includes char
         dom.word_input.value = char
         app.word_search.filter()
     syllables = [

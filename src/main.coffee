@@ -70,7 +70,6 @@ array_deduplicate_key = (a, get_key) ->
     else
       existing[key] = true
       true
-
 # https://en.wiktionary.org/wiki/Appendix:Unicode
 hanzi_unicode_ranges = [
   ["30A0", "30FF"]  # katakana used for some components

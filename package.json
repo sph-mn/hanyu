@@ -4,6 +4,7 @@
   "license": "cc-by-sa",
   "dependencies": {
     "canvas": "^2.11.2",
+    "cheerio": "^1.0.0",
     "coffeescript": "*",
     "csv": "*",
     "fit-curve": "^0.2.0",
