@@ -17,11 +17,12 @@ flip_vertical = (polyline, height) -> [x, height - y] for [x, y] in polyline
 
 canvas_context_draw_svg_commands = (ctx, commands) ->
   ctx.beginPath()
-  for command in commands
-    switch command.code
-      when "M" then ctx.moveTo command.x, command.y
-      when "L" then ctx.lineTo command.x, command.y
-      when "Q" then ctx.quadraticCurveTo command.x1, command.y1, command.x, command.y
+  for a in commands
+    switch a.code
+      when "M" then ctx.moveTo a.x, a.y
+      when "L" then ctx.lineTo a.x, a.y
+      when "Q" then ctx.quadraticCurveTo a.x1, a.y1, a.x, a.y
+      when "C" then ctx.bezierCurveTo a.x1, a.y1, a.x2, a.y2, a.x, a.y
       when "Z" then ctx.closePath()
   ctx.fillStyle = "#fff"
   ctx.fill()
@@ -221,6 +222,25 @@ ensure_direction = (polyline, original_direction) ->
   delta = Math.max -1, Math.min(1, dot_product)
   if 0 > delta then polyline.reverse() else polyline
 
+center_polylines = (polylines, canvas_width, canvas_height) ->
+  total_x = 0
+  total_y = 0
+  total_points = 0
+  for polyline in polylines
+    for point in polyline
+      total_x += point[0]
+      total_y += point[1]
+      total_points += 1
+  centroid_x = total_x / total_points
+  centroid_y = total_y / total_points
+  translate_x = canvas_width / 2 - centroid_x
+  translate_y = canvas_height / 2 - centroid_y
+  for polyline in polylines
+    for point in polyline
+      point[0] += translate_x
+      point[1] += translate_y
+  null
+
 simplify = (start, end) ->
   svg_graphics = JSON.parse(read_text_file("data/svg-graphics.json")).slice(start, end)
   canvas_width = canvas_height = 1024
@@ -229,15 +249,17 @@ simplify = (start, end) ->
   ctx = canvas.getContext "2d"
   result = {}
   for [char, paths, directions] in svg_graphics
-    continue unless "价" == char
+    #continue unless "价" == char
     polylines = for path, i in paths
       ctx.clearRect 0, 0, canvas_width, canvas_height
       canvas_context_draw_svg_path ctx, path
       ensure_direction centerline_from_canvas(canvas), directions[i]
-    strokes = simplify_to_svg scale_by_centroids(polylines, 0.85)
+    polylines = scale_by_centroids(polylines, 0.88)
+    center_polylines polylines, canvas_width, canvas_height
+    strokes = simplify_to_svg polylines
     result[char] = strokes
-    paths_to_svg_file "#{char}.svg", strokes, stroke_width, canvas_width, canvas_height
-  #fs.writeFileSync "tmp/svg-graphics-simple-#{start}-#{end}.json", JSON.stringify(result)
+    #paths_to_svg_file "tmp/#{char}.svg", strokes, stroke_width, canvas_width, canvas_height
+  fs.writeFileSync "tmp/svg-graphics-simple-#{start}-#{end}.json", JSON.stringify(result)
 
 simplify_parallel = () ->
   total = read_text_file("data/svg-graphics.txt").split("\n").length
