@@ -14,18 +14,18 @@ see under data/
 * hsk.csv and hsk-pinyin-translations.csv
 * character-learning.csv: characters sorted by frequency, with readings and number of words with this reading, false pronunciations for guessing and syllable commonness among all characters, compositions, character meaning, and example words. suitable as the basis for an anki deck
 * pinyin-learning.csv: a reverse version of character-learning that maps word pinyin and choices to word and translation
-* character-overlap.csv: characters and characters with the most shared strokes in any order
 * characters-repeated-components.csv: characters that consist of a repetition of another character
 * hanzi.apkg, pinyin.apkg: anki decks based on character-learning.csv and pinyin-learning.csv
+* svg-graphics.json: contains svg for the individual strokes as simple lines and the directions of strokes
 * ... and more
 
 # data sources
-* [word frequency](https://github.com/ernop/anki-chinese-word-frequency/blob/master/internet-zh.num)
+* [character decompositions](https://en.wiktionary.org)
+* [character graphics](https://github.com/parsimonhi/animCJK)
 * [chinese to english translations](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)
 * [hsk3 word list](https://github.com/krmanik/HSK-3.0-words-list/tree/main)
 * [table of general standard chinese characters](https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters)
-* [character decompositions](https://en.wiktionary.org)
-* [character graphics](https://github.com/skishore/makemeahanzi)
+* [word frequency](https://github.com/ernop/anki-chinese-word-frequency/blob/master/internet-zh.num)
 
 # license
 creative commons share-alike
