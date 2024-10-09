@@ -16,7 +16,9 @@ see under data/
 * pinyin-learning.csv: a reverse version of character-learning that maps word pinyin and choices to word and translation
 * characters-repeated-components.csv: characters that consist of a repetition of another character
 * hanzi.apkg, pinyin.apkg: anki decks based on character-learning.csv and pinyin-learning.csv
-* svg-graphics.json: contains svg for the individual strokes as simple lines and the directions of strokes
+* svg-graphics-simple.json: contains svg for the individual strokes as simple lines and the directions of strokes
+  * field 1: paths ordered by stroke order
+  * field 2: direction vectors for each stroke
 * ... and more
 
 # data sources

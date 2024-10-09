@@ -58,6 +58,7 @@ remove_short_paths = (polylines, limit) ->
     a
 
 extract_longest_path = (polylines) ->
+  return polylines unless polylines
   return polylines[0] if 1 == polylines.length
   # Step 1: Build the graph
   nodeMap = new Map() # Map from point string to node ID
@@ -241,19 +242,29 @@ center_polylines = (polylines, canvas_width, canvas_height) ->
       point[1] += translate_y
   null
 
+read_svg_graphics_json = () -> JSON.parse read_text_file "data/svg-graphics.json"
+
 simplify = (start, end) ->
-  svg_graphics = JSON.parse(read_text_file("data/svg-graphics.json")).slice(start, end)
+  svg_graphics = read_svg_graphics_json().slice start, end
   canvas_width = canvas_height = 1024
   stroke_width = 8
   canvas = createCanvas canvas_width, canvas_height
   ctx = canvas.getContext "2d"
   result = {}
-  for [char, paths, directions] in svg_graphics
+  for [char, paths, directions], i in svg_graphics
+    console.log "#{i}/#{end - start}"
+    skip_char = false
     #continue unless "价" == char
     polylines = for path, i in paths
       ctx.clearRect 0, 0, canvas_width, canvas_height
       canvas_context_draw_svg_path ctx, path
-      ensure_direction centerline_from_canvas(canvas), directions[i]
+      centerline = centerline_from_canvas canvas
+      unless centerline
+        skip_char = true
+        console.log "centerline extraction failed for #{char}"
+        break
+      ensure_direction centerline, directions[i]
+    continue if skip_char
     polylines = scale_by_centroids(polylines, 0.88)
     center_polylines polylines, canvas_width, canvas_height
     strokes = simplify_to_svg polylines
@@ -262,14 +273,14 @@ simplify = (start, end) ->
   fs.writeFileSync "tmp/svg-graphics-simple-#{start}-#{end}.json", JSON.stringify(result)
 
 simplify_parallel = () ->
-  total = read_text_file("data/svg-graphics.txt").split("\n").length
-  max_processes = 28
+  total = read_svg_graphics_json().length
+  max_processes = 20
   batch_size = Math.ceil total / max_processes
   active_processes = []
   call_script = (start, end, callback) ->
     child = spawn "exe/update-svg-graphics", ["simplify", start, end]
-    child.stdout.on "data", (data) -> console.log "#{start}/#{end}: #{data.toString().trim()}"
-    child.stderr.on "data", (data) -> console.error "#{start}/#{end}: #{data}"
+    child.stdout.on "data", (data) -> console.log "#{start}-#{end}: #{data.toString().trim()}"
+    child.stderr.on "data", (data) -> console.error "#{start}-#{end}: #{data}"
     active_processes -= 1
     process_queue()
   process_queue = () ->

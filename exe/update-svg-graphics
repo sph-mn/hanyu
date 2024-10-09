@@ -8,4 +8,4 @@ switch command
   when "simplify" then svg_graphics.simplify start && parseInt(start), end && parseInt(end)
   when "simplify_parallel" then svg_graphics.simplify_parallel()
   when "merge" then svg_graphics.merge()
-  else console.log "usage: command [command_arguments ...]\ncommand: extract/simplify/merge"
+  else console.log "usage: command [command_arguments ...]\ncommand: extract/simplify/simplify_parallel/merge"
