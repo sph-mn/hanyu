@@ -58,8 +58,8 @@ remove_short_paths = (polylines, limit) ->
     a
 
 extract_longest_path = (polylines) ->
-  return polylines unless polylines
-  return polylines[0] if 1 == polylines.length
+  if 2 > polylines.length
+    return (if polylines.length then polylines[0] else polylines)
   # Step 1: Build the graph
   nodeMap = new Map() # Map from point string to node ID
   nodeId = 0
@@ -259,7 +259,7 @@ simplify = (start, end) ->
       ctx.clearRect 0, 0, canvas_width, canvas_height
       canvas_context_draw_svg_path ctx, path
       centerline = centerline_from_canvas canvas
-      unless centerline
+      unless centerline.length
         skip_char = true
         console.log "centerline extraction failed for #{char}"
         break
@@ -272,8 +272,9 @@ simplify = (start, end) ->
     #paths_to_svg_file "tmp/#{char}.svg", strokes, stroke_width, canvas_width, canvas_height
   fs.writeFileSync "tmp/svg-graphics-simple-#{start}-#{end}.json", JSON.stringify(result)
 
-simplify_parallel = () ->
-  total = read_svg_graphics_json().length
+simplify_parallel = (start_offset, end_offset) ->
+  if end_offset then total = read_svg_graphics_json().slice(start_offset, end_offset).length
+  else total = read_svg_graphics_json().length
   max_processes = 20
   batch_size = Math.ceil total / max_processes
   active_processes = []
@@ -281,6 +282,7 @@ simplify_parallel = () ->
     child = spawn "exe/update-svg-graphics", ["simplify", start, end]
     child.stdout.on "data", (data) -> console.log "#{start}-#{end}: #{data.toString().trim()}"
     child.stderr.on "data", (data) -> console.error "#{start}-#{end}: #{data}"
+    console.log start, end
     active_processes -= 1
     process_queue()
   process_queue = () ->
@@ -289,7 +291,7 @@ simplify_parallel = () ->
       active_processes += 1
       call_script start, end
   tasks = for i in [0...(total / batch_size)]
-    start = i * batch_size
+    start = start_offset + i * batch_size
     end = start + batch_size
     {start, end}
   process_queue tasks

@@ -280,7 +280,7 @@ sort_by_frequency = (frequency_index, word_key, pinyin_key, data) ->
       fa - fb
 
 sort_by_character_frequency = (frequency_index, character_key, data) ->
-  data = data.sort (a, b) ->
+  data.sort (a, b) ->
     fa = frequency_index[a[character_key]]
     fb = frequency_index[b[character_key]]
     if fa is undefined and fb is undefined
@@ -809,6 +809,8 @@ update_characters_data = ->
   character_data = read_csv_file "data/character-strokes-decomposition.csv"
   compositions_index = get_compositions_index()
   dictionary_lookup = dictionary_index_word_f 0
+  character_frequency_index = get_character_frequency_index()
+  character_data = sort_by_character_frequency character_frequency_index, 0, character_data
   result = []
   for a, i in character_data
     [char, strokes, decomposition] = a
