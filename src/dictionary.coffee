@@ -32,7 +32,7 @@ hanzi_unicode_ranges = [
 unicode_ranges_pattern = (a, is_reject) -> "[" + (if is_reject then "^" else "") + a.map((a) -> a.map((b) -> "\\u{#{b}}").join("-")).join("") + "]"
 unicode_ranges_regexp = (a, is_reject, regexp_flags) -> new RegExp unicode_ranges_pattern(a, is_reject), "u" + (regexp_flags || "")
 non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
-pinyin_regexp = /([a-z]+)([0-5])?$/
+latin_regexp = /([a-z]+)([0-5])?$/
 
 class trie_node_class
   constructor: ->
@@ -100,7 +100,7 @@ class character_search_class
       continue unless 0 < a.length
       if non_hanzi_regexp.test a
         continue unless 1 < a.length
-        syllable = a.match pinyin_regexp
+        syllable = a.match latin_regexp
         continue unless syllable
         [_, syllable, tone] = syllable
         if @is_syllable syllable
@@ -116,7 +116,7 @@ class character_search_class
     for value in hanzi_values
       data = @character_index[value]
       continue unless data
-      [char, stroke_count, pinyin, compositions, decompositions, svg] = data
+      [char, stroke_count, latin, compositions, decompositions, svg] = data
       unless dom.search_containing.checked || dom.search_contained.checked
         matches.push data
         continue
@@ -131,12 +131,17 @@ class character_search_class
     html = ""
     if matches.length
       for data in matches.slice 0, @matches_limit
-        [char, stroke_count, pinyin, compositions, decompositions, svg] = data
-        if svg
-          graphic = @make_svg svg
-          html += "<div>#{graphic}<div class=\"text_char\">#{char}</div><div class=\"pinyin\">#{pinyin}</div></div>"
+        [char, stroke_count, latin, compositions, decompositions, svg_paths] = data
+        if svg_paths
+          svg = @make_svg svg_paths
+          html += "<div>"
+          html += "#{svg}<div class=\"m\"><div class=\"text_char\">#{char}</div><div class=\"latin\">#{latin}</div></div>"
+          html += "</div>"
         else
-          html += "<div><div class=\"text_char nosvg\">#{char}</div><div class=\"stroke_count\">#{stroke_count}</div><div class=\"pinyin\">#{pinyin}</div></div>"
+          html += "<div class=\"nosvg\">"
+          html += "<div class=\"text_char\">#{char}</div>"
+          html += "<div class=\"m\"><div class=\"stroke_count\">#{stroke_count}</div><div class=\"latin\">#{latin}</div></div>"
+          html += "</div>"
       if @matches_limit < matches.length
         html += "<div id=\"character_show_remaining\" class=\"link\">show #{matches.length - @matches_limit} more</div>"
       @matches_limit = @default_matches_limit
@@ -160,7 +165,7 @@ class character_search_class
         @matches_limit = 1024
         @filter()
         return
-      if target.classList.contains("text_char") && !target.classList.contains("nosvg")
+      if target.classList.contains("text_char") && !target.parentNode.classList.contains("nosvg")
         char = target.innerHTML
         return if dom.word_input.value.includes char
         dom.word_input.value = char
@@ -262,7 +267,10 @@ class word_search_class
 
 class app_class
   constructor: ->
+    dom.toggle_search_type.checked = false
     dom.about_link.addEventListener "click", -> dom.about.classList.toggle "hidden"
+    dom.about_link_close.addEventListener "click", -> dom.about.classList.toggle "hidden"
+    dom.toggle_search_type.addEventListener "change", (event) -> dom.filter.classList.toggle "search_character_active"
     @url_params = new URLSearchParams window.location.search
     @character_search = new character_search_class @
     @word_search = new word_search_class @

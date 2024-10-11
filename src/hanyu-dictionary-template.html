@@ -4,7 +4,7 @@
     <link rel="icon" href="data:," />
     <meta charset="utf-8"/>
     <meta name="viewport" content="initial-scale=1"/>
-    <title>chinese dictionary</title>
+    <title>hanyu dictionary</title>
     <style>
      html,input,button{font-family:"Noto Sans";font-size:22px}
      h1{display:inline-block;margin:0;font-size:1em}
@@ -17,25 +17,30 @@
      button:active{background-color:#ccc}
      .hidden{display:none}
      #about_link{text-decoration:underline;cursor:pointer;display:inline-block;margin-left:20px;position:absolute;top:0;right:0;font-size:0.75em}
-     #about_link:hover{text-decoration:none}
+     #about_link_close{text-decoration:underline;cursor:pointer}
+     #about_link:hover,#about_link_close:hover{text-decoration:none}
      #about{margin-bottom:20px}
      #word_results{margin-top:10px}
      #word_results > div > :nth-child(1){font-size:1.5em;font-weight:100;font-family:"Noto Sans SC";display:inline-block}
      #word_results > div > .single:nth-child(1){cursor:pointer}
+     #filter{display:flex;flex-wrap:wrap;column-gap:10px;align-items:center}
      #filter label{white-space:nowrap}
-     #filter{display:flex;flex-wrap:wrap}
+     #filter .search_character{display:none}
+     #filter.search_character_active .search_character{display:block}
+     #filter.search_character_active .search_word{display:none}
      #character_results{display:flex;flex-wrap:wrap;align-items:center}
      #character_results > * > svg{width:8rem;height:8rem}
      #character_results > * > svg > path{stroke-width:8;stroke:#fff;fill:none}
-     #character_results > * > svg > text{fill:#aaa;font-size:5rem}
-     #character_results > * > svg ~ *{text-align:center;display:none;position:relative}
-     #character_results > :hover > svg ~ *{display:block}
-     #character_results > * > .text_char.nosvg{font-size:6rem;font-weight:lighter}
-     #character_results > * > .text_char:hover{cursor:pointer}
-     #character_results > * > .nosvg ~ *{position:relative;text-align:center}
-     #character_results > * > .nosvg + .stroke_count ~ *{display:none}
-     #character_results > :hover > .text_char.nosvg ~ *{display:block}
-     #character_results > * > .pinyin{color:#888;margin-left:1ch}
+     #character_results > * > svg > text{fill:#aaa;font-size:5rem;cursor:default}
+     #character_results > * > .m{text-align:center;position:relative;top:-20px;height:0}
+     #character_results > * > .m > *{display:inline-block;visibility:hidden}
+     #character_results > * > .m > .text_char:hover{cursor:pointer}
+     #character_results > * > .m > .latin{color:#888;margin-left:1ch}
+     #character_results > :hover > .m > *{visibility:visible}
+     #character_results > .nosvg > .text_char{font-size:6rem;font-weight:lighter}
+     #character_results > .nosvg > .m > .stroke_count{visibility:visible}
+     #character_results > .nosvg > .m > .latin{display:none}
+     #character_results > .nosvg:hover > .m > .latin{display:inline-block}
      .link{cursor:pointer;text-decoration:underline}
      .link:hover{text-decoration:none}
      @media (max-width: 700px) {
@@ -48,40 +53,45 @@
       <h1>chinese-english dictionary</h1>
       <div id="about_link">about</div>
       <div id="about" class="hidden">
-          word search
-          <ul>
-              <li>certain non-essential word types, including regional dialects, archaic terms, and domain-specific vocabulary, are not included</li>
-              <li>search results are sorted by word frequency and length</li>
-              <li>for latin character input, searches are performed in pinyin and optionally in translations if the 'translations' checkbox is checked. the 'split' checkbox has no effect in these cases</li>
-              <li>searches partial matches for chinese character input. if the 'split' checkbox is checked, input is split into words and exact matches are searched. the 'translations' checkbox has no effect in these cases</li>
-              <li>supports regular expressions, except when the 'split' checkbox is checked for chinese characters. for example, '^word' searches at the beginning of entries, 'word$' searches at the end, and '.' can be used as a wildcard</li>
-              <li>result word length may be limited based on the input length</li>
-              <li>result lines can be copied and saved directly as a machine-readable space-separated dsv file, which can then be opened as a spreadsheet</li>
-              <li>word frequency data is sourced from <a href="https://github.com/ernop/anki-chinese-word-frequency/" target="_blank">ernop/anki-chinese-word-frequency</a></li>
-              <li>translations are sourced from <a href="https://www.mdbg.net/chinese/dictionary?page=cc-cedict" target="_blank">cc-cedict</a></li>
-              <li><a href="https://github.com/sph-mn/hanyu" target="_blank">project homepage</a></li>
-          </ul>
-          character lookup
-          <ul>
-              <li>supports search by character and pinyin, numeric tone marks only</li>
-              <li>comma separate search terms to search for multiple queries at once</li>
-              <li>the containing and contained checkboxes have no effect for latin character terms</li>
-              <li>graphics are sourced from <a href="https://github.com/skishore/makemeahanzi" target="_blank">make me a hanzi</a></li>
-          </ul>
-          general
-          <ul>
-              <li>only simplified characters are supported</li>
-              <li><a href="https://github.com/sph-mn/hanyu" target="_blank">project homepage</a></li>
-          </ul>
+        word search
+        <ul>
+          <li>contains over 60000 translations, with words sorted by frequency of use. it is not designed to serve as a comprehensive dictionary</li>
+          <li>certain non-essential word types, including regional dialects, archaic terms, and domain-specific vocabulary, are not included</li>
+          <li>search results are sorted by word frequency and length</li>
+          <li>for latin character input, searches are performed in pinyin and optionally in translations if the 'translations' checkbox is checked. the 'split' checkbox has no effect in these cases</li>
+          <li>searches partial matches for chinese character input. if the 'split' checkbox is checked, input is split into words and exact matches are searched. the 'translations' checkbox has no effect in these cases</li>
+          <li>supports regular expressions, except when the 'split' checkbox is checked for chinese characters. for example, '^word' searches at the beginning of entries, 'word$' searches at the end, and '.' can be used as a wildcard</li>
+          <li>result word length may be limited based on the input length</li>
+          <li>result lines can be copied and saved directly as a machine-readable space-separated dsv file, which can then be opened as a spreadsheet</li>
+          <li>word frequency data is sourced from <a href="https://github.com/ernop/anki-chinese-word-frequency/" target="_blank">ernop/anki-chinese-word-frequency</a></li>
+          <li>translations are sourced from <a href="https://www.mdbg.net/chinese/dictionary?page=cc-cedict" target="_blank">cc-cedict</a></li>
+          <li><a href="https://github.com/sph-mn/hanyu" target="_blank">project homepage</a></li>
+        </ul>
+        character lookup
+        <ul>
+          <li>supports search by character and pinyin, numeric tone marks only</li>
+          <li>comma separate search terms to search for multiple queries at once</li>
+          <li>the containing and contained checkboxes have no effect for latin character terms</li>
+          <li>graphics are sourced from <a href="https://github.com/parsimonhi/animCJK" target="_blank">animcjk</a></li>
+        </ul>
+        general
+        <ul>
+          <li>only simplified characters are supported</li>
+          <li><a href="https://github.com/sph-mn/hanyu" target="_blank">project homepage</a></li>
+        </ul>
+        <div id="about_link_close">close</div>
       </div>
     </div>
     <div id="filter">
-      <div>
-        <button id="character_reset">clear</button> <input id="character_input" placeholder="character..."/>
+      <div class="search_type_selection">
+        <label><input id="toggle_search_type" type="checkbox"/>character</label>
+      </div>
+      <div class="search_character">
+        <button id="character_reset">clear</button> <input id="character_input" placeholder="char..."/>
         <label title="show characters that contain the given characters"><input id="search_containing" type="checkbox"/>containing</label>
         <label title="show characters that are contained in the given characters"><input id="search_contained" type="checkbox"/>contained</label>
       </div>
-      <div>
+      <div class="search_word">
         <button id="word_reset">clear</button> <input id="word_input" placeholder="word..."/>
         <label title="search inside translations for latin character input"><input id="search_translations" type="checkbox"/>translations</label>
         <label title="search partial matches for chinese character input"><input id="search_split" type="checkbox"/>split</label>
@@ -90,15 +100,15 @@
     <div id="character_results"></div>
     <div id="word_results"></div>
     <style>
-      @font-face {
-        font-family: "Noto Sans SC";
-        src: url("data:font/ttf;base64,__font__") format("truetype");
-        font-weight: normal;
-        font-style: normal;
-      }
+     @font-face {
+       font-family: "Noto Sans SC";
+       src: url("data:font/ttf;base64,__font__") format("truetype");
+       font-weight: normal;
+       font-style: normal;
+     }
     </style>
     <script>
-      __script__
+     __script__
     </script>
   </body>
 </html>

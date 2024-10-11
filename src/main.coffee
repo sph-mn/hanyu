@@ -279,18 +279,18 @@ sort_by_frequency = (frequency_index, word_key, pinyin_key, data) ->
     else
       fa - fb
 
-sort_by_character_frequency = (frequency_index, character_key, data) ->
-  data.sort (a, b) ->
+sort_by_character_frequency_f = (frequency_index, character_key) ->
+  (a, b) ->
     fa = frequency_index[a[character_key]]
     fb = frequency_index[b[character_key]]
     if fa is undefined and fb is undefined
       a[character_key].length - b[character_key].length
-    else if fa is undefined
-      1
-    else if fb is undefined
-      -1
-    else
-      fa - fb
+    else if fa is undefined then 1
+    else if fb is undefined then -1
+    else fa - fb
+
+sort_by_character_frequency = (frequency_index, character_key, data) ->
+  data.sort sort_by_character_frequency_f(frequency_index, character_key)
 
 update_cedict_csv = () ->
   cedict = read_text_file "data/cedict_ts.u8"
@@ -810,7 +810,6 @@ update_characters_data = ->
   compositions_index = get_compositions_index()
   dictionary_lookup = dictionary_index_word_f 0
   character_frequency_index = get_character_frequency_index()
-  character_data = sort_by_character_frequency character_frequency_index, 0, character_data
   result = []
   for a, i in character_data
     [char, strokes, decomposition] = a
@@ -823,6 +822,11 @@ update_characters_data = ->
       pinyin = entry[1]
     else pinyin = ""
     result.push [char, strokes, pinyin, decomposition || "", compositions.join(""), svg_paths]
+  character_compare = sort_by_character_frequency_f(character_frequency_index, 0)
+  result.sort (a, b) ->
+    if not a[5] and b[5] then return 1
+    if a[5] and not b[5] then return -1
+    character_compare a, b
   fs.writeFileSync "data/characters.json", JSON.stringify result
 
 run = () ->
