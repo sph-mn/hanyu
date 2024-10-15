@@ -194,7 +194,7 @@ extract_path_data_from_svg = () ->
 
 get_direction = (polyline) ->
   [x1, y1] = polyline[0]
-  [x2, y2] = polyline[1]
+  [x2, y2] = polyline[polyline.length - 1]
   direction_vector = [x2 - x1, y2 - y1]
   magnitude = Math.sqrt direction_vector[0] ** 2 + direction_vector[1] ** 2
   [direction_vector[0] / magnitude, direction_vector[1] / magnitude]
@@ -254,7 +254,7 @@ simplify = (start, end) ->
   for [char, paths, directions], i in svg_graphics
     console.log "#{i}/#{end - start}"
     skip_char = false
-    #continue unless "价" == char
+    #continue unless "包" == char
     polylines = for path, i in paths
       ctx.clearRect 0, 0, canvas_width, canvas_height
       canvas_context_draw_svg_path ctx, path
