@@ -577,13 +577,13 @@ get_character_syllables_tones_count_index = () ->
 get_character_example_words_f = () ->
   dictionary = dictionary_index_word_pinyin_f 0, 1
   words = read_csv_file "data/frequency-pinyin-translation.csv"
-  (char, pinyin) ->
+  (char, pinyin, frequency_limit) ->
     char_word = words.find((b) -> b[0] is char)
     unless char_word
-      char_word = dictionary(char, pinyin)
+      char_word = dictionary char, pinyin
       char_word = char_word[0] if char_word
     char_words = if char_word then [char_word] else []
-    char_words.concat words.filter (b) -> b[0].includes(char) && b[0] != char
+    char_words.concat words.filter (b, i) -> b[0].includes(char) && b[0] != char && (!frequency_limit || i < frequency_limit)
 
 sort_standard_character_readings = () ->
   reading_count_index = get_character_reading_count_index()
@@ -829,8 +829,43 @@ update_characters_data = ->
     character_compare a, b
   fs.writeFileSync "data/characters.json", JSON.stringify result
 
+get_common_words_per_character = (max_words_per_char, max_frequency) ->
+  character_frequency_index = get_character_frequency_index()
+  get_character_example_words = get_character_example_words_f()
+  standard_chars = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
+  chars = standard_chars.map (a) -> [a[0], a[1].split(", ")[0]]
+  chars = sort_by_character_frequency character_frequency_index, 0, chars
+  rows = for a in chars
+    a = get_character_example_words a[0], a[1], max_frequency
+    if 1 < a.length then a = a.slice 0, max_words_per_char
+    a
+  rows = rows.flat 1
+  rows = array_deduplicate_key rows, (a) -> a[1]
+
+update_gridlearner_data = ->
+  words = get_common_words_per_character 5, 16000
+  chars = words.filter((a) -> 1 == a[0].length)
+  batch_size = 250
+  get_batch_index = (i) -> (1 + i / batch_size).toString().padStart 2, "0"
+  for i in [0...chars.length] by batch_size
+    data = ([a[0], a[1]] for a in chars[i...i + batch_size])
+    ii = get_batch_index i
+    write_csv_file "data/gridlearner/character-reading-#{ii}.dsv", data
+  for i in [0...chars.length] by batch_size
+    data = ([a[0], a[2]] for a in chars[i...i + batch_size])
+    ii = get_batch_index i
+    write_csv_file "data/gridlearner/character-meaning-#{ii}.dsv", data
+  for i in [0...words.length] by batch_size
+    data = ([a[0], a[1]] for a in words[i...i + batch_size])
+    ii = get_batch_index i
+    write_csv_file "data/gridlearner/word-reading-#{ii}.dsv", data
+  for i in [0...words.length] by batch_size
+    data = ([a[0], a[2]] for a in words[i...i + batch_size])
+    ii = get_batch_index i
+    write_csv_file "data/gridlearner/word-meaning-#{ii}.dsv", data
+
 run = () ->
-  #update_compositions()
+  update_gridlearner_data()
   #console.log "コ刂".match hanzi_regexp
   #find_component_repetitions()
   #console.log non_hanzi_regexp

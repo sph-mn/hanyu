@@ -34,6 +34,8 @@ creative commons share-alike
 
 # development
 * ./exe/update-dictionary to build html/hanyu-dictionary.html from html/hanyu-dictionary-template.html
+  * update-characters-data collects the character data
+  * update-svg-graphics regenerates the character svg graphics. it is usually with sub-commands "simplify_parallel" and then "merge" to merge result files from ./tmp to data/svg-graphics-simple.json.
 * the main code file is js/main.coffee
 
 # hanzi-convert

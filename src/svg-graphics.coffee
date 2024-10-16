@@ -274,7 +274,9 @@ simplify = (start, end) ->
 
 simplify_parallel = (start_offset, end_offset) ->
   if end_offset then total = read_svg_graphics_json().slice(start_offset, end_offset).length
-  else total = read_svg_graphics_json().length
+  else
+    total = read_svg_graphics_json().length
+    start_offset = 0
   max_processes = 20
   batch_size = Math.ceil total / max_processes
   active_processes = []
