@@ -217,7 +217,7 @@ class word_search_class
             regexp = new RegExp value.replace(/u/g, "(u|ü)")
             (entry) -> entry[2].some (a) -> regexp.test a
         else
-          length_limit = value.length * (if value.length > 4 then 3 else 2)
+          length_limit = value.length * 2.5
           regexp = new RegExp("\\b" + value)
           return (entry) ->
             length_limit >= entry[1].length and (regexp.test(entry[1]) or regexp.test(entry[1].replace(/[0-4]/g, "")))
