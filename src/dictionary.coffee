@@ -32,7 +32,7 @@ hanzi_unicode_ranges = [
 unicode_ranges_pattern = (a, is_reject) -> "[" + (if is_reject then "^" else "") + a.map((a) -> a.map((b) -> "\\u{#{b}}").join("-")).join("") + "]"
 unicode_ranges_regexp = (a, is_reject, regexp_flags) -> new RegExp unicode_ranges_pattern(a, is_reject), "u" + (regexp_flags || "")
 non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
-latin_regexp = /([a-z]+)([0-5])?$/
+latin_regexp = /([a-z]+)([0-5])?$/i
 
 class trie_node_class
   constructor: ->
@@ -211,31 +211,31 @@ class word_search_class
     values = values.filter (a) -> a.length > 0
     return unless values.length
     regexps = values.map((value) ->
-      if /[a-z0-9]/.test(value)
+      if dom.search_split.checked and !dom.search_translations.checked
+        characters = Array.from value.replace(/[^\u4E00-\u9FA5]/ig, "")
+        words = []
+        i = 0
+        while i < characters.length
+          j = i + 1
+          while j < Math.min(i + 5, characters.length) + 1
+            words.push characters.slice(i, j).join("")
+            j += 1
+          i += 1
+        regexp = new RegExp("(^" + words.join("$)|(^") + "$)")
+        (entry) -> regexp.test entry[0]
+      else if /[a-zA-Z0-9]/.test(value)
         if dom.search_translations.checked
           if value.length > 2
-            regexp = new RegExp value.replace(/u/g, "(u|ü)")
-            (entry) -> entry[2].some (a) -> regexp.test a
+            regexp = new RegExp(value.replace(/u/ig, "(u|ü)"), "i")
+            (entry) -> entry[2].some((a) -> regexp.test(a))
         else
           length_limit = value.length * 2.5
-          regexp = new RegExp("\\b" + value)
-          return (entry) ->
+          regexp = new RegExp("\\b" + value, "i")
+          (entry) ->
             length_limit >= entry[1].length and (regexp.test(entry[1]) or regexp.test(entry[1].replace(/[0-4]/g, "")))
       else if !dom.search_translations.checked
-        regexp = undefined
-        if dom.search_split.checked
-          characters = Array.from value.replace(/[^\u4E00-\u9FA5]/ig, "")
-          words = []
-          i = 0
-          while i < characters.length
-            j = i + 1
-            while j < Math.min(i + 5, characters.length) + 1
-              words.push characters.slice(i, j).join ""
-              j += 1
-            i += 1
-          regexp = new RegExp("(^" + words.join("$)|(^") + "$)")
-        else regexp = new RegExp value
-        (entry) -> regexp.test entry[0]
+        regexp = new RegExp(value)
+        (entry) -> regexp.test(entry[0])
     ).filter((a) -> a)
     html = ""
     matches_count = 0

@@ -843,24 +843,24 @@ get_common_words_per_character = (max_words_per_char, max_frequency) ->
   rows = array_deduplicate_key rows, (a) -> a[1]
 
 update_gridlearner_data = ->
-  words = get_common_words_per_character 5, 16000
+  words = get_common_words_per_character 5, 32000
   chars = words.filter((a) -> 1 == a[0].length)
-  batch_size = 250
+  batch_size = 750
   get_batch_index = (i) -> (1 + i / batch_size).toString().padStart 2, "0"
   for i in [0...chars.length] by batch_size
-    data = ([a[0], a[1]] for a in chars[i...i + batch_size])
+    data = ([a[1], a[0]] for a in chars[i...i + batch_size])
     ii = get_batch_index i
     write_csv_file "data/gridlearner/character-reading-#{ii}.dsv", data
   for i in [0...chars.length] by batch_size
-    data = ([a[0], a[2]] for a in chars[i...i + batch_size])
+    data = ([a[2], a[0]] for a in chars[i...i + batch_size])
     ii = get_batch_index i
     write_csv_file "data/gridlearner/character-meaning-#{ii}.dsv", data
   for i in [0...words.length] by batch_size
-    data = ([a[0], a[1]] for a in words[i...i + batch_size])
+    data = ([a[1], a[0]] for a in words[i...i + batch_size])
     ii = get_batch_index i
     write_csv_file "data/gridlearner/word-reading-#{ii}.dsv", data
   for i in [0...words.length] by batch_size
-    data = ([a[0], a[2]] for a in words[i...i + batch_size])
+    data = ([a[2], a[0]] for a in words[i...i + batch_size])
     ii = get_batch_index i
     write_csv_file "data/gridlearner/word-meaning-#{ii}.dsv", data
 
