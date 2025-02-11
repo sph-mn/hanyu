@@ -473,6 +473,20 @@ dsv_add_example_words = () ->
     a
   write_csv_file 0, rows
 
+update_characters_by_pinyin_learning = ->
+  by_pinyin = {}
+  chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars.forEach (a) -> object_array_add(by_pinyin, a[1], a[0])
+  rows = []
+  for pinyin, chars_array of by_pinyin
+    for character in chars_array
+      rows.push [character, pinyin, chars_array.length]
+  rows = rows.sort (a, b) -> (b[2] - a[2]) || a[1].localeCompare(b[1]) or a[0].localeCompare(b[0])
+  rows = characters_add_learning_data rows
+  write_csv_file("data/characters-by-pinyin-learning.csv", rows)
+  rows = (a for a in rows.reverse() when a[2] < 3)
+  write_csv_file("data/characters-by-pinyin-learning-rare.csv", rows)
+
 update_characters_by_pinyin = () ->
   by_pinyin = {}
   chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
@@ -480,6 +494,8 @@ update_characters_by_pinyin = () ->
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
   rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
   write_csv_file "data/characters-by-pinyin.csv", rows
+  rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
+  write_csv_file "data/characters-by-pinyin-by-count.csv", rows
   # only common characters
   common_limit = 2000
   by_pinyin = {}
@@ -637,56 +653,35 @@ update_pinyin_learning = () ->
   rows = add_sort_field add_word_choices rows
   write_csv_file "data/pinyin-learning.csv", rows
 
-update_character_learning = () ->
-  character_frequency_index = get_character_frequency_index()
+characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array, ...]
   reading_count_index = get_character_reading_count_index()
   character_by_reading_index = get_character_by_reading_index()
   get_character_example_words = get_character_example_words_f()
-  decompositions_index = get_decompositions_index()
-  rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
-  rows = array_deduplicate_key rows, (a) -> a[0]
-  rows = sort_by_character_frequency character_frequency_index, 0, rows
-  syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
-  add_guess_readings = (rows) ->
-    # example: "kan3 (5) chui1 (2) lun3 (2) hong1 (6) tang4 (2) du1 (5) xie3 (2) fan2 (16)"
-    syllable_count_index = get_character_syllables_tones_count_index()
-    max_guess_readings = 5
-    rows.map (a) ->
-      # add for each guess reading the number of other characters with this reading
-      alternatives = n_times max_guess_readings - 1, (n) -> random_element syllables
-      alternatives = delete_duplicates array_shuffle [a[1]].concat alternatives
-      alternatives = alternatives.map (b) -> b + " (" + (syllable_count_index[b] || 1) + ")"
-      a.push alternatives.join " "
-      a
-  #rows = add_guess_readings rows
+  rows = array_deduplicate_key(rows, (a) -> a[0])
+  syllables = delete_duplicates(rows.map((a) -> a[1].split(", ")).flat())
   add_same_reading_characters = (rows) ->
-    max_same_reading_characters = 10
+    max_same_reading_characters = 8
     rows.map (a) ->
-      b = array_shuffle (character_by_reading_index[a[1]] || []).filter((b) -> a[0] != b)
-      a.push b.slice(0, max_same_reading_characters).join ""
+      b = array_shuffle(character_by_reading_index[a[1]] or [])
+      b = b.filter((b) -> a[0] != b)
+      a.push(b.slice(0, max_same_reading_characters).join(""))
       a
-  rows = add_same_reading_characters rows
-  add_syllable_counts = (rows) ->
-    rows.map (a) ->
-      # must be run after add_guess_readings.
-      # add for each possible reading the number of words with this character and reading
-      a[1] = a[1].split(", ").map((b) -> b + " (" + (reading_count_index[a[0] + b] || 1) + ")").join(", ")
-      a
-  # add decompositions
-  rows.map (a) ->
-    b = decompositions_index[a[0]]
-    a.push b if b
-    a
-  rows = add_sort_field rows
-  # write
-  write_csv_file "data/character-learning-without-translations.csv", rows
+  rows = add_same_reading_characters(rows)
+  rows = add_sort_field(rows)
   add_example_words = (rows) ->
     rows.map (a) ->
-      words = get_character_example_words a[0], a[1]
-      a.push words.slice(1, 5).map((b) -> b[0]).join " "
-      a.push words.slice(0, 5).map((b) -> b.join(" ")).join "\n"
+      words = get_character_example_words(a[0], a[1])
+      a.push(words.slice(1, 5).map((b) -> b[0]).join(" "))
+      a.push(words.slice(0, 5).map((b) -> b.join(" ")).join("\n"))
       a
-  rows = add_example_words rows
+  rows = add_example_words(rows)
+  rows
+
+update_character_learning = ->
+  character_frequency_index = get_character_frequency_index()
+  rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
+  rows = sort_by_character_frequency(character_frequency_index, 0, rows)
+  rows = characters_add_learning_data rows
   write_csv_file "data/character-learning.csv", rows
 
 update_syllables_character_count = () ->
@@ -865,7 +860,8 @@ update_gridlearner_data = ->
     write_csv_file "data/gridlearner/word-meaning-#{ii}.dsv", data
 
 run = () ->
-  update_gridlearner_data()
+  update_characters_by_pinyin_learning()
+  #update_gridlearner_data()
   #console.log "コ刂".match hanzi_regexp
   #find_component_repetitions()
   #console.log non_hanzi_regexp
@@ -887,6 +883,7 @@ run = () ->
   #update_syllables_by_reading()
 
 module.exports = {
+  update_characters_by_pinyin_learning
   update_character_overlap
   cedict_filter_only
   clean_frequency_list
