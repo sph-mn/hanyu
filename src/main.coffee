@@ -781,8 +781,13 @@ find_component_repetitions = () ->
       if 1 == delete_duplicates(split_chars(b)).length
         console.log a[0], b
 
+update_compositions = ->
+  rows = ([a, b.join("")] for a, b of get_compositions_index())
+  write_csv_file "data/character-composition.csv", rows
+
 get_compositions_index = ->
-  decompositions = get_full_decompositions()
+  decompositions = read_csv_file "data/character-strokes-decomposition.csv"
+  decompositions = ([a, c?.split("") || []] for [a, b, c] in decompositions)
   compositions = {}
   for a in decompositions
     [char, a] = a
@@ -795,9 +800,25 @@ get_compositions_index = ->
       else compositions[component] = [char]
   compositions
 
-update_compositions = ->
-  rows = ([a, b.join("")] for a, b of get_compositions_index())
-  write_csv_file "data/character-composition.csv", rows
+update_composition_hierarchy = ->
+  compositions = get_compositions_index()
+  build = (a) ->
+    b = [a]
+    for c in compositions[a] when compositions[a]
+      b.push(if compositions[c] then build(c) else c)
+    b
+  build_string = (a, root = true) ->
+    if root
+      lines = for item in a
+        line = build_string(item, false)
+        if line.length > 1
+          line = line[0] + ' ' + line.substring(1)
+        line
+      lines.join "\n"
+    else
+      ((if Array.isArray(c) then "(" + build_string(c, false) + ")" else c) for c in a).join ""
+  string = build_string (build a for a of compositions when a.match(hanzi_regexp))
+  fs.writeFileSync "data/composition-hierarchy.txt", string
 
 update_characters_data = ->
   graphics_data = JSON.parse read_text_file "data/svg-graphics-simple.json"
@@ -860,7 +881,8 @@ update_gridlearner_data = ->
     write_csv_file "data/gridlearner/word-meaning-#{ii}.dsv", data
 
 run = () ->
-  update_characters_by_pinyin_learning()
+  update_composition_hierarchy()
+  #update_characters_by_pinyin_learning()
   #update_gridlearner_data()
   #console.log "コ刂".match hanzi_regexp
   #find_component_repetitions()
