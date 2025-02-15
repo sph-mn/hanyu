@@ -678,7 +678,6 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
     strokes = get_stroke_count_index()
     rows.map (a) ->
       b = (decompositions[a[0]] || []).filter((a) -> strokes[a] && strokes[a] > 1).map((a) -> dictionary a).filter (a) -> a
-      return a unless b.length
       c = b.map((c) -> c[0].slice(0, 2).join(" ")).join(", ")
       a.push c
       a
