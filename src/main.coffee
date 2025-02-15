@@ -134,6 +134,8 @@ cedict_glossary = (a) ->
     /variant of /
     /\(loanword/
     /\(neologism/
+    /\(archaic/
+    /\(dialect/
   ]
   a = a.split("/").map (a) -> a.toLowerCase().split(";")
   a = a.flat().map (a) -> a.trim()
@@ -201,6 +203,8 @@ get_frequency_index = () ->
     frequency_index[a] = i unless frequency_index[a]
   frequency_index
 
+get_all_standard_characters = () -> read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
+get_all_standard_characters_with_pinyin = () -> read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(",")[0]]
 get_all_characters = () -> read_csv_file("data/character-strokes-decomposition.csv").map (a) -> a[0]
 display_all_characters = () -> console.log get_all_characters().join("")
 
@@ -658,7 +662,7 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
   character_by_reading_index = get_character_by_reading_index()
   get_character_example_words = get_character_example_words_f()
   rows = array_deduplicate_key(rows, (a) -> a[0])
-  syllables = delete_duplicates(rows.map((a) -> a[1].split(", ")).flat())
+  syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
   add_same_reading_characters = (rows) ->
     max_same_reading_characters = 8
     rows.map (a) ->
@@ -667,7 +671,19 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
       a.push(b.slice(0, max_same_reading_characters).join(""))
       a
   rows = add_same_reading_characters(rows)
-  rows = add_sort_field(rows)
+  add_contained_characters = (rows) ->
+    decompositions = get_full_decompositions_index()
+    all_chars_and_pinyin = new get_all_standard_characters_with_pinyin()
+    dictionary = dictionary_index_word_f 0
+    strokes = get_stroke_count_index()
+    rows.map (a) ->
+      b = (decompositions[a[0]] || []).filter((a) -> strokes[a] && strokes[a] > 1).map((a) -> dictionary a).filter (a) -> a
+      return a unless b.length
+      c = b.map((c) -> c[0].slice(0, 2).join(" ")).join(", ")
+      a.push c
+      a
+  rows = add_contained_characters rows
+  rows = add_sort_field rows
   add_example_words = (rows) ->
     rows.map (a) ->
       words = get_character_example_words(a[0], a[1])
@@ -680,7 +696,7 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
 update_character_learning = ->
   character_frequency_index = get_character_frequency_index()
   rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
-  rows = sort_by_character_frequency(character_frequency_index, 0, rows)
+  rows = sort_by_character_frequency character_frequency_index, 0, rows
   rows = characters_add_learning_data rows
   write_csv_file "data/character-learning.csv", rows
 
