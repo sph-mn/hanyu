@@ -270,31 +270,24 @@ update_character_reading_count = () ->
   rows = rows.sort (a, b) -> b[2] - a[2]
   write_csv_file "data/character-reading-count.csv", rows
 
-sort_by_frequency = (frequency_index, word_key, pinyin_key, data) ->
-  data = data.sort (a, b) ->
-    fa = frequency_index[a[word_key] + a[pinyin_key]]
-    fb = frequency_index[b[word_key] + b[pinyin_key]]
-    if fa is undefined and fb is undefined
-      a[word_key].length - b[word_key].length
-    else if fa is undefined
-      1
-    else if fb is undefined
-      -1
-    else
-      fa - fb
-
-sort_by_character_frequency_f = (frequency_index, character_key) ->
+sort_by_index_and_character_f = (index, character_key) ->
+  # {character: integer, ...}, any -> function(a, b)
   (a, b) ->
-    fa = frequency_index[a[character_key]]
-    fb = frequency_index[b[character_key]]
-    if fa is undefined and fb is undefined
-      a[character_key].length - b[character_key].length
-    else if fa is undefined then 1
-    else if fb is undefined then -1
-    else fa - fb
+    ca = a[character_key]
+    cb = b[character_key]
+    ia = index[ca]
+    ib = index[cb]
+    if ia is undefined and ib is undefined
+      (ca.length - cb.length) || ca.localeCompare(cb) || cb.localeCompare(ca)
+    else if ia is undefined then 1
+    else if ib is undefined then -1
+    else ia - ib
 
 sort_by_character_frequency = (frequency_index, character_key, data) ->
-  data.sort sort_by_character_frequency_f(frequency_index, character_key)
+  data.sort sort_by_index_and_character_f frequency_index, character_key
+
+sort_by_stroke_count = (stroke_count_index, character_key, data) ->
+  data.sort sort_by_index_and_character_f stroke_count_index, character_key
 
 update_cedict_csv = () ->
   cedict = read_text_file "data/cedict_ts.u8"
@@ -543,7 +536,12 @@ get_full_decompositions = () ->
     #[parts[0], parts.slice(1)]
 
 get_full_decompositions_index = () -> index_key_value get_full_decompositions(), 0, 1
-get_stroke_count_index = (a) -> index_key_value read_csv_file("data/character-strokes-decomposition.csv"), 0, 1
+
+get_stroke_count_index = (a) ->
+  data = read_csv_file("data/character-strokes-decomposition.csv")
+  result = {}
+  result[a[0]] = parseInt a[1] for a in data
+  result
 
 update_character_overlap = () ->
   # 大犬太 草早旱
@@ -689,13 +687,33 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
       a.push(words.slice(1, 5).map((b) -> b[0]).join(" "))
       a.push(words.slice(0, 5).map((b) -> b.join(" ")).join("\n"))
       a
-  rows = add_example_words(rows)
+  rows = add_example_words rows
   rows
 
+sort_by_frequency_and_stroke_count_f = (char_key) ->
+  frequency_index = get_character_frequency_index()
+  stroke_count_index = get_stroke_count_index()
+  stroke_counts = Object.values(stroke_count_index)
+  mu_s = stroke_counts.reduce(((a, b) -> a + b), 0) / stroke_counts.length
+  sigma_s = Math.sqrt(stroke_counts.reduce(((a, b) -> a + (b - mu_s) ** 2), 0) / stroke_counts.length)
+  frequency_ranks = ((frequency_index[ch] or stroke_counts.length) for ch of stroke_count_index)
+  log_freq_ranks = (Math.log(r) for r in frequency_ranks)
+  mu_l = log_freq_ranks.reduce(((a, b) -> a + b), 0) / log_freq_ranks.length
+  sigma_f = Math.sqrt(log_freq_ranks.reduce(((a, b) -> a + (b - mu_l) ** 2), 0) / log_freq_ranks.length)
+  k = sigma_s / sigma_f
+  soften_stroke = (s) ->
+    diff = s - mu_s
+    Math.sign(diff) * Math.log(1 + Math.abs(diff)) / Math.log(1 + sigma_s)
+  compute_sort_value = (ch) ->
+    soften_stroke(stroke_count_index[ch]) + k * Math.log(frequency_index[ch])
+  (a, b) -> compute_sort_value(a[char_key]) - compute_sort_value(b[char_key])
+
+sort_by_frequency_and_stroke_count = (data, char_key) ->
+  data.sort sort_by_frequency_and_stroke_count_f(char_key)
+
 update_character_learning = ->
-  character_frequency_index = get_character_frequency_index()
   rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
-  rows = sort_by_character_frequency character_frequency_index, 0, rows
+  rows = sort_by_frequency_and_stroke_count rows, 0
   rows = characters_add_learning_data rows
   write_csv_file "data/character-learning.csv", rows
 
