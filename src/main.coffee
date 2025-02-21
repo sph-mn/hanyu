@@ -54,10 +54,20 @@ delete_duplicates_stable_with_key = (a, key) ->
       result.push a
   result
 
+lcg = (seed) ->
+  m = 2 ** 31
+  a = 1103515245
+  c = 12345
+  state = seed
+  ->
+    state = (a * state + c) % m
+    state / m
+
 array_shuffle = (a) ->
+  rand = lcg(23465700980)
   n = a.length
   while n > 0
-    i = Math.floor Math.random() * n
+    i = Math.floor rand() * n
     n -= 1
     [a[n], a[i]] = [a[i], a[n]]
   a
@@ -690,6 +700,37 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
   rows = add_example_words rows
   rows
 
+fix_dependency_order = (items, char_key) ->
+  # move contained characters before containing characters.
+  di = get_full_decompositions_index()
+  pm = {}
+  for i, a of items
+    pm[a[char_key]] = i
+  changed = true
+  while changed
+    changed = false
+    i = 0
+    while i < items.length
+      c = items[i][char_key]
+      deps = di[c] or []
+      for d in deps
+        j = pm[d]
+        if j? and j > i
+          b = items.splice(j, 1)[0]
+          items.splice(i, 0, b)
+          for k in [Math.min(i, j)..Math.max(i, j)]
+            pm[items[k][char_key]] = k
+          changed = true
+          break
+      if changed then break
+      i += 1
+  items
+
+# test examples: 刀 and 那
+sort_by_frequency_and_dependency_f = (char_key) ->
+  fi = get_character_frequency_index()
+  (a, b) -> fi[a[char_key]] - fi[b[char_key]]
+
 sort_by_frequency_and_stroke_count_f = (char_key) ->
   frequency_index = get_character_frequency_index()
   stroke_count_index = get_stroke_count_index()
@@ -709,13 +750,19 @@ sort_by_frequency_and_stroke_count_f = (char_key) ->
   (a, b) -> compute_sort_value(a[char_key]) - compute_sort_value(b[char_key])
 
 sort_by_frequency_and_stroke_count = (data, char_key) ->
-  data.sort sort_by_frequency_and_stroke_count_f(char_key)
+  data.sort sort_by_frequency_and_stroke_count_f char_key
+
+sort_by_frequency_and_dependency = (data, char_key) ->
+  data = data.sort sort_by_frequency_and_dependency_f char_key
+  data = fix_dependency_order data, char_key
 
 update_character_learning = ->
   rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
-  rows = sort_by_frequency_and_stroke_count rows, 0
+  rows = sort_by_frequency_and_dependency rows, 0
   rows = characters_add_learning_data rows
   write_csv_file "data/character-learning.csv", rows
+  rows = ([a[0], a[1], a[2], a[3]] for a in rows)
+  write_csv_file "data/character-learning-reduced.csv", rows
 
 update_syllables_character_count = () ->
   # number of characters with the same reading
