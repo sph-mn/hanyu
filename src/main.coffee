@@ -459,6 +459,13 @@ update_hsk_pinyin_translations = () ->
     translations = dictionary_lookup a[0], a[1]
     return a unless translations
     a.concat [translations[0][2]]
+  frequency_index = get_character_frequency_index()
+  rows = rows.sort (a, b) ->
+    chars_a = split_chars a[0]
+    chars_b = split_chars b[0]
+    max_a = Math.max.apply Math, chars_a.map (char) -> frequency_index[char]
+    max_b = Math.max.apply Math, chars_b.map (char) -> frequency_index[char]
+    max_a - max_b
   write_csv_file "data/hsk-pinyin-translation.csv", rows
 
 pinyin_to_hanzi = (a) ->
