@@ -175,7 +175,7 @@ simplify_to_svg = (polylines) ->
   svg_paths
 
 extract_path_data_from_svg = () ->
-  svg_path = "data/svgsZhHans"
+  svg_path = "data/foreign/svgsZhHans"
   entries = fs.readdirSync svg_path
   svg_files = entries.filter (a) -> a.endsWith ".svg"
   for file in svg_files
@@ -213,7 +213,7 @@ extract_paths_and_direction_from_svg = () ->
 extract = () ->
   # extract graphics data from animcjk svg graphics
   json = JSON.stringify extract_paths_and_direction_from_svg()
-  fs.writeFileSync "data/svg-graphics.json", json
+  fs.writeFileSync "data/character-svg-animcjk.json", json
 
 point_distance = ([x1, y1], [x2, y2]) -> Math.sqrt (x2 - x1) ** 2 + (y2 - y1) ** 2
 
@@ -242,7 +242,7 @@ center_polylines = (polylines, canvas_width, canvas_height) ->
       point[1] += translate_y
   null
 
-read_svg_graphics_json = () -> JSON.parse read_text_file "data/svg-graphics.json"
+read_svg_graphics_json = () -> JSON.parse read_text_file "data/character-svg-animcjk.json"
 
 simplify = (start, end) ->
   svg_graphics = read_svg_graphics_json().slice start, end
@@ -270,7 +270,7 @@ simplify = (start, end) ->
     strokes = simplify_to_svg polylines
     result[char] = strokes
     #paths_to_svg_file "tmp/#{char}.svg", strokes, stroke_width, canvas_width, canvas_height
-  fs.writeFileSync "tmp/svg-graphics-simple-#{start}-#{end}.json", JSON.stringify(result)
+  fs.writeFileSync "tmp/character-svg-animcjk-simple-#{start}-#{end}.json", JSON.stringify(result)
 
 simplify_parallel = (start_offset, end_offset) ->
   if end_offset then total = read_svg_graphics_json().slice(start_offset, end_offset).length
@@ -281,7 +281,7 @@ simplify_parallel = (start_offset, end_offset) ->
   batch_size = Math.ceil total / max_processes
   active_processes = []
   call_script = (start, end, callback) ->
-    child = spawn "exe/update-svg-graphics", ["simplify", start, end]
+    child = spawn "exe/update-character-svg", ["simplify", start, end]
     child.stdout.on "data", (data) -> console.log "#{start}-#{end}: #{data.toString().trim()}"
     child.stderr.on "data", (data) -> console.error "#{start}-#{end}: #{data}"
     console.log start, end
@@ -304,7 +304,7 @@ merge = ->
   for file in files
     continue unless file.endsWith ".json"
     Object.assign result, JSON.parse(read_text_file "tmp/" + file)
-  fs.writeFileSync "data/svg-graphics-simple.json", JSON.stringify(result)
+  fs.writeFileSync "data/character-svg-animcjk-simple.json", JSON.stringify(result)
 
 module.exports = {
   simplify

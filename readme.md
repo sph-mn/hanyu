@@ -7,16 +7,16 @@ dictionary that sorts results by word frequency and character count, with charac
 see under data/
 * frequency-pinyin-translation.csv: words with pinyin and translation sorted by frequency
 * cedict.csv: filtered csv version of cedict with one translation per line
-* character-strokes-decomposition.csv: characters with stroke count and composition
+* characters-strokes-decomposition.csv: characters with stroke count and composition
 * table-of-general-standard-chinese-characters.csv: the official character list including pronunciations
 * characters-by-pinyin.csv
 * words-by-type/: separated by verb, noun, adjective, and so on
 * hsk.csv and hsk-pinyin-translations.csv
-* character-learning.csv: characters sorted by frequency, with readings and number of words with this reading, false pronunciations for guessing and syllable commonness among all characters, compositions, character meaning, and example words. suitable as the basis for an anki deck
-* pinyin-learning.csv: a reverse version of character-learning that maps word pinyin and choices to word and translation
+* characters-learning.csv: characters sorted by frequency, with readings and number of words with this reading, false pronunciations for guessing and syllable commonness among all characters, compositions, character meaning, and example words. suitable as the basis for an anki deck
+* pinyin-learning.csv: a reverse version of characters-learning that maps word pinyin and choices to word and translation
 * characters-repeated-components.csv: characters that consist of a repetition of another character
-* hanzi.apkg, pinyin.apkg: anki decks based on character-learning.csv and pinyin-learning.csv
-* svg-graphics-simple.json: contains svg for the individual strokes as simple lines and the directions of strokes
+* hanzi.apkg, pinyin.apkg: anki decks based on characters-learning.csv and pinyin-learning.csv
+* characters-svg-animcjk-simple.json: contains svg for the individual strokes as simple lines and the directions of strokes
   * field 1: paths ordered by stroke order
   * field 2: direction vectors for each stroke
 * ... and more
@@ -35,7 +35,7 @@ creative commons share-alike
 # development
 * ./exe/update-dictionary to build html/hanyu-dictionary.html from html/hanyu-dictionary-template.html
   * update-characters-data collects the character data
-  * update-svg-graphics regenerates the character svg graphics. it is usually with sub-commands "simplify_parallel" and then "merge" to merge result files from ./tmp to data/svg-graphics-simple.json.
+  * update-svg-graphics regenerates the character svg graphics. it is usually with sub-commands "simplify_parallel" and then "merge" to merge result files from ./tmp to data/characters-svg-animcjk-simple.json.
 * the main code file is js/main.coffee
 
 # hanzi-convert

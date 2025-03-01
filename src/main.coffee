@@ -167,8 +167,8 @@ cedict_additions = (a) ->
 
 cedict_filter_only = () ->
   # retains the original cedict format.
-  cedict = read_text_file "data/cedict_ts.u8"
-  frequency_array = array_from_newline_file "data/frequency.csv"
+  cedict = read_text_file "data/foreign/cedict_ts.u8"
+  frequency_array = array_from_newline_file "data/words-by-frequency.csv"
   frequency = {}
   frequency_array.forEach (a, i) -> frequency[a] = i
   rows = cedict.split "\n"
@@ -206,7 +206,7 @@ cedict_filter_only = () ->
 
 get_frequency_index = () ->
   # -> {"#{word}#{pinyin}": integer}
-  frequency = array_from_newline_file "data/frequency-pinyin.csv"
+  frequency = array_from_newline_file "data/words-by-frequency-pinyin.csv"
   frequency_index = {}
   frequency.forEach (a, i) ->
     a = a.replace " ", ""
@@ -215,13 +215,13 @@ get_frequency_index = () ->
 
 get_all_standard_characters = () -> read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
 get_all_standard_characters_with_pinyin = () -> read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(",")[0]]
-get_all_characters = () -> read_csv_file("data/character-strokes-decomposition.csv").map (a) -> a[0]
+get_all_characters = () -> read_csv_file("data/characters-strokes-decomposition.csv").map (a) -> a[0]
 display_all_characters = () -> console.log get_all_characters().join("")
 
 get_all_characters_and_pinyin = () ->
   # sorted by frequency
   result = []
-  a = read_csv_file "data/frequency-pinyin.csv"
+  a = read_csv_file "data/words-by-frequency-pinyin.csv"
   a.forEach (a) ->
     chars = split_chars a[0]
     pinyin = pinyin_split2 a[1]
@@ -233,7 +233,7 @@ get_all_characters_and_pinyin = () ->
 get_frequency_characters_and_pinyin = () ->
   # with duplicates. use case: count character reading frequency
   result = []
-  a = read_csv_file "data/frequency-pinyin.csv"
+  a = read_csv_file "data/words-by-frequency-pinyin.csv"
   a.forEach (a) ->
     chars = split_chars a[0]
     pinyin = pinyin_split2 a[1]
@@ -278,7 +278,7 @@ update_character_reading_count = () ->
     count = index[a]
     if count then rows.push [a[0], a.slice(1), count]
   rows = rows.sort (a, b) -> b[2] - a[2]
-  write_csv_file "data/character-reading-count.csv", rows
+  write_csv_file "data/characters-pinyin-count.csv", rows
 
 sort_by_index_and_character_f = (index, character_key) ->
   # {character: integer, ...}, any -> function(a, b)
@@ -300,7 +300,7 @@ sort_by_stroke_count = (stroke_count_index, character_key, data) ->
   data.sort sort_by_index_and_character_f stroke_count_index, character_key
 
 update_cedict_csv = () ->
-  cedict = read_text_file "data/cedict_ts.u8"
+  cedict = read_text_file "data/foreign/cedict_ts.u8"
   frequency_index = get_frequency_index()
   lines = cedict.split "\n"
   data = lines.map (line) ->
@@ -337,7 +337,7 @@ dictionary_cedict_to_json = (data) ->
 update_dictionary = () ->
   word_data = read_csv_file "data/cedict.csv"
   word_data = dictionary_cedict_to_json word_data
-  character_data = read_text_file "data/characters.json"
+  character_data = read_text_file "data/characters-svg.json"
   script = read_text_file "src/dictionary.coffee"
   script = coffee.compile(script, bare: true).trim()
   script = replace_placeholders script, {word_data, character_data}
@@ -347,7 +347,7 @@ update_dictionary = () ->
   fs.writeFileSync "compiled/hanyu-dictionary.html", html
 
 clean_frequency_list = () ->
-  frequency_array = array_from_newline_file "data/frequency.csv"
+  frequency_array = array_from_newline_file "data/words-by-frequency.csv"
   frequency_array = frequency_array.filter (a) ->
     traditional_to_simplified remove_non_chinese_characters a
   frequency_array.forEach (a) -> console.log a
@@ -379,7 +379,7 @@ dictionary_index_word_pinyin_f = () ->
 
 update_frequency_pinyin = () ->
   dictionary_lookup = dictionary_index_word_pinyin_f 0, 1
-  frequency = array_from_newline_file "data/frequency.csv"
+  frequency = array_from_newline_file "data/words-by-frequency.csv"
   hsk = read_csv_file "data/hsk.csv"
   hsk_index = {}
   hsk.forEach (a) ->
@@ -393,9 +393,9 @@ update_frequency_pinyin = () ->
     return [] unless translation
     [a[0], translation[0][1], translation[0][2]]
   rows = rows.filter (a) -> 3 is a.length
-  write_csv_file "data/frequency-pinyin-translation.csv", rows
+  write_csv_file "data/words-by-frequency-pinyin-translation.csv", rows
   rows = rows.map (a) -> [a[0], a[1]]
-  write_csv_file "data/frequency-pinyin.csv", rows
+  write_csv_file "data/words-by-frequency-pinyin.csv", rows
 
 mark_to_number = (a) ->
   a.split(" ").map((a) -> pinyin_split2(a).map(pinyin_utils.markToNumber).join("")).join(" ")
@@ -478,7 +478,7 @@ hanzi_to_pinyin = (a) ->
 
 dsv_add_example_words = () ->
   dictionary = dictionary_index_word_pinyin_f 0, 1
-  words = read_csv_file "data/frequency-pinyin-translation.csv"
+  words = read_csv_file "data/words-by-frequency-pinyin-translation.csv"
   rows = read_csv_file(0).map (a) ->
     char_words = words.filter((b) -> b[0].includes a[0])
     unless char_words.length
@@ -536,7 +536,7 @@ index_key_value = (a, key_key, value_key) ->
   a.forEach (a) -> b[a[key_key]] = a[value_key]
   b
 
-get_decompositions_index = () -> index_key_value read_csv_file("data/character-strokes-decomposition.csv"), 0, 2
+get_decompositions_index = () -> index_key_value read_csv_file("data/characters-strokes-decomposition.csv"), 0, 2
 
 get_full_decompositions = () ->
   # also include decompositions of components per entry
@@ -555,7 +555,7 @@ get_full_decompositions = () ->
 get_full_decompositions_index = () -> index_key_value get_full_decompositions(), 0, 1
 
 get_stroke_count_index = (a) ->
-  data = read_csv_file("data/character-strokes-decomposition.csv")
+  data = read_csv_file("data/characters-strokes-decomposition.csv")
   result = {}
   result[a[0]] = parseInt a[1] for a in data
   result
@@ -593,25 +593,25 @@ update_character_overlap = () ->
     b = a.map (a) -> a[1]
     [a[0][0], b.join("")]
   rows = rows.sort (a, b) -> b[1].length - a[1].length
-  write_csv_file "data/character-overlap.csv", rows
+  write_csv_file "data/characters-overlap.csv", rows
   rows = similarities.map (a) ->
     b = a.filter((a) -> a[4] < 4000).map (a) -> a[1]
     [a[0][0], b.join("")]
-  write_csv_file "data/character-overlap-common.csv", rows
+  write_csv_file "data/characters-overlap-common.csv", rows
 
 get_character_reading_count_index = () ->
   result = {}
-  read_csv_file("data/character-reading-count.csv").forEach (a) -> result[a[0] + a[1]] = parseInt a[2]
+  read_csv_file("data/characters-pinyin-count.csv").forEach (a) -> result[a[0] + a[1]] = parseInt a[2]
   result
 
 get_character_syllables_tones_count_index = () ->
   result = {}
-  read_csv_file("data/syllables-tones-character-count.csv").forEach (a) -> result[a[0]] = parseInt a[1]
+  read_csv_file("data/syllables-tones-character-counts.csv").forEach (a) -> result[a[0]] = parseInt a[1]
   result
 
 get_character_example_words_f = () ->
   dictionary = dictionary_index_word_pinyin_f 0, 1
-  words = read_csv_file "data/frequency-pinyin-translation.csv"
+  words = read_csv_file "data/words-by-frequency-pinyin-translation.csv"
   (char, pinyin, frequency_limit) ->
     char_word = words.find((b) -> b[0] is char)
     unless char_word
@@ -767,9 +767,9 @@ update_character_learning = ->
   rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
   rows = sort_by_frequency_and_dependency rows, 0
   rows = characters_add_learning_data rows
-  write_csv_file "data/character-learning.csv", rows
+  write_csv_file "data/characters-learning.csv", rows
   rows = ([a[0], a[1], a[2], a[3]] for a in rows)
-  write_csv_file "data/character-learning-reduced.csv", rows
+  write_csv_file "data/characters-learning-reduced.csv", rows
 
 update_syllables_character_count = () ->
   # number of characters with the same reading
@@ -784,9 +784,9 @@ update_syllables_character_count = () ->
     chars = chars.map (a) -> a[0]
     chars = delete_duplicates_stable chars
     chars.map((a) -> [a, counts[a]]).sort (a, b) -> b[1] - a[1]
-  write_csv_file "data/syllables-tones-character-count.csv", get_data(chars)
-  write_csv_file "data/syllables-character-count.csv", get_data(chars_without_tones)
-  write_csv_file "data/syllables-tones-character-count-common.csv", get_data(chars_common)
+  write_csv_file "data/syllables-tones-character-counts.csv", get_data(chars)
+  write_csv_file "data/syllables-character-counts.csv", get_data(chars_without_tones)
+  write_csv_file "data/syllables-tones-character-counts-common.csv", get_data(chars_common)
 
 grade_text_files = (paths) ->
   paths.forEach (a) -> console.log grade_text(read_text_file(a)) + " " + path.basename(a)
@@ -826,7 +826,7 @@ update_extra_stroke_counts = () ->
   write_csv_file "data/extra-stroke-counts.csv", data
 
 update_decompositions = (start_index, end_index) ->
-  chars = read_csv_file "data/character-strokes-decomposition.csv"
+  chars = read_csv_file "data/characters-strokes-decomposition.csv"
   chars = chars.filter (a) -> "1" != a[1]
   chars = chars.slice start_index, end_index
   batch_size = 10
@@ -847,21 +847,21 @@ update_decompositions = (start_index, end_index) ->
           console.log c.join " "
 
 add_new_data = () ->
-  chars = read_csv_file "data/character-strokes-decomposition.csv"
+  chars = read_csv_file "data/characters-strokes-decomposition.csv"
   new_data = read_csv_file("new-data").filter (a) -> a[0].length
   all = chars.concat new_data
   all_index = {}
   all.forEach (a) -> all_index[a[0]] = a
   all = Object.values(all_index).sort (a, b) -> a[1] - b[1] || a[0].localeCompare(b[0])
-  write_csv_file "data/character-strokes-decomposition-new.csv", all
+  write_csv_file "data/characters-strokes-decomposition-new.csv", all
 
 sort_data = () ->
-  chars = read_csv_file "data/character-strokes-decomposition.csv"
+  chars = read_csv_file "data/characters-strokes-decomposition.csv"
   chars = chars.sort (a, b) -> a[1] - b[1] || a[0].localeCompare(b[0])
-  write_csv_file "data/character-strokes-decomposition-new.csv", chars
+  write_csv_file "data/characters-strokes-decomposition-new.csv", chars
 
 find_component_repetitions = () ->
-  chars = read_csv_file "data/character-strokes-decomposition.csv"
+  chars = read_csv_file "data/characters-strokes-decomposition.csv"
   chars = chars.forEach (a) ->
     if a[2]
       b = a[2].replace non_hanzi_regexp, ""
@@ -870,10 +870,10 @@ find_component_repetitions = () ->
 
 update_compositions = ->
   rows = ([a, b.join("")] for a, b of get_compositions_index())
-  write_csv_file "data/character-composition.csv", rows
+  write_csv_file "data/characters-composition.csv", rows
 
 get_compositions_index = ->
-  decompositions = read_csv_file "data/character-strokes-decomposition.csv"
+  decompositions = read_csv_file "data/characters-strokes-decomposition.csv"
   decompositions = ([a, c?.split("") || []] for [a, b, c] in decompositions)
   compositions = {}
   for a in decompositions
@@ -909,7 +909,7 @@ update_composition_hierarchy = ->
 
 update_characters_data = ->
   graphics_data = JSON.parse read_text_file "data/svg-graphics-simple.json"
-  character_data = read_csv_file "data/character-strokes-decomposition.csv"
+  character_data = read_csv_file "data/characters-strokes-decomposition.csv"
   compositions_index = get_compositions_index()
   dictionary_lookup = dictionary_index_word_f 0
   character_frequency_index = get_character_frequency_index()
@@ -930,7 +930,7 @@ update_characters_data = ->
     if not a[5] and b[5] then return 1
     if a[5] and not b[5] then return -1
     character_compare a, b
-  fs.writeFileSync "data/characters.json", JSON.stringify result
+  fs.writeFileSync "data/characters-svg.json", JSON.stringify result
 
 get_common_words_per_character = (max_words_per_char, max_frequency) ->
   character_frequency_index = get_character_frequency_index()
@@ -953,19 +953,19 @@ update_gridlearner_data = ->
   for i in [0...chars.length] by batch_size
     data = ([a[1], a[0]] for a in chars[i...i + batch_size])
     ii = get_batch_index i
-    write_csv_file "data/gridlearner/character-reading-#{ii}.dsv", data
+    write_csv_file "data/gridlearner/characters-pinyin-#{ii}.dsv", data
   for i in [0...chars.length] by batch_size
     data = ([a[2], a[0]] for a in chars[i...i + batch_size])
     ii = get_batch_index i
-    write_csv_file "data/gridlearner/character-meaning-#{ii}.dsv", data
+    write_csv_file "data/gridlearner/characters-translation-#{ii}.dsv", data
   for i in [0...words.length] by batch_size
     data = ([a[1], a[0]] for a in words[i...i + batch_size])
     ii = get_batch_index i
-    write_csv_file "data/gridlearner/word-reading-#{ii}.dsv", data
+    write_csv_file "data/gridlearner/word-pinyin-#{ii}.dsv", data
   for i in [0...words.length] by batch_size
     data = ([a[2], a[0]] for a in words[i...i + batch_size])
     ii = get_batch_index i
-    write_csv_file "data/gridlearner/word-meaning-#{ii}.dsv", data
+    write_csv_file "data/gridlearner/word-translation-#{ii}.dsv", data
 
 run = () ->
   update_composition_hierarchy()
