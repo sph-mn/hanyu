@@ -146,6 +146,7 @@ cedict_glossary = (a) ->
     /\(neologism/
     /\(archaic/
     /\(dialect/
+    /\(vulgar/
   ]
   a = a.split("/").map (a) -> a.toLowerCase().split(";")
   a = a.flat().map (a) -> a.trim()
@@ -206,7 +207,7 @@ cedict_filter_only = () ->
 
 get_frequency_index = () ->
   # -> {"#{word}#{pinyin}": integer}
-  frequency = array_from_newline_file "data/words-by-frequency-pinyin.csv"
+  frequency = array_from_newline_file "data/words-by-frequency-with-pinyin.csv"
   frequency_index = {}
   frequency.forEach (a, i) ->
     a = a.replace " ", ""
@@ -218,10 +219,10 @@ get_all_standard_characters_with_pinyin = () -> read_csv_file("data/table-of-gen
 get_all_characters = () -> read_csv_file("data/characters-strokes-decomposition.csv").map (a) -> a[0]
 display_all_characters = () -> console.log get_all_characters().join("")
 
-get_all_characters_and_pinyin = () ->
+get_all_characters_with_pinyin = () ->
   # sorted by frequency
   result = []
-  a = read_csv_file "data/words-by-frequency-pinyin.csv"
+  a = read_csv_file "data/words-by-frequency-with-pinyin.csv"
   a.forEach (a) ->
     chars = split_chars a[0]
     pinyin = pinyin_split2 a[1]
@@ -233,7 +234,7 @@ get_all_characters_and_pinyin = () ->
 get_frequency_characters_and_pinyin = () ->
   # with duplicates. use case: count character reading frequency
   result = []
-  a = read_csv_file "data/words-by-frequency-pinyin.csv"
+  a = read_csv_file "data/words-by-frequency-with-pinyin.csv"
   a.forEach (a) ->
     chars = split_chars a[0]
     pinyin = pinyin_split2 a[1]
@@ -241,7 +242,7 @@ get_frequency_characters_and_pinyin = () ->
   result
 
 get_all_characters_sorted_by_frequency = () ->
-  delete_duplicates_stable get_all_characters_and_pinyin().map (a) -> split_chars(a[0])[0]
+  delete_duplicates_stable get_all_characters_with_pinyin().map (a) -> split_chars(a[0])[0]
 
 get_character_frequency_index = () ->
   # -> {character: integer}
@@ -299,6 +300,19 @@ sort_by_character_frequency = (frequency_index, character_key, data) ->
 sort_by_stroke_count = (stroke_count_index, character_key, data) ->
   data.sort sort_by_index_and_character_f stroke_count_index, character_key
 
+sort_by_word_frequency = (frequency_index, word_key, pinyin_key, data) ->
+  data.sort (a, b) ->
+    fa = frequency_index[a[word_key] + a[pinyin_key]]
+    fb = frequency_index[b[word_key] + b[pinyin_key]]
+    if fa is undefined and fb is undefined
+      a[word_key].length - b[word_key].length
+    else if fa is undefined
+      1
+    else if fb is undefined
+      -1
+    else
+      fa - fb
+
 update_cedict_csv = () ->
   cedict = read_text_file "data/foreign/cedict_ts.u8"
   frequency_index = get_frequency_index()
@@ -320,7 +334,7 @@ update_cedict_csv = () ->
   data = cedict_additions data
   data = cedict_merge_definitions data
   data.forEach (a) -> a[2] = a[2].join "; "
-  data = sort_by_frequency frequency_index, 0, 1, data
+  data = sort_by_word_frequency frequency_index, 0, 1, data
   data = data.filter (a, index) -> index < 3000 || a[0].length < 3
   test = () ->
     example1 = data.findIndex((a) => a[0] is "猫")
@@ -393,9 +407,9 @@ update_frequency_pinyin = () ->
     return [] unless translation
     [a[0], translation[0][1], translation[0][2]]
   rows = rows.filter (a) -> 3 is a.length
-  write_csv_file "data/words-by-frequency-pinyin-translation.csv", rows
+  write_csv_file "data/words-by-frequency-with-pinyin-translation.csv", rows
   rows = rows.map (a) -> [a[0], a[1]]
-  write_csv_file "data/words-by-frequency-pinyin.csv", rows
+  write_csv_file "data/words-by-frequency-with-pinyin.csv", rows
 
 mark_to_number = (a) ->
   a.split(" ").map((a) -> pinyin_split2(a).map(pinyin_utils.markToNumber).join("")).join(" ")
@@ -478,7 +492,7 @@ hanzi_to_pinyin = (a) ->
 
 dsv_add_example_words = () ->
   dictionary = dictionary_index_word_pinyin_f 0, 1
-  words = read_csv_file "data/words-by-frequency-pinyin-translation.csv"
+  words = read_csv_file "data/words-by-frequency-with-pinyin-translation.csv"
   rows = read_csv_file(0).map (a) ->
     char_words = words.filter((b) -> b[0].includes a[0])
     unless char_words.length
@@ -489,7 +503,7 @@ dsv_add_example_words = () ->
 
 update_characters_by_pinyin_learning = ->
   by_pinyin = {}
-  chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
   chars.forEach (a) -> object_array_add(by_pinyin, a[1], a[0])
   rows = []
   for pinyin, chars_array of by_pinyin
@@ -503,7 +517,7 @@ update_characters_by_pinyin_learning = ->
 
 update_characters_by_pinyin = () ->
   by_pinyin = {}
-  chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
   chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
   rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
@@ -513,7 +527,7 @@ update_characters_by_pinyin = () ->
   # only common characters
   common_limit = 2000
   by_pinyin = {}
-  chars = get_all_characters_and_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
   chars = chars.slice(0, common_limit)
   chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
@@ -611,7 +625,7 @@ get_character_syllables_tones_count_index = () ->
 
 get_character_example_words_f = () ->
   dictionary = dictionary_index_word_pinyin_f 0, 1
-  words = read_csv_file "data/words-by-frequency-pinyin-translation.csv"
+  words = read_csv_file "data/words-by-frequency-with-pinyin-translation.csv"
   (char, pinyin, frequency_limit) ->
     char_word = words.find((b) -> b[0] is char)
     unless char_word
@@ -672,6 +686,26 @@ update_pinyin_learning = () ->
   rows = add_sort_field add_word_choices rows
   write_csv_file "data/pinyin-learning.csv", rows
 
+get_char_pinyin = do ->
+  all_chars_and_pinyin = get_all_characters_with_pinyin()
+  char_pinyin_index = index_key_value all_chars_and_pinyin, 0, 1
+  dictionary = dictionary_index_word_f 0
+  (a) ->
+    b = dictionary a
+    return b[0][1] if b && b.length
+    b = char_pinyin_index[a]
+    return b if b
+
+get_char_decompositions = do ->
+  decompositions = get_full_decompositions_index()
+  strokes = get_stroke_count_index()
+  get_char_pinyin()
+  (a) ->
+    b = decompositions[a]
+    return [] unless b
+    b = b.filter((a) -> !strokes[a] || strokes[a] > 1)
+    b.map((a) -> [a, get_char_pinyin(a)]).filter (a) -> a[1]
+
 characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array, ...]
   reading_count_index = get_character_reading_count_index()
   character_by_reading_index = get_character_by_reading_index()
@@ -687,13 +721,9 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
       a
   rows = add_same_reading_characters(rows)
   add_contained_characters = (rows) ->
-    decompositions = get_full_decompositions_index()
-    all_chars_and_pinyin = new get_all_standard_characters_with_pinyin()
-    dictionary = dictionary_index_word_f 0
-    strokes = get_stroke_count_index()
     rows.map (a) ->
-      b = (decompositions[a[0]] || []).filter((a) -> strokes[a] && strokes[a] > 1).map((a) -> dictionary a).filter (a) -> a
-      c = b.map((c) -> c[0].slice(0, 2).join(" ")).join(", ")
+      b = get_char_decompositions a[0]
+      c = b.map((c) -> c.join(" ")).join(", ")
       a.push c
       a
   rows = add_contained_characters rows
@@ -733,38 +763,19 @@ fix_dependency_order = (items, char_key) ->
       i += 1
   items
 
-# test examples: 刀 and 那
-sort_by_frequency_and_dependency_f = (char_key) ->
+# test examples: 刀 < 那
+sort_by_frequency_f = (char_key) ->
   fi = get_character_frequency_index()
   (a, b) -> fi[a[char_key]] - fi[b[char_key]]
 
-sort_by_frequency_and_stroke_count_f = (char_key) ->
-  frequency_index = get_character_frequency_index()
-  stroke_count_index = get_stroke_count_index()
-  stroke_counts = Object.values(stroke_count_index)
-  mu_s = stroke_counts.reduce(((a, b) -> a + b), 0) / stroke_counts.length
-  sigma_s = Math.sqrt(stroke_counts.reduce(((a, b) -> a + (b - mu_s) ** 2), 0) / stroke_counts.length)
-  frequency_ranks = ((frequency_index[ch] or stroke_counts.length) for ch of stroke_count_index)
-  log_freq_ranks = (Math.log(r) for r in frequency_ranks)
-  mu_l = log_freq_ranks.reduce(((a, b) -> a + b), 0) / log_freq_ranks.length
-  sigma_f = Math.sqrt(log_freq_ranks.reduce(((a, b) -> a + (b - mu_l) ** 2), 0) / log_freq_ranks.length)
-  k = sigma_s / sigma_f
-  soften_stroke = (s) ->
-    diff = s - mu_s
-    Math.sign(diff) * Math.log(1 + Math.abs(diff)) / Math.log(1 + sigma_s)
-  compute_sort_value = (ch) ->
-    soften_stroke(stroke_count_index[ch]) + k * Math.log(frequency_index[ch])
-  (a, b) -> compute_sort_value(a[char_key]) - compute_sort_value(b[char_key])
-
-sort_by_frequency_and_stroke_count = (data, char_key) ->
-  data.sort sort_by_frequency_and_stroke_count_f char_key
+sort_by_frequency = (data, char_key) -> data.sort sort_by_frequency_f char_key
 
 sort_by_frequency_and_dependency = (data, char_key) ->
-  data = data.sort sort_by_frequency_and_dependency_f char_key
+  data = data.sort sort_by_frequency_f char_key
   data = fix_dependency_order data, char_key
 
-update_character_learning = ->
-  rows = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(", ")[0]]
+update_characters_learning = ->
+  rows = get_all_standard_characters_with_pinyin()
   rows = sort_by_frequency_and_dependency rows, 0
   rows = characters_add_learning_data rows
   write_csv_file "data/characters-learning.csv", rows
@@ -985,7 +996,7 @@ run = () ->
   #sort_standard_character_readings()
   #update_syllables_character_count()
   #update_character_reading_count()
-  #update_character_learning()
+  #update_characters_learning()
   #update_syllables_with_tones_by_reading()
   #console.log "/" + hanzi_unicode_ranges_regexp + "/gu"
   #display_all_characters()
@@ -1010,7 +1021,7 @@ module.exports = {
   hanzi_to_pinyin
   mark_to_number
   update_characters_by_pinyin
-  update_character_learning
+  update_characters_learning
   update_pinyin_learning
   grade_text
   grade_text_files
