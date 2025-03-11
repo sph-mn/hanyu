@@ -215,7 +215,10 @@ get_frequency_index = () ->
   frequency_index
 
 get_all_standard_characters = () -> read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
-get_all_standard_characters_with_pinyin = () -> read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(",")[0]]
+get_all_standard_characters_with_pinyin = () ->
+  a = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(",")[0]]
+  b = read_csv_file("data/additional-characters.csv").map (a) -> [a[0], a[1].split(",")[0]]
+  a.concat b
 get_all_characters = () -> read_csv_file("data/characters-strokes-decomposition.csv").map (a) -> a[0]
 display_all_characters = () -> console.log get_all_characters().join("")
 
@@ -228,6 +231,8 @@ get_all_characters_with_pinyin = () ->
     pinyin = pinyin_split2 a[1]
     chars.forEach (a, i) -> result.push [a + pinyin[i], a, pinyin[i]]
   a = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
+  b = read_csv_file("data/additional-characters.csv")
+  a = b.concat a
   a.forEach (a) -> a[1].split(", ").forEach (pinyin) -> result.push [a[0] + pinyin, a[0], pinyin]
   delete_duplicates_stable_with_key(result, 0).map (a) -> [a[1], a[2].replace("u:", "ü")]
 
@@ -699,7 +704,6 @@ get_char_pinyin = do ->
 get_char_decompositions = do ->
   decompositions = get_full_decompositions_index()
   strokes = get_stroke_count_index()
-  get_char_pinyin()
   (a) ->
     b = decompositions[a]
     return [] unless b
