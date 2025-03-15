@@ -5,21 +5,43 @@ dictionary that sorts results by word frequency and character count, with charac
 
 # data files
 see under data/
-* frequency-pinyin-translation.csv: words with pinyin and translation sorted by frequency
+* words-by-frequency.csv
+* words-by-frequency-with-pinyin.csv
+* table-of-general-standard-chinese-characters.csv
+* additional-characters.csv
+* characters-strokes-decomposition.csv
+* characters-pinyin-count.csv
 * cedict.csv: filtered csv version of cedict with one translation per line
-* characters-strokes-decomposition.csv: characters with stroke count and composition
-* table-of-general-standard-chinese-characters.csv: the official character list including pronunciations
+* hsk.csv: hsk 1-9
+* words-by-frequency-with-pinyin-translation.csv
+* hsk-pinyin-translation.csv
+* characters-by-pinyin-learning.csv
+* characters-by-pinyin-learning-rare.csv
 * characters-by-pinyin.csv
-* words-by-type/: separated by verb, noun, adjective, and so on
-* hsk.csv and hsk-pinyin-translations.csv
-* characters-learning.csv: characters sorted by frequency, with readings and number of words with this reading, false pronunciations for guessing and syllable commonness among all characters, compositions, character meaning, and example words. suitable as the basis for an anki deck
-* pinyin-learning.csv: a reverse version of characters-learning that maps word pinyin and choices to word and translation
-* characters-repeated-components.csv: characters that consist of a repetition of another character
-* hanzi.apkg, pinyin.apkg: anki decks based on characters-learning.csv and pinyin-learning.csv
+* characters-by-pinyin-by-count.csv
+* characters-by-pinyin-common.csv
+* characters-overlap.csv
+* characters-overlap-common.csv
+* syllables-tones-character-counts.csv
+* pinyin-learning.csv
+* characters-learning.csv
+* characters-learning-reduced.csv
+* syllables-character-counts.csv
+* syllables-tones-character-counts-common.csv
+* extra-components.csv
+* extra-stroke-counts.csv
+* characters-strokes-decomposition-new.csv
+* characters-composition.csv
+* composition-hierarchy.txt
+* words-by-type/
 * characters-svg-animcjk-simple.json: contains svg for the individual strokes as simple lines and the directions of strokes
   * field 1: paths ordered by stroke order
   * field 2: direction vectors for each stroke
-* ... and more
+* anki decks
+  * hanzi.apkg, character, words -> pinyin, example words with translation, components with pinyin
+  * pinyin.apkg, pinyin -> word, translation
+  * rares.apkg
+* ... and [more](https://github.com/sph-mn/hanyu/tree/master/data)
 
 # data sources
 * [character decompositions](https://en.wiktionary.org)

@@ -923,7 +923,7 @@ update_composition_hierarchy = ->
   fs.writeFileSync "data/composition-hierarchy.txt", string
 
 update_characters_data = ->
-  graphics_data = JSON.parse read_text_file "data/svg-graphics-simple.json"
+  graphics_data = JSON.parse read_text_file "data/characters-svg-animcjk-simple.json"
   character_data = read_csv_file "data/characters-strokes-decomposition.csv"
   compositions_index = get_compositions_index()
   dictionary_lookup = dictionary_index_word_f 0
@@ -940,11 +940,7 @@ update_characters_data = ->
       pinyin = entry[1]
     else pinyin = ""
     result.push [char, strokes, pinyin, decomposition || "", compositions.join(""), svg_paths]
-  character_compare = sort_by_character_frequency_f(character_frequency_index, 0)
-  result.sort (a, b) ->
-    if not a[5] and b[5] then return 1
-    if a[5] and not b[5] then return -1
-    character_compare a, b
+  result = sort_by_character_frequency character_frequency_index, 0, result
   fs.writeFileSync "data/characters-svg.json", JSON.stringify result
 
 get_common_words_per_character = (max_words_per_char, max_frequency) ->
