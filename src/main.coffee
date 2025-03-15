@@ -555,6 +555,25 @@ index_key_value = (a, key_key, value_key) ->
   a.forEach (a) -> b[a[key_key]] = a[value_key]
   b
 
+update_compositions = ->
+  rows = ([a, b.join("")] for a, b of get_compositions_index())
+  write_csv_file "data/characters-composition.csv", rows
+
+get_compositions_index = ->
+  decompositions = read_csv_file "data/characters-strokes-decomposition.csv"
+  decompositions = ([a, c?.split("") || []] for [a, b, c] in decompositions)
+  compositions = {}
+  for a in decompositions
+    [char, a] = a
+    for component in a
+      c = compositions[component]
+      if c
+        unless c.includes char
+          c.push char
+          compositions[component] = c
+      else compositions[component] = [char]
+  compositions
+
 get_decompositions_index = () -> index_key_value read_csv_file("data/characters-strokes-decomposition.csv"), 0, 2
 
 get_full_decompositions = () ->
@@ -578,45 +597,6 @@ get_stroke_count_index = (a) ->
   result = {}
   result[a[0]] = parseInt a[1] for a in data
   result
-
-update_character_overlap = () ->
-  # 大犬太 草早旱
-  stroke_count_index = get_stroke_count_index()
-  decompositions_index = get_decompositions_index()
-  words = Object.keys(decompositions_index)
-  character_frequency_index = get_character_frequency_index()
-  similarities = words.map (a) ->
-    #return [] unless a[0] == "大"
-    #return [] unless a == "口"
-    #return [] unless a[0] == "草"
-    aa = decompositions_index[a]?.split("").filter((a) -> a.match hanzi_regexp)
-    a_strokes = parseInt stroke_count_index[a]
-    return unless aa
-    similarities = words.map (b) ->
-      #return [] unless b == "哩"
-      return if a == b
-      bb = decompositions_index[b]?.split("").filter (a) -> a.match hanzi_regexp
-      return unless bb
-      inclusion = bb.includes a
-      if inclusion
-        b_strokes = parseInt stroke_count_index[b]
-        strokes = Math.abs a_strokes - b_strokes
-        intersection = array_intersection aa, bb
-        overlap = intersection.length / Math.max(aa.length, bb.length)
-        frequency = character_frequency_index[b] || words.length
-        [a, b, overlap, strokes, frequency]
-    similarities = similarities.filter (a) -> a
-    similarities.sort (a, b) -> a[4] - b[4] || b[2] - a[2] || a[3] - b[3]
-  similarities = similarities.filter (a) -> a && a.length
-  rows = similarities.map (a) ->
-    b = a.map (a) -> a[1]
-    [a[0][0], b.join("")]
-  rows = rows.sort (a, b) -> b[1].length - a[1].length
-  write_csv_file "data/characters-overlap.csv", rows
-  rows = similarities.map (a) ->
-    b = a.filter((a) -> a[4] < 4000).map (a) -> a[1]
-    [a[0][0], b.join("")]
-  write_csv_file "data/characters-overlap-common.csv", rows
 
 get_character_reading_count_index = () ->
   result = {}
@@ -883,25 +863,6 @@ find_component_repetitions = () ->
       if 1 == delete_duplicates(split_chars(b)).length
         console.log a[0], b
 
-update_compositions = ->
-  rows = ([a, b.join("")] for a, b of get_compositions_index())
-  write_csv_file "data/characters-composition.csv", rows
-
-get_compositions_index = ->
-  decompositions = read_csv_file "data/characters-strokes-decomposition.csv"
-  decompositions = ([a, c?.split("") || []] for [a, b, c] in decompositions)
-  compositions = {}
-  for a in decompositions
-    [char, a] = a
-    for component in a
-      c = compositions[component]
-      if c
-        unless c.includes char
-          c.push char
-          compositions[component] = c
-      else compositions[component] = [char]
-  compositions
-
 update_composition_hierarchy = ->
   compositions = get_compositions_index()
   build = (a) ->
@@ -1004,7 +965,6 @@ run = () ->
 
 module.exports = {
   update_characters_by_pinyin_learning
-  update_character_overlap
   cedict_filter_only
   clean_frequency_list
   dsv_add_translations
