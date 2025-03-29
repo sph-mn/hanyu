@@ -288,13 +288,15 @@ update_character_reading_count = () ->
 
 sort_by_index_and_character_f = (index, character_key) ->
   # {character: integer, ...}, any -> function(a, b)
+  f = sort_by_character_f index
+  (a, b) -> f a[character_key], b[character_key]
+
+sort_by_character_f = (index) ->
   (a, b) ->
-    ca = a[character_key]
-    cb = b[character_key]
-    ia = index[ca]
-    ib = index[cb]
+    ia = index[a]
+    ib = index[b]
     if ia is undefined and ib is undefined
-      (ca.length - cb.length) || ca.localeCompare(cb) || cb.localeCompare(ca)
+      (a.length - b.length) || a.localeCompare(b) || b.localeCompare(a)
     else if ia is undefined then 1
     else if ib is undefined then -1
     else ia - ib
@@ -555,10 +557,6 @@ index_key_value = (a, key_key, value_key) ->
   a.forEach (a) -> b[a[key_key]] = a[value_key]
   b
 
-update_compositions = ->
-  rows = ([a, b.join("")] for a, b of get_compositions_index())
-  write_csv_file "data/characters-composition.csv", rows
-
 get_compositions_index = ->
   decompositions = read_csv_file "data/characters-strokes-decomposition.csv"
   decompositions = ([a, c?.split("") || []] for [a, b, c] in decompositions)
@@ -572,6 +570,9 @@ get_compositions_index = ->
           c.push char
           compositions[component] = c
       else compositions[component] = [char]
+  frequency_sorter = sort_by_character_f get_character_frequency_index()
+  for a, b of compositions
+    compositions[a] = b.sort frequency_sorter
   compositions
 
 get_decompositions_index = () -> index_key_value read_csv_file("data/characters-strokes-decomposition.csv"), 0, 2
@@ -863,25 +864,16 @@ find_component_repetitions = () ->
       if 1 == delete_duplicates(split_chars(b)).length
         console.log a[0], b
 
-update_composition_hierarchy = ->
+update_characters_contained = ->
   compositions = get_compositions_index()
-  build = (a) ->
-    b = [a]
-    for c in compositions[a] when compositions[a]
-      b.push(if compositions[c] then build(c) else c)
-    b
-  build_string = (a, root = true) ->
-    if root
-      lines = for item in a
-        line = build_string(item, false)
-        if line.length > 1
-          line = line[0] + ' ' + line.substring(1)
-        line
-      lines.join "\n"
-    else
-      ((if Array.isArray(c) then "(" + build_string(c, false) + ")" else c) for c in a).join ""
-  string = build_string (build a for a of compositions when a.match(hanzi_regexp))
-  fs.writeFileSync "data/composition-hierarchy.txt", string
+  exclusions = "一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹八凵儿囗丁"
+  lines = []
+  for char of compositions when char.match(hanzi_regexp) and not exclusions.includes(char)
+    parts = [char].concat compositions[char]
+    line = parts[0] + (if parts.length > 1 then " " + parts.slice(1).join("") else "")
+    lines.push line
+  lines.sort (a, b) -> a.length - b.length
+  fs.writeFileSync "data/characters-contained.txt", lines.join "\n"
 
 update_characters_data = ->
   graphics_data = JSON.parse read_text_file "data/characters-svg-animcjk-simple.json"
@@ -940,7 +932,7 @@ update_gridlearner_data = ->
     write_csv_file "data/gridlearner/word-translation-#{ii}.dsv", data
 
 run = () ->
-  update_composition_hierarchy()
+  update_characters_contained()
   #update_characters_by_pinyin_learning()
   #update_gridlearner_data()
   #console.log "コ刂".match hanzi_regexp
