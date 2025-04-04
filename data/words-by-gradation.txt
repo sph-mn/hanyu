@@ -1,0 +1,154 @@
+indefinite, universal, negative pronouns
+大家 da4jia1 everyone
+所有人 suo3you3ren2 "everyone, all people"
+每个人 mei3ge4ren2 "every person"
+任何人 ren4he2ren2 anyone
+谁都 shei2dou1 "anyone, everyone"
+有人 you3ren2 someone
+某人 mou3ren2 "someone, a certain person"
+没人 mei2ren2 "no one"
+没有人 mei2you3ren2 "no one, nobody"
+无人 wu2ren2 "no one"
+
+time, temporal references
+最近 zui4jin4 recently
+近来 jin4lai2 lately
+如今 ru2jin1 nowadays
+这阵子 zhe4zhen4zi "these days"
+很快 hen3kuai4 soon
+一会儿 yi1hui4r "in a moment"
+以前 yi3qian2 "in the past"
+将来 jiang1lai2 "in the future"
+目前 mu4qian2 "at present"
+当前 dang1qian2 currently
+现在 xian4zai4 now
+暂时 zan4shi2 temporarily
+
+frequency, repetition
+总是 zong3shi4 always
+常常 chang2chang2 "often"
+经常 jing1chang2 frequently
+有时候 you3shi2hou4 "sometimes"
+有时 you3shi2 sometimes
+偶尔 ou3er3 occasionally
+不常 bu4chang2 seldom
+很少 hen3shao3 rarely
+几乎不 ji1hu1bu4 hardly
+从不 cong2bu4 never
+从来不 cong2lai2bu4 never
+一向 yi2xiang4 "always"
+一直 yi4zhi2 consistently
+
+degree constructions
+稍微 shao1wei1 slightly
+有点儿 you3dian3r "a bit"
+一点点 yi1dian3dian3 "a tiny bit"
+非常 fei1chang2 very
+十分 shi2fen1 "very, extremely"
+极其 ji2qi2 exceedingly
+比较 bi3jiao4 relatively
+尤其 you2qi2 especially
+更 geng4 more
+更加 geng4jia1 "even more"
+最 zui4 "the most"
+部分地 bu4fen4de partly
+微妙地 wei1miao4de subtly
+稍稍 shao1shao1 "slightly, just a little"
+略微 lüèwei1 "a bit, slightly"
+太 tai4 "too, overly"
+挺 ting3 "quite, pretty"
+相当 xiang1dang1 "quite, considerably"
+过于 guo4yu2 "too much"
+过分 guo4fen4 "excessively"
+异常 yi4chang2 "exceptionally, unusually"
+极了 ji2le "extremely"
+有些 you3xie1 "somewhat"
+
+aspectual gradation
+逐渐 zhu2jian4 gradually
+一点一点 yi4dian3yi4dian3 "little by little"
+越来越 yue4lai2yue4 "more and more"
+日益 ri4yi4 "increasingly"
+突然 tu1ran2 suddenly
+一下子 yi1xia4zi "all at once"
+
+possibility, certainty
+也许 ye3xu3 maybe
+可能 ke3neng2 "possible, probably"
+应该 ying1gai1 should
+必然 bi4ran2 inevitably
+肯定 ken3ding4 "definitely, certainly"
+一定 yi2ding4 certainly, must
+大概 da4gai4 "probably, approximately"
+似乎 si4hu1 "it seems"
+明显地 ming2xian3de obviously
+隐约 yin3yue1 "faintly, vaguely"
+从不 cong2bu4 never
+不可能 bu4ke3neng2 impossible
+绝不 jue2bu4 "absolutely not"
+或许 huo4xu3 maybe
+未必 wei4bi4 "not necessarily"
+不一定 bu4yi2ding4 "not necessarily"
+
+contrast, concession, turn of thought
+但是 dan4shi4 but
+不过 bu2guo4 however
+然而 ran2er2 nevertheless
+虽然 sui1ran2 although
+尽管 jin3guan3 "even though"
+即使 ji2shi3 "even if"
+反而 fan3er2 "on the contrary"
+却 que4 "yet, however"
+
+cause, reason, purpose
+因为 yin1wei4 because
+由于 you2yu2 "due to"
+因此 yin1ci3 therefore
+所以 suo3yi3 so
+为了 wei4le "in order to"
+导致 dao3zhi4 "to lead to"
+结果 jie2guo3 "as a result"
+
+focus, emphasis, restriction
+只是 zhi3shi4 "only, just"
+仅仅 jin3jin3 "merely, just"
+特别 te4bie2 especially
+主要 zhu3yao4 mainly
+甚至 shen4zhi4 even
+连 lian2 even
+只要 zhi3yao4 "as long as"
+
+sequence, logic, ordering
+首先 shou3xian1 "first of all"
+然后 ran2hou4 then
+接着 jie1zhe next
+最后 zui4hou4 finally
+于是 yu2shi4 "so, as a result"
+再者 zai4zhe3 "moreover, next"
+
+lexical scales
+大小 da4xiao3 size
+小 xiao3 small
+中等 zhong1deng3 medium
+大 da4 large
+数量 shu4liang4 amount
+少 shao3 few
+一些 yi1xie1 some
+多 duo1 many
+温度 wen1du4 temperature
+冷 leng3 cold
+凉 liang2 cool
+温 wen1 warm
+热 re4 hot
+速度 su4du4 speed
+慢 man4 slow
+普通 pu3tong1 "ordinary, average"
+快 kuai4 fast
+强度 qiang2du4 strength
+弱 ruo4 weak
+一般 yi4ban1 average
+强 qiang2 strong
+重要性 zhong4yao4xing4 importance
+不重要 bu2zhong4yao4 unimportant
+重要 zhong4yao4 important
+非常重要 fei1chang2zhong4yao4 "very important"
