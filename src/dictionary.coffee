@@ -33,6 +33,8 @@ unicode_ranges_pattern = (a, is_reject) -> "[" + (if is_reject then "^" else "")
 unicode_ranges_regexp = (a, is_reject, regexp_flags) -> new RegExp unicode_ranges_pattern(a, is_reject), "u" + (regexp_flags || "")
 non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
 latin_regexp = /([a-z]+)([0-5])?$/i
+delete_duplicates = (a) -> [...new Set(a)]
+split_chars = (a) -> [...a]
 
 class trie_node_class
   constructor: ->
@@ -92,6 +94,7 @@ class character_search_class
       placed_positions.push [x, y]
     result + "</svg>"
   filter: =>
+    # support pinyin and characters, split at non-hanzi, sort frequent first, only use pinyin prefix
     dom.character_results.innerHTML = ""
     values = dom.character_input.value.split(",").map (a) -> a.trim()
     latin_values = []
@@ -104,11 +107,13 @@ class character_search_class
         continue unless syllable
         [_, syllable, tone] = syllable
         if @is_syllable syllable
-          latin_values.push new RegExp syllable + (tone || "[0-5]")
+          latin_values.push new RegExp "^" + syllable + (tone || "[0-5]")
       else
-        if 1 < a.length then hanzi_values = hanzi_values.concat Array.from a
+        if 1 < a.length then hanzi_values = hanzi_values.concat split_chars a
         else hanzi_values.push a
     return unless latin_values.length or hanzi_values.length
+    latin_values = delete_duplicates latin_values
+    hanzi_values = delete_duplicates hanzi_values
     matches = []
     for value in latin_values
       for data in @character_data
@@ -210,7 +215,7 @@ class word_search_class
     values = dom.word_input.value.split(",").map (a) -> a.trim()
     values = values.filter (a) -> a.length > 0
     return unless values.length
-    regexps = values.map((value) ->
+    regexps = values.map((value) =>
       if dom.search_split.checked and !dom.search_translations.checked
         characters = Array.from value.replace(/[^\u4E00-\u9FA5]/ig, "")
         words = []
@@ -221,6 +226,8 @@ class word_search_class
             words.push characters.slice(i, j).join("")
             j += 1
           i += 1
+        words = delete_duplicates words
+        words = words.sort (a, b) -> b.length - a.length
         regexp = new RegExp("(^" + words.join("$)|(^") + "$)")
         (entry) -> regexp.test entry[0]
       else if /[a-zA-Z0-9]/.test(value)
@@ -237,14 +244,15 @@ class word_search_class
         regexp = new RegExp(value)
         (entry) -> regexp.test(entry[0])
     ).filter((a) -> a)
-    html = ""
-    matches_count = 0
+    matches = []
     for entry in @word_data
-      break unless matches_count < @result_limit
+      break unless matches.length < @result_limit
       for matcher in regexps
-        if matcher entry
-          html += @make_result_html entry
-          matches_count += 1
+        matches.push entry if matcher entry
+    if dom.search_split.checked
+      matches = matches.sort (a, b) -> b[0].length - a[0].length
+    html = ""
+    html += @make_result_html entry for entry in matches
     dom.word_results.innerHTML = html || "no word results"
   constructor: (app) ->
     param_input = app.url_params.get "word_input"
