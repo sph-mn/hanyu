@@ -217,24 +217,31 @@ get_frequency_index = () ->
 get_all_standard_characters = () -> read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
 get_all_standard_characters_with_pinyin = () ->
   a = read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> [a[0], a[1].split(",")[0]]
-  b = read_csv_file("data/additional-characters.csv").map (a) -> [a[0], a[1].split(",")[0]]
+  b = read_csv_file("data/additional-characters.csv").filter((a) -> !character_exclusions.includes(a[0])).map (a) -> [a[0], a[1].split(",")[0]]
   a.concat b
 get_all_characters = () -> read_csv_file("data/characters-strokes-decomposition.csv").map (a) -> a[0]
 display_all_characters = () -> console.log get_all_characters().join("")
 
 get_all_characters_with_pinyin = () ->
-  # sorted by frequency
   result = []
-  a = read_csv_file "data/words-by-frequency-with-pinyin.csv"
-  a.forEach (a) ->
-    chars = split_chars a[0]
-    pinyin = pinyin_split2 a[1]
-    chars.forEach (a, i) -> result.push [a + pinyin[i], a, pinyin[i]]
+  #a = read_csv_file "data/words-by-frequency-with-pinyin.csv"
+  #a.forEach (a) ->
+  #  chars = split_chars a[0]
+  #  pinyin = pinyin_split2 a[1]
+  #  chars.forEach (a, i) -> result.push [a + pinyin[i], a, pinyin[i]]
   a = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
-  b = read_csv_file("data/additional-characters.csv")
+  b = read_csv_file "data/additional-characters.csv"
   a = b.concat a
-  a.forEach (a) -> a[1].split(", ").forEach (pinyin) -> result.push [a[0] + pinyin, a[0], pinyin]
+  a.forEach (b) ->
+    pinyin = b[1].split(", ")[0]
+    result.push [b[0] + pinyin, b[0], pinyin]
   delete_duplicates_stable_with_key(result, 0).map (a) -> [a[1], a[2].replace("u:", "ü")]
+
+get_character_by_reading_index = () ->
+  chars = get_all_characters_with_pinyin()
+  result = {}
+  chars.forEach (a) -> object_array_add result, a[1], a[0]
+  result
 
 get_frequency_characters_and_pinyin = () ->
   # with duplicates. use case: count character reading frequency
@@ -522,16 +529,39 @@ update_characters_by_pinyin_learning = ->
   rows = (a for a in rows.reverse() when a[2] < 3)
   write_csv_file("data/characters-by-pinyin-learning-rare.csv", rows)
 
-update_characters_by_pinyin = () ->
-  by_pinyin = {}
-  chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
-  chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
-  rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
-  rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
-  write_csv_file "data/characters-by-pinyin.csv", rows
-  rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
-  write_csv_file "data/characters-by-pinyin-by-count.csv", rows
-  # only common characters
+to_fullwidth = (str) ->
+  str.replace /./g, (char) ->
+    code = char.charCodeAt 0
+    if char is " "
+      "　"
+    else if code >= 33 and code <= 126
+      String.fromCharCode(code - 33 + 65281)
+    else
+      char
+
+format_lines_vertically = (rows) ->
+  columns = rows.map ([syllable, chars]) -> [split_chars(to_fullwidth(syllable)), split_chars(to_fullwidth(chars))]
+  syllable_max_height = Math.max.apply(null, columns.map (a) -> a[0].length)
+  chars_max_height = Math.max.apply(null, columns.map (a) -> a[1].length)
+  delimiter = "　"
+  csv_lines = []
+  for i in [0...syllable_max_height]
+    row = columns.map (a) -> if a[0][i]? then a[0][i] else ""
+    csv_lines.push row.join delimiter
+  for i in [0...chars_max_height]
+    row = columns.map (a) -> if a[1][i]? then a[1][i] else ""
+    csv_lines.push row.join delimiter
+  csv_lines
+
+update_characters_by_pinyin_html = (rows) ->
+  font = read_text_file "src/NotoSansSC-Light.ttf.base64"
+  html = read_text_file "src/characters-by-pinyin-template.html"
+  content = rows.map (a) -> "<b><b>#{a[0]}</b><b>#{a[1]}</b></b>"
+  content = content.join "\n"
+  html = replace_placeholders html, {font, content}
+  fs.writeFileSync "compiled/characters-by-pinyin.html", html
+
+update_characters_by_pinyin_common = (rows) ->
   common_limit = 2000
   by_pinyin = {}
   chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
@@ -540,6 +570,21 @@ update_characters_by_pinyin = () ->
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
   rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
   write_csv_file "data/characters-by-pinyin-common.csv", rows
+
+update_characters_by_pinyin_vertical = (rows) ->
+  vertical_rows = format_lines_vertically rows
+  fs.writeFileSync "data/characters-by-pinyin-by-count-vertical.csv", vertical_rows.join "\n"
+
+update_characters_by_pinyin = () ->
+  by_pinyin = {}
+  chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
+  rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
+  rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
+  write_csv_file "data/characters-by-pinyin.csv", rows
+  update_characters_by_pinyin_html rows
+  rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
+  write_csv_file "data/characters-by-pinyin-by-count.csv", rows
 
 http_get = (url) ->
   new Promise (resolve, reject) ->
@@ -631,13 +676,6 @@ sort_standard_character_readings = () ->
     a
   write_csv_file path, rows
 
-get_character_by_reading_index = () ->
-  result = {}
-  read_csv_file("data/table-of-general-standard-chinese-characters.csv").forEach (a) ->
-    pinyin = a[1].split(", ")[0]
-    object_array_add result, pinyin, a[0]
-  result
-
 add_sort_field = (rows) ->
   a.push i for a, i in rows
   rows
@@ -698,7 +736,7 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
   rows = array_deduplicate_key(rows, (a) -> a[0])
   syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
   add_same_reading_characters = (rows) ->
-    max_same_reading_characters = 8
+    max_same_reading_characters = 24
     rows.map (a) ->
       b = array_shuffle(character_by_reading_index[a[1]] or [])
       b = b.filter((b) -> a[0] != b)
@@ -864,11 +902,12 @@ find_component_repetitions = () ->
       if 1 == delete_duplicates(split_chars(b)).length
         console.log a[0], b
 
+character_exclusions = "一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹八凵儿囗丁乁"
+
 update_characters_contained = ->
   compositions = get_compositions_index()
-  exclusions = "一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹八凵儿囗丁"
   lines = []
-  for char of compositions when char.match(hanzi_regexp) and not exclusions.includes(char)
+  for char of compositions when char.match(hanzi_regexp) and not character_exclusions.includes(char)
     parts = [char].concat compositions[char]
     line = parts[0] + (if parts.length > 1 then " " + parts.slice(1).join("") else "")
     lines.push line
@@ -931,8 +970,13 @@ update_gridlearner_data = ->
     ii = get_batch_index i
     write_csv_file "data/gridlearner/word-translation-#{ii}.dsv", data
 
+syllables_prefix_hierarchy = ->
+  syllables = read_text_file("data/syllables.txt").split " "
+  console.log syllables
+
 run = () ->
-  update_characters_contained()
+  syllables_prefix_hierarchy()
+  #update_characters_contained()
   #update_characters_by_pinyin_learning()
   #update_gridlearner_data()
   #console.log "コ刂".match hanzi_regexp
