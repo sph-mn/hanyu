@@ -553,23 +553,33 @@ format_lines_vertically = (rows) ->
     csv_lines.push row.join delimiter
   csv_lines
 
-update_characters_by_pinyin_html = (rows) ->
-  font = read_text_file "src/NotoSansSC-Light.ttf.base64"
-  html = read_text_file "src/characters-by-pinyin-template.html"
-  content = rows.map (a) -> "<b><b>#{a[0]}</b><b>#{a[1]}</b></b>"
-  content = content.join "\n"
-  html = replace_placeholders html, {font, content}
-  fs.writeFileSync "compiled/characters-by-pinyin.html", html
-
-update_characters_by_pinyin_common = (rows) ->
-  common_limit = 2000
+get_characters_by_pinyin_rows = ->
   by_pinyin = {}
   chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
-  chars = chars.slice(0, common_limit)
   chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
-  rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
-  write_csv_file "data/characters-by-pinyin-common.csv", rows
+  rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
+
+update_character_table_html = (pinyin, contained, pinyin_by_count) ->
+  make_table = (rows, name) ->
+    rows = rows.map (a) -> "<b><b>#{a[0]}</b><b>#{a[1]}</b></b>"
+    "<div class=\"#{name}\">" + rows.join("\n") + "</div>"
+  [
+    make_table(pinyin, "pinyin")
+    make_table(pinyin_by_count, "pinyin_by_count")
+    make_table(contained, "contained")
+  ].join "\n"
+
+update_character_table = ->
+  pinyin = get_characters_by_pinyin_rows()
+  pinyin_by_count = pinyin.slice().sort (a, b) -> a[1].length - b[1].length
+  contained = get_characters_contained_rows()
+  contained = ([a[0], a[1].join("")] for a in contained)
+  content = update_character_table_html pinyin, contained, pinyin_by_count
+  font = read_text_file "src/NotoSansSC-Light.ttf.base64"
+  html = read_text_file "src/character-table-template.html"
+  html = replace_placeholders html, {font, content}
+  fs.writeFileSync "compiled/character-table.html", html
 
 update_characters_by_pinyin_vertical = (rows) ->
   vertical_rows = format_lines_vertically rows
@@ -582,7 +592,6 @@ update_characters_by_pinyin = () ->
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
   rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
   write_csv_file "data/characters-by-pinyin.csv", rows
-  update_characters_by_pinyin_html rows
   rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
   write_csv_file "data/characters-by-pinyin-by-count.csv", rows
 
@@ -808,7 +817,6 @@ update_characters_learning = ->
 update_syllables_character_count = () ->
   # number of characters with the same reading
   chars = read_csv_file("data/characters-by-pinyin.csv").map (a) -> [a[0], a[1].length]
-  chars_common = read_csv_file("data/characters-by-pinyin-common.csv").map (a) -> [a[0], a[1].length]
   chars_without_tones = chars.map (a) -> [a[0].replace(/[0-5]/g, ""), a[1]]
   get_data = (chars) ->
     counts = {}
@@ -820,7 +828,6 @@ update_syllables_character_count = () ->
     chars.map((a) -> [a, counts[a]]).sort (a, b) -> b[1] - a[1]
   write_csv_file "data/syllables-tones-character-counts.csv", get_data(chars)
   write_csv_file "data/syllables-character-counts.csv", get_data(chars_without_tones)
-  write_csv_file "data/syllables-tones-character-counts-common.csv", get_data(chars_common)
 
 grade_text_files = (paths) ->
   paths.forEach (a) -> console.log grade_text(read_text_file(a)) + " " + path.basename(a)
@@ -904,15 +911,16 @@ find_component_repetitions = () ->
 
 character_exclusions = "一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹八凵儿囗丁乁"
 
-update_characters_contained = ->
+get_characters_contained_rows = ->
   compositions = get_compositions_index()
-  lines = []
+  rows = []
   for char of compositions when char.match(hanzi_regexp) and not character_exclusions.includes(char)
-    parts = [char].concat compositions[char]
-    line = parts[0] + (if parts.length > 1 then " " + parts.slice(1).join("") else "")
-    lines.push line
-  lines.sort (a, b) -> a.length - b.length
-  fs.writeFileSync "data/characters-contained.txt", lines.join "\n"
+    rows.push [char, compositions[char]]
+  rows.sort (a, b) -> a[1].length - b[1].length
+
+update_characters_contained = ->
+  lines = (a[0] + " " + a[1] for a in get_characters_contained_rows()).join "\n"
+  fs.writeFileSync "data/characters-contained.txt", lines
 
 update_characters_data = ->
   graphics_data = JSON.parse read_text_file "data/characters-svg-animcjk-simple.json"
@@ -975,7 +983,8 @@ syllables_prefix_hierarchy = ->
   console.log syllables
 
 run = () ->
-  syllables_prefix_hierarchy()
+  update_character_table()
+  #syllables_prefix_hierarchy()
   #update_characters_contained()
   #update_characters_by_pinyin_learning()
   #update_gridlearner_data()

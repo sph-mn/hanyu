@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <link rel="icon" href="data:," />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1"/>
+    <title>character table</title>
+    <style>
+     html,input,button{font-family:"Noto Sans";font-size:24px}
+     body{background-color:#000;color:#ddd}
+     body a{color:#ddd}
+     b{display:inline-block;padding:0;margin:0;font-weight:normal}
+     body > b{margin-right:10px;white-space:nowrap}
+     b > b:first-child {font-size: 50%;vertical-align:top}
+     b > b:last-child {font-size:200%;margin-left:5px;white-space:normal}
+     @media (max-width: 700px) {
+       html{font-size:10px}
+     }
+    </style>
+  </head>
+  <body>
+      <nav>
+          <a href="#" data-target="0">pinyin</a>
+          <a href="#" data-target="1">pinyin by count</a>
+          <a href="#" data-target="2">contained</a>
+      </nav>
+      <section>
+          __content__
+      </section>
+      <script>
+       document.addEventListener("DOMContentLoaded",function(){
+           var links = document.querySelectorAll("nav a")
+           var divs = document.querySelectorAll("body > section > div")
+           for(var i = 0;i < divs.length;i++){
+               divs[i].style.display = i === 0 ? "block" : "none"
+           }
+           for(var i = 0;i < links.length;i++){
+               links[i].addEventListener("click",function(e){
+                   e.preventDefault()
+                   var target_index = parseInt(this.getAttribute("data-target"),10)
+                   for(var j = 0;j < divs.length;j++){
+                       divs[j].style.display = j === target_index ? "block" : "none"
+                   }
+               })
+           }
+       })
+      </script>
+  </body>
+</html>
