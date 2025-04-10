@@ -978,12 +978,9 @@ update_gridlearner_data = ->
     ii = get_batch_index i
     write_csv_file "data/gridlearner/word-translation-#{ii}.dsv", data
 
-syllables_prefix_hierarchy = ->
-  syllables = read_text_file("data/syllables.txt").split " "
-  console.log syllables
-
 run = () ->
-  update_character_table()
+  #update_syllable_circle()
+  #update_character_table()
   #syllables_prefix_hierarchy()
   #update_characters_contained()
   #update_characters_by_pinyin_learning()
