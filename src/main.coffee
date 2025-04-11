@@ -595,6 +595,9 @@ update_characters_by_pinyin = () ->
   write_csv_file "data/characters-by-pinyin.csv", rows
   rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
   write_csv_file "data/characters-by-pinyin-by-count.csv", rows
+  rows = rows.filter (a) -> a[1].length < 4
+  rows = rows.sort (b, a) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
+  write_csv_file "data/characters-by-pinyin-rare.csv", rows
 
 http_get = (url) ->
   new Promise (resolve, reject) ->
@@ -920,8 +923,11 @@ get_characters_contained_rows = ->
   rows.sort (a, b) -> a[1].length - b[1].length
 
 update_characters_contained = ->
-  lines = (a[0] + " " + a[1] for a in get_characters_contained_rows()).join "\n"
-  fs.writeFileSync "data/characters-contained.txt", lines
+  rows = get_characters_contained_rows()
+  lines = (a[0] + " " + a[1] for a in rows).join "\n"
+  #fs.writeFileSync "data/characters-contained.txt", lines
+  rows = (a[0] + " " + get_char_decompositions(a[0]).join("") for a in rows)
+  fs.writeFileSync "data/characters-containing.txt", rows.join "\n"
 
 update_characters_data = ->
   graphics_data = JSON.parse read_text_file "data/characters-svg-animcjk-simple.json"
@@ -981,7 +987,7 @@ update_gridlearner_data = ->
 
 run = () ->
   #update_syllable_circle()
-  #update_character_table()
+  update_characters_contained()
   #syllables_prefix_hierarchy()
   #update_characters_contained()
   #update_characters_by_pinyin_learning()
