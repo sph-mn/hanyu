@@ -4,7 +4,7 @@ coffee = require "coffeescript"
 fs = require "fs"
 hanzi_tools = require "hanzi-tools"
 html_parser = require "node-html-parser"
-path = require "path"
+node_path = require "path"
 pinyin_split = require "pinyin-split"
 pinyin_utils = require "pinyin-utils"
 read_text_file = (file) -> fs.readFileSync file, "utf8"
@@ -185,7 +185,7 @@ grade_text = (txt) ->
   Math.max 1, Math.round(10 * score)
 grade_text_files = (paths) ->
   for file in paths
-    console.log grade_text(read_text_file(file)) + " " + path.basename(file)
+    console.log grade_text(read_text_file(file)) + " " + node_path.basename(file)
 
 add_translations_and_pinyin = (input_file, lookup_index, output_file) ->
   dict_lookup = dictionary_index_word_f 0
@@ -201,9 +201,73 @@ dictionary_cedict_to_json = (data) ->
     a[2] = a[2].split "/"
     a
 
+update_character_table_html = (pinyin, contained, pinyin_by_count) ->
+  make_table = (rows, name) ->
+    rows = rows.map (a) -> "<b><b>#{a[0]}</b><b>#{a[1]}</b></b>"
+    "<div class=\"#{name}\">" + rows.join("\n") + "</div>"
+  [
+    make_table(pinyin, "pinyin")
+    make_table(pinyin_by_count, "pinyin_by_count")
+    make_table(contained, "contained")
+  ].join "\n"
+
+get_characters_contained_rows = ->
+  compositions = get_compositions_index()
+  rows = []
+  for char of compositions when char.match(hanzi_regexp) and not character_exclusions.includes(char)
+    rows.push [char, compositions[char]]
+  rows.sort (a, b) -> a[1].length - b[1].length
+
+update_character_table = ->
+  pinyin = get_characters_by_pinyin_rows()
+  pinyin = ([a[0], a[1].join("")] for a in pinyin)
+  pinyin_by_count = pinyin.slice().sort (a, b) -> a[1].length - b[1].length
+  contained = get_characters_contained_rows()
+  contained = ([a[0], a[1].join("")] for a in contained)
+  content = update_character_table_html pinyin, contained, pinyin_by_count
+  font = read_text_file "src/NotoSansSC-Light.ttf.base64"
+  html = read_text_file "src/character-table-template.html"
+  html = replace_placeholders html, {font, content}
+  fs.writeFileSync "compiled/character-table.html", html
+
+update_characters_contained = ->
+  rows = get_characters_contained_rows()
+  lines = (a[0] + " " + a[1] for a in rows).join "\n"
+  fs.writeFileSync "data/characters-contained.txt", lines
+  rows = (a[0] + " " + get_char_decompositions(a[0]).join("") for a in rows)
+  fs.writeFileSync "data/characters-containing.txt", rows.join "\n"
+
+is_file = (path) -> fs.statSync(path).isFile()
+strip_extensions = (filename) -> filename.replace /\.[^.]+$/, ''
+
+update_lists = (paths) ->
+  nav_links = []
+  paths = (a for a in paths when is_file a)
+  content = for path, i in paths
+    rows = read_csv_file path
+    parts = for row in rows
+      [head, tail...] = row
+      tail = tail.join " "
+      """
+      <b><b>#{head}</b><b>#{tail}</b></b>
+      """
+    label = strip_extensions node_path.basename path
+    nav_links.push """
+       <a href="#" data-target="#{i}">#{label}</a>
+    """
+    "<div>" + parts.join("\n") + "</div>"
+  content = content.join "\n"
+  nav_links = nav_links.join "\n"
+  font = read_text_file "src/NotoSansSC-Light.ttf.base64"
+  html = read_text_file "src/lists-template.html"
+  html = replace_placeholders html, {font, content, nav_links}
+  fs.writeFileSync "tmp/lists.html", html
+
 run = () ->
-  add_translations_and_pinyin 0, 0, 1
+  update_lists()
+  #add_translations_and_pinyin 0, 0, 1
   #update_character_reading_count()
+
 module.exports =
   read_text_file: read_text_file
   get_all_characters_with_pinyin: get_all_characters_with_pinyin
@@ -225,3 +289,4 @@ module.exports =
   grade_text: grade_text
   grade_text_files: grade_text_files
   run: run
+  update_lists: update_lists

@@ -1,0 +1,4 @@
+#!./node_modules/coffeescript/bin/coffee
+main = require "../src/main"
+paths = process.argv.slice 2
+main.update_lists paths

@@ -9,6 +9,7 @@ indefinite, universal, negative pronouns
 没人 mei2ren2 "no one"
 没有人 mei2you3ren2 "no one, nobody"
 无人 wu2ren2 "no one"
+随便 sui2bian4 "whatever, any"
 
 time, temporal references
 最近 zui4jin4 recently
@@ -38,6 +39,8 @@ frequency, repetition
 从来不 cong2lai2bu4 never
 一向 yi2xiang4 "always"
 一直 yi4zhi2 consistently
+一向 yi2xiang4 "always (habitual)" (already present)
+一直以来 yi4zhi2yi3lai2 "all along"
 
 degree constructions
 稍微 shao1wei1 slightly
@@ -63,6 +66,10 @@ degree constructions
 异常 yi4chang2 "exceptionally, unusually"
 极了 ji2le "extremely"
 有些 you3xie1 "somewhat"
+完全 wan2quan2 "completely, entirely"
+全部 quan2bu4 "entirely, all of"
+彻底 che4di3 "thoroughly"
+尽 jin4 "to the fullest extent"
 
 aspectual gradation
 逐渐 zhu2jian4 gradually
@@ -117,6 +124,9 @@ focus, emphasis, restriction
 甚至 shen4zhi4 even
 连 lian2 even
 只要 zhi3yao4 "as long as"
+就 jiu4 "only, just "
+才 cai2 only
+唯独 wei2du2 "only, solely"
 
 sequence, logic, ordering
 首先 shou3xian1 "first of all"

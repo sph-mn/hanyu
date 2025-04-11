@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <link rel="icon" href="data:," />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1"/>
+    <title>lists</title>
+    <style>
+     html,input,button{font-family:"Noto Sans";font-size:32px}
+     body{background-color:#000;color:#ddd}
+     body a{color:#ddd}
+     div b{display:block;padding:0;margin:0;font-weight:normal}
+     div > b > b:nth-child(1){display:inline;margin-left:20px;font-size:150%}
+     div > b > b:nth-child(2){display:inline;margin-left:20px}
+     @media (max-width: 700px) {
+       html{font-size:10px}
+     }
+    </style>
+  </head>
+  <body>
+      <nav>
+          __nav_links__
+      </nav>
+      <section>
+          __content__
+      </section>
+      <script>
+       document.addEventListener("DOMContentLoaded",function(){
+           var links = document.querySelectorAll("nav a")
+           var divs = document.querySelectorAll("body > section > div")
+           for(var i = 0;i < divs.length;i++){
+               divs[i].style.display = i === 0 ? "block" : "none"
+           }
+           for(var i = 0;i < links.length;i++){
+               links[i].addEventListener("click",function(e){
+                   e.preventDefault()
+                   var target_index = parseInt(this.getAttribute("data-target"),10)
+                   for(var j = 0;j < divs.length;j++){
+                       divs[j].style.display = j === target_index ? "block" : "none"
+                   }
+               })
+           }
+       })
+      </script>
+  </body>
+</html>
