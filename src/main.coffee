@@ -557,7 +557,7 @@ get_characters_by_pinyin_rows = ->
   by_pinyin = {}
   chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
   chars.forEach (a) -> object_array_add by_pinyin, a[1], a[0]
-  rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
+  rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a]]
   rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
 
 update_character_table_html = (pinyin, contained, pinyin_by_count) ->
@@ -572,6 +572,7 @@ update_character_table_html = (pinyin, contained, pinyin_by_count) ->
 
 update_character_table = ->
   pinyin = get_characters_by_pinyin_rows()
+  pinyin = ([a[0], a[1].join("")] for a in pinyin)
   pinyin_by_count = pinyin.slice().sort (a, b) -> a[1].length - b[1].length
   contained = get_characters_contained_rows()
   contained = ([a[0], a[1].join("")] for a in contained)
@@ -1006,13 +1007,18 @@ run = () ->
   #update_syllables_by_reading()
 
 module.exports = {
+  read_text_file
+  get_characters_by_pinyin_rows
   update_characters_by_pinyin_learning
   cedict_filter_only
   clean_frequency_list
   dsv_add_translations
   dsv_add_example_words
+  replace_placeholders
   dsv_mark_to_number
+  object_array_add
   update_cedict_csv
+  get_all_characters_with_pinyin
   update_dictionary
   update_characters_data
   update_frequency_pinyin
