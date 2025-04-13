@@ -1,8 +1,5 @@
-dom = {}; (dom[a.id] = a for a in document.querySelectorAll("[id]"))
-
 class syllable_circle_class
   character_data: __character_data__
-  svg: dom.syllable_circle_svg
   tone_colors:
     1: "#ccddee"  # blue is calm, high, stable - like a flat tone.
     2: "#cceecc"  # green grows - rising movement.
@@ -10,9 +7,9 @@ class syllable_circle_class
     4: "#eecccc"  # red is strong and final - matching the sharp, falling quality.
   update_display: (syllable) ->
     chars = @character_data[syllable] or []
-    g = dom.character_display
+    g = @dom.character_display
     g.innerHTML = ""
-    bbox = @svg.viewBox.baseVal
+    bbox = @dom.syllable_circle_svg.viewBox.baseVal
     cx = bbox.x + bbox.width / 2
     cy = bbox.y + bbox.height / 2
     n = chars.length
@@ -34,8 +31,8 @@ class syllable_circle_class
       color = @tone_colors[tone] or "white"
       g.innerHTML += "<text x='#{x}' y='#{y}' fill='#{color}' font-size='#{font_size}' text-anchor='middle' dominant-baseline='middle'>#{char}</text>"
   update_line_to: (x, y) ->
-    line = dom.center_line
-    bbox = @svg.viewBox.baseVal
+    line = @dom.center_line
+    bbox = @dom.syllable_circle_svg.viewBox.baseVal
     cx = bbox.x + bbox.width / 2
     cy = bbox.y + bbox.height / 2
     line.setAttribute "x1", cx
@@ -54,19 +51,21 @@ class syllable_circle_class
     el.style.fontWeight = "bold"
     @locked_syllable = el
     syllable = el.dataset.syllable
-    sx = parseFloat el.dataset.x
-    sy = parseFloat el.dataset.y
+    sx = parseFloat el.getAttribute "x"
+    sy = parseFloat el.getAttribute "y"
     @update_display syllable
     @update_line_to sx, sy
   constructor: ->
-    @svg.setAttribute("width", window.innerWidth)
-    @svg.setAttribute("height", window.innerWidth)
-    for text in document.querySelectorAll("text[data-syllable]")
+    ids = ["syllable_circle_svg", "center_line", "character_display"]
+    @dom = {}; (@dom[a] = document.getElementById a for a in ids)
+    @dom.syllable_circle_svg.setAttribute "width", window.innerWidth
+    @dom.syllable_circle_svg.setAttribute "height", window.innerWidth
+    for text in document.querySelectorAll "text[data-syllable]"
       handler = (event) =>
         return if @locked_syllable?
         syllable = event.target.dataset.syllable
-        sx = parseFloat event.target.dataset.x
-        sy = parseFloat event.target.dataset.y
+        sx = parseFloat event.target.getAttribute "x"
+        sy = parseFloat event.target.getAttribute "y"
         @update_display syllable
         @update_line_to sx, sy
       text.addEventListener("mouseenter", handler)

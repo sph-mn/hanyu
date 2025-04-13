@@ -25,7 +25,7 @@ create_text = (x, y, font_size, text, angle, fill = "black", center_x, center_y)
 
 create_syllable_text = (x, y, font_size, syllable, angle, fill = "black", center_x, center_y) ->
   {rotate_deg, anchor} = get_text_attrs(angle, x, y, center_x, center_y)
-  "<text x=\"#{x.toFixed(2)}\" y=\"#{y.toFixed(2)}\" font-size=\"#{font_size}\" text-anchor=\"#{anchor}\" dominant-baseline=\"middle\" transform=\"rotate(#{rotate_deg.toFixed(2)} #{x.toFixed(2)} #{y.toFixed(2)})\" fill=\"#{fill}\" data-syllable=\"#{syllable}\" data-x=\"#{x}\" data-y=\"#{y}\">#{syllable}</text>"
+  "<text x=\"#{x.toFixed(2)}\" y=\"#{y.toFixed(2)}\" font-size=\"#{font_size}\" text-anchor=\"#{anchor}\" dominant-baseline=\"middle\" transform=\"rotate(#{rotate_deg.toFixed(2)} #{x.toFixed(2)} #{y.toFixed(2)})\" fill=\"#{fill}\" data-syllable=\"#{syllable}\">#{syllable}</text>"
 
 group_by_initial = (syllables) ->
   initial_map = {}
@@ -35,9 +35,8 @@ group_by_initial = (syllables) ->
     initial_map[initial].push i
   initial_map
 
-syllable_circle_svg = ->
+syllable_circle_svg = (syllables) ->
   # the circle starts at 0 radians and goes counter-clockwise only for mathematical purity.
-  syllables = fs.readFileSync("data/syllables.txt", "utf8").trim().split /\s+/
   svg_size = 1800
   center_x = svg_size / 2
   center_y = svg_size / 2
@@ -59,7 +58,7 @@ syllable_circle_svg = ->
     angle = avg_index * angle_step
     pos = compute_position(angle, inner_radius, center_x, center_y)
     svg_parts.push create_text(pos.x, pos.y, font_size * 1.5, initial, angle, "#888", center_x, center_y)
-  svg_parts.push "<g id=\"character_display\" style=\"background-color:#000\">"
+  svg_parts.push "<g id=\"character_display\" style=\"background-color:#000\"/>"
   svg_parts.push "</svg>"
   svg_parts.join "\n"
 
@@ -73,8 +72,10 @@ get_characters_by_syllable_with_tone = ->
   b
 
 update_syllable_circle = ->
-  svg = syllable_circle_svg()
-  character_data = JSON.stringify get_characters_by_syllable_with_tone()
+  character_data = get_characters_by_syllable_with_tone()
+  syllables = Object.keys(character_data).sort()
+  svg = syllable_circle_svg syllables
+  character_data = JSON.stringify character_data
   script = main.read_text_file "src/syllable-circle-script.coffee"
   script = coffee.compile(script, bare: true).trim()
   script = main.replace_placeholders script, {character_data}
