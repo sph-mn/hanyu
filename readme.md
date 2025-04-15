@@ -49,7 +49,7 @@ see under data/
 * [chinese to english translations](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)
 * [hsk3 word list](https://github.com/krmanik/HSK-3.0-words-list/tree/main)
 * [table of general standard chinese characters](https://en.wiktionary.org/wiki/Appendix:Table_of_General_Standard_Chinese_Characters)
-* [word frequency](https://github.com/ernop/anki-chinese-word-frequency/blob/master/internet-zh.num)
+* [word frequency](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0010729#s2) SUBTLEX-CH
 
 # license
 creative commons share-alike
