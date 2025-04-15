@@ -30,6 +30,15 @@ sort_data = () ->
   chars = chars.sort (a, b) -> a[1] - b[1] || a[0].localeCompare(b[0])
   write_csv_file "data/characters-strokes-decomposition-new.csv", chars
 
+update_extra_stroke_counts = () ->
+  data = read_csv_file "data/extra-components.csv"
+  data = data.sort (a, b) -> b.length - a.length
+  data = delete_duplicates_stable_with_key data, 0
+  data = data.filter (a) -> a.length > 1
+  data = data.map (a) -> [a[0], parseInt(a[1], 10)]
+  data = data.sort (a, b) -> a[1] - b[1]
+  write_csv_file "data/extra-stroke-counts.csv", data
+
 update_decompositions = (start_index, end_index) ->
   chars = read_csv_file "data/characters-strokes-decomposition.csv"
   chars = chars.filter (a) -> "1" != a[1]
@@ -127,6 +136,14 @@ format_lines_vertically = (rows) ->
     row = columns.map (a) -> if a[1][i]? then a[1][i] else ""
     csv_lines.push row.join delimiter
   csv_lines
+
+update_hsk = () ->
+  files = fs.readdirSync "data/hsk"
+  data = files.map (a) -> read_csv_file("data/hsk/#{a}", "\t")
+  data = data.flat(1).map (a) ->
+    pinyin = pinyin_split2(a[2]).map(pinyin_utils.markToNumber).join("").toLowerCase()
+    [a[1], pinyin]
+  write_csv_file "data/hsk.csv", data
 
 update_hsk_pinyin_translations = () ->
   dictionary_lookup = dictionary_index_word_pinyin_f 0, 1

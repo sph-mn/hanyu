@@ -15,6 +15,9 @@
      @media (max-width: 700px) {
        html{font-size:10px}
      }
+     @media print {
+       nav{display:none}
+     }
     </style>
   </head>
   <body>
@@ -28,8 +31,13 @@
        document.addEventListener("DOMContentLoaded",function(){
            var links = document.querySelectorAll("nav a")
            var divs = document.querySelectorAll("body > section > div")
+           var params = new URLSearchParams(window.location.search)
+           var initial_index = parseInt(params.get("nav"),10)
+           if(isNaN(initial_index) || initial_index < 0 || initial_index >= divs.length){
+               initial_index = 0
+           }
            for(var i = 0;i < divs.length;i++){
-               divs[i].style.display = i === 0 ? "block" : "none"
+               divs[i].style.display = i === initial_index ? "block" : "none"
            }
            for(var i = 0;i < links.length;i++){
                links[i].addEventListener("click",function(e){
@@ -38,6 +46,10 @@
                    for(var j = 0;j < divs.length;j++){
                        divs[j].style.display = j === target_index ? "block" : "none"
                    }
+                   var new_params = new URLSearchParams(window.location.search)
+                   new_params.set("nav",target_index)
+                   var new_url = window.location.pathname + "?" + new_params.toString()
+                   history.replaceState(null,"",new_url)
                })
            }
        })
