@@ -498,9 +498,9 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
   add_same_reading_characters = (rows) ->
     max_same_reading_characters = 24
     rows.map (a) ->
-      b = array_shuffle(character_by_reading_index[a[1]] or [])
-      b = b.filter((b) -> a[0] != b)
-      a.push(b.slice(0, max_same_reading_characters).join(""))
+      b = (character_by_reading_index[a[1]] or []).slice(0, max_same_reading_characters)
+      b = b.filter (b) -> a[0] != b
+      a.push b.join ""
       a
   rows = add_same_reading_characters(rows)
   add_contained_characters = (rows) ->
@@ -551,7 +551,7 @@ sort_by_frequency = (data, char_key) -> data.sort sort_by_frequency_f char_key
 
 sort_by_frequency_and_dependency = (data, char_key) ->
   data = data.sort sort_by_frequency_f char_key
-  #data = fix_dependency_order data, char_key
+  data = fix_dependency_order data, char_key
   data
 
 update_characters_learning = ->
