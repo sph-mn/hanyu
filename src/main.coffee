@@ -858,7 +858,18 @@ update_cedict_csv = () ->
   #test()
   write_csv_file "data/cedict.csv", data
 
-run = () ->
+update_word_frequency_pinyin = ->
+  words = array_from_newline_file "data/words-by-frequency.txt"
+  dict = dictionary_index_word_f 0
+  result = for word in words
+    entry = dict word
+    continue unless entry
+    pinyin = entry[0][1]
+    [word, pinyin]
+  write_csv_file "data/words-by-frequency-with-pinyin.csv", result
+
+run = ->
+  #update_word_frequency_pinyin()
   #console.log get_all_characters_with_pinyin()
   #update_lists()
   #update_character_frequency()
