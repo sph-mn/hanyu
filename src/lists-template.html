@@ -6,7 +6,7 @@
     <meta name="viewport" content="initial-scale=1"/>
     <title>lists</title>
     <style>
-     section{font-family:"Noto Sans";font-size:42px;padding:10px}
+     section{font-family:"Noto Sans SC";font-size:42px;padding:10px}
      body{background-color:#000;color:#ddd}
      body a{color:#ddd}
      nav a{font-size:14px;text-decoration:none}
@@ -14,7 +14,7 @@
      div > b > b:nth-child(1){display:inline;margin-left:20px;font-size:150%}
      div > b > b:nth-child(2){display:inline;margin-left:20px}
      @media (max-width: 700px) {
-       html{font-size:10px}
+       html{font-size:30px}
      }
      @media print {
        nav{display:none}
@@ -28,6 +28,14 @@
       <section>
           __content__
       </section>
+      <style>
+       @font-face {
+         font-family: "Noto Sans SC";
+         src: url("data:font/ttf;base64,__font__") format("truetype");
+         font-weight: normal;
+         font-style: normal;
+       }
+      </style>
       <script>
        document.addEventListener("DOMContentLoaded",function(){
            var links = document.querySelectorAll("nav a")

@@ -315,26 +315,57 @@ get_characters_by_pinyin_rows = ->
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a]]
   rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
 
-update_character_table_html = (pinyin, contained, pinyin_by_count) ->
+update_character_table_html = (data) ->
+  nav_links = []
+  i = 0
   make_table = (rows, name) ->
+    nav_links.push """
+       <a href="#" data-target="#{i}">#{name}</a>
+    """
+    i += 1
     rows = rows.map (a) -> "<b><b>#{a[0]}</b><b>#{a[1]}</b></b>"
     "<div class=\"#{name}\">" + rows.join("\n") + "</div>"
-  [
-    make_table(pinyin, "pinyin")
-    make_table(pinyin_by_count, "pinyin_by_count")
-    make_table(contained, "contained")
-  ].join "\n"
+  content = (make_table b, a for a, b of data).join "\n"
+  nav_links = nav_links.join "\n"
+  [content, nav_links]
+
+arrow_for_angle = (angle) ->
+  angle = (angle + Math.PI) % (2 * Math.PI) - Math.PI
+  if -Math.PI/8 <= angle < Math.PI/8 then "→"
+  else if Math.PI/8 <= angle < 3*Math.PI/8 then "↗"
+  else if 3*Math.PI/8 <= angle < 5*Math.PI/8 then "↑"
+  else if 5*Math.PI/8 <= angle < 7*Math.PI/8 then "↖"
+  else if 7*Math.PI/8 <= angle or angle < -7*Math.PI/8 then "←"
+  else if -7*Math.PI/8 <= angle < -5*Math.PI/8 then "↙"
+  else if -5*Math.PI/8 <= angle < -3*Math.PI/8 then "↓"
+  else if -3*Math.PI/8 <= angle < -Math.PI/8 then "↘"
+
+get_syllable_circle_arrow = do ->
+  syllables = read_text_file("data/syllables.txt").trim().split(" ")
+  (syllable) ->
+    i = syllables.indexOf syllable
+    angle = 2 * Math.PI * i / syllables.length
+    arrow_for_angle angle
 
 update_character_table = ->
+  prelearn = read_csv_file("/home/nonroot/chinese/1/lists/prelearn.csv").map (a) -> [a[0], a[1]]
+  prelearn_groups = {}
+  for a in prelearn
+    object_array_add prelearn_groups, a[1], a[0]
+  prelearn = []
+  for a, b of prelearn_groups
+    arrow = get_syllable_circle_arrow a.replace(/[0-5]$/, "")
+    prelearn.push [a + arrow, b.join("")]
   pinyin = get_characters_by_pinyin_rows()
   pinyin = ([a[0], a[1].join("")] for a in pinyin)
   pinyin_by_count = pinyin.slice().sort (a, b) -> a[1].length - b[1].length
   contained = get_characters_contained_rows()
   contained = ([a[0], a[1].join("")] for a in contained)
-  content = update_character_table_html pinyin, contained, pinyin_by_count
+  character_data = {pinyin, contained, pinyin_by_count, prelearn}
+  [content, nav_links] = update_character_table_html character_data
   font = read_text_file "src/NotoSansSC-Light.ttf.base64"
   html = read_text_file "src/character-table-template.html"
-  html = replace_placeholders html, {font, content}
+  html = replace_placeholders html, {font, content, nav_links}
   fs.writeFileSync "compiled/character-table.html", html
 
 update_characters_by_pinyin_vertical = (rows) ->
@@ -639,16 +670,6 @@ get_common_words_per_character = (max_words_per_char, max_frequency) ->
   rows = rows.flat 1
   rows = array_deduplicate_key rows, (a) -> a[1]
 
-update_character_table_html = (pinyin, contained, pinyin_by_count) ->
-  make_table = (rows, name) ->
-    rows = rows.map (a) -> "<b><b>#{a[0]}</b><b>#{a[1]}</b></b>"
-    "<div class=\"#{name}\">" + rows.join("\n") + "</div>"
-  [
-    make_table(pinyin, "pinyin")
-    make_table(pinyin_by_count, "pinyin_by_count")
-    make_table(contained, "contained")
-  ].join "\n"
-
 get_characters_contained_rows = ->
   compositions = get_compositions_index()
   rows = []
@@ -656,17 +677,6 @@ get_characters_contained_rows = ->
     rows.push [char, compositions[char]]
   rows.sort (a, b) -> a[1].length - b[1].length
 
-update_character_table = ->
-  pinyin = get_characters_by_pinyin_rows()
-  pinyin = ([a[0], a[1].join("")] for a in pinyin)
-  pinyin_by_count = pinyin.slice().sort (a, b) -> a[1].length - b[1].length
-  contained = get_characters_contained_rows()
-  contained = ([a[0], a[1].join("")] for a in contained)
-  content = update_character_table_html pinyin, contained, pinyin_by_count
-  font = read_text_file "src/NotoSansSC-Light.ttf.base64"
-  html = read_text_file "src/character-table-template.html"
-  html = replace_placeholders html, {font, content}
-  fs.writeFileSync "compiled/character-table.html", html
 
 update_characters_contained = ->
   rows = get_characters_contained_rows()
@@ -873,6 +883,8 @@ run = ->
   #console.log get_all_characters_with_pinyin()
   #update_lists()
   #update_character_frequency()
+  #update_characters_by_pinyin()
+  update_character_table()
   #update_cedict_csv()
   #cedict_filter_only()
   #add_translations_and_pinyin 0, 0, 1
