@@ -104,7 +104,16 @@ non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
 hanzi_and_idc_regexp = unicode_ranges_regexp hanzi_unicode_ranges.concat([["2FF0", "2FFF"]])
 non_pinyin_regexp = /[^a-z0-5]/g
 
-get_frequency_index = () ->
+get_word_frequency_index = () ->
+  # -> {"#{word}#{pinyin}": integer}
+  frequency = array_from_newline_file "data/words-by-frequency.txt"
+  frequency_index = {}
+  frequency.forEach (a, i) ->
+    a = a.replace " ", ""
+    frequency_index[a] = i unless frequency_index[a]
+  frequency_index
+
+get_word_frequency_index_with_pinyin = () ->
   # -> {"#{word}#{pinyin}": integer}
   frequency = array_from_newline_file "data/words-by-frequency-with-pinyin.csv"
   frequency_index = {}
@@ -213,10 +222,23 @@ sort_by_character_frequency = (frequency_index, character_key, data) ->
 sort_by_stroke_count = (stroke_count_index, character_key, data) ->
   data.sort sort_by_index_and_character_f stroke_count_index, character_key
 
-sort_by_word_frequency = (frequency_index, word_key, pinyin_key, data) ->
+sort_by_word_frequency_with_pinyin = (frequency_index, word_key, pinyin_key, data) ->
   data.sort (a, b) ->
     fa = frequency_index[a[word_key] + a[pinyin_key]]
     fb = frequency_index[b[word_key] + b[pinyin_key]]
+    if fa is undefined and fb is undefined
+      a[word_key].length - b[word_key].length
+    else if fa is undefined
+      1
+    else if fb is undefined
+      -1
+    else
+      fa - fb
+
+sort_by_word_frequency = (frequency_index, word_key, data) ->
+  data.sort (a, b) ->
+    fa = frequency_index[a[word_key]]
+    fb = frequency_index[b[word_key]]
     if fa is undefined and fb is undefined
       a[word_key].length - b[word_key].length
     else if fa is undefined
@@ -343,6 +365,7 @@ arrow_for_angle = (angle) ->
 get_syllable_circle_arrow = do ->
   syllables = read_text_file("data/syllables.txt").trim().split(" ")
   (syllable) ->
+    syllable = syllable.replace(/[0-5]$/, "")
     i = syllables.indexOf syllable
     angle = 2 * Math.PI * i / syllables.length
     arrow_for_angle angle
@@ -354,7 +377,7 @@ update_character_table = ->
     object_array_add prelearn_groups, a[1], a[0]
   prelearn = []
   for a, b of prelearn_groups
-    arrow = get_syllable_circle_arrow a.replace(/[0-5]$/, "")
+    arrow = get_syllable_circle_arrow a
     prelearn.push [a + arrow, b.join("")]
   pinyin = get_characters_by_pinyin_rows()
   pinyin = ([a[0], a[1].join("")] for a in pinyin)
@@ -533,21 +556,27 @@ characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array,
       b = b.filter (b) -> a[0] != b
       a.push b.join ""
       a
-  rows = add_same_reading_characters(rows)
+  add_syllable_arrows = (rows) ->
+    rows.map (a) ->
+      arrow = get_syllable_circle_arrow a[1]
+      a.push arrow
+      a
   add_contained_characters = (rows) ->
     rows.map (a) ->
       b = get_char_decompositions a[0]
       c = b.map((c) -> c.join(" ")).join(", ")
       a.push c
       a
-  rows = add_contained_characters rows
-  rows = add_sort_field rows
   add_example_words = (rows) ->
     rows.map (a) ->
       words = get_character_example_words(a[0], a[1])
       a.push(words.slice(1, 5).map((b) -> b[0]).join(" "))
       a.push(words.slice(0, 5).map((b) -> b.join(" ")).join("\n"))
       a
+  rows = add_contained_characters rows
+  rows = add_same_reading_characters(rows)
+  rows = add_sort_field rows
+  rows = add_syllable_arrows rows
   rows = add_example_words rows
   rows
 
@@ -840,7 +869,7 @@ cedict_filter_only = () ->
 
 update_cedict_csv = () ->
   cedict = read_text_file "data/cedict-filtered.u8"
-  frequency_index = get_frequency_index()
+  frequency_index = get_word_frequency_index_with_pinyin()
   lines = cedict.split "\n"
   data = lines.map (line) ->
     if "#" is line[0] then return null
@@ -859,7 +888,7 @@ update_cedict_csv = () ->
   data = cedict_additions data
   data = cedict_merge_definitions data
   data.forEach (a) -> a[2] = a[2].join "; "
-  data = sort_by_word_frequency frequency_index, 0, 1, data
+  data = sort_by_word_frequency_with_pinyin frequency_index, 0, 1, data
   data = data.filter (a, index) -> index < 3000 || a[0].length < 3
   test = () ->
     example1 = data.findIndex((a) => a[0] is "猫")
@@ -878,13 +907,65 @@ update_word_frequency_pinyin = ->
     [word, pinyin]
   write_csv_file "data/words-by-frequency-with-pinyin.csv", result
 
+get_practice_words = (num_attempts, max_freq) ->
+  # get a list of the most frequent words where each character ideally appears
+  #   only once and no word appears twice.
+  word_frequency_index = get_word_frequency_index()
+  characters = get_all_standard_characters()
+  rows = read_csv_file "data/words-by-frequency-with-pinyin.csv"
+  rows = rows.filter (a)->
+    chars = split_chars a[0]
+    chars.length > 1 && chars[0] != chars[1]
+  candidate_words = {}
+  for [w, p] in rows
+    freq = word_frequency_index[w] || max_freq + 1
+    continue if freq > max_freq
+    for ch in split_chars w
+      continue unless ch in characters
+      (candidate_words[ch] ?= []).push [w,p,freq]
+  characters = characters.filter (ch)-> candidate_words[ch]?
+  for ch in characters
+    candidate_words[ch].sort (a,b)-> a[2] - b[2]
+  best_total_cost = Infinity
+  best_assign = null
+  for attempt in [0...num_attempts]
+    order = array_shuffle characters.slice()
+    counts = {}
+    used_words = {}
+    assign = {}
+    run_cost = 0
+    for ch in order
+      opts = candidate_words[ch]
+      best_score = Infinity
+      chosen = null
+      for [w,p,freq] in opts when not used_words[w]
+        score = sum(counts[c] || 0 for c in w) + freq
+        if score < best_score or (score is best_score and Math.random() < 0.5)
+          best_score = score
+          chosen = [w,p,freq]
+      continue unless chosen?
+      assign[ch] = chosen
+      used_words[chosen[0]] = true
+      counts[c] = (counts[c] || 0) + 1 for c in chosen[0]
+      run_cost += best_score
+    if run_cost < best_total_cost
+      best_total_cost = run_cost
+      best_assign = assign
+  words = ([x[0],x[1]] for ch,x of best_assign)
+  sort_by_word_frequency word_frequency_index, 0, words
+
+update_practice_words = ->
+  rows = get_practice_words 1000, Infinity
+  write_csv_file "data/practice-words.csv", rows
+
 run = ->
   #update_word_frequency_pinyin()
   #console.log get_all_characters_with_pinyin()
   #update_lists()
   #update_character_frequency()
   #update_characters_by_pinyin()
-  update_character_table()
+  update_practice_words()
+  #update_character_table()
   #update_cedict_csv()
   #cedict_filter_only()
   #add_translations_and_pinyin 0, 0, 1
