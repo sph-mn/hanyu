@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <link rel="icon" href="data:," />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1"/>
+    <title>character tables</title>
+    <style>
+     html{font-size:60px}
+     section{font-family:"Noto Sans SC";padding:10px}
+     body{background-color:#000;color:#ddd}
+     body a{color:#ddd}
+     nav a{font-size:14px;text-decoration:none}
+     body > b{margin-right:10px;white-space:nowrap}
+     div b{display:inline-block;padding:0;margin:0;font-weight:normal}
+     b > b:first-child {font-size: 30%;vertical-align:top}
+     b > b:last-child {font-size:150%;margin-left:5px;white-space:normal}
+     @media (max-width: 700px) {
+       html{font-size:30px}
+     }
+     @media print {
+       nav{display:none}
+     }
+    </style>
+  </head>
+  <body>
+      <nav>
+          __nav_links__
+      </nav>
+      <section>
+          __content__
+      </section>
+      <style>
+       @font-face {
+         font-family: "Noto Sans SC";
+         src: url("data:font/ttf;base64,__font__") format("truetype");
+         font-weight: normal;
+         font-style: normal;
+       }
+      </style>
+      <script>
+       document.addEventListener("DOMContentLoaded",function(){
+           var links = document.querySelectorAll("nav a")
+           var divs = document.querySelectorAll("body > section > div")
+           var params = new URLSearchParams(window.location.search)
+           var initial_index = parseInt(params.get("nav"),10)
+           if(isNaN(initial_index) || initial_index < 0 || initial_index >= divs.length){
+               initial_index = 0
+           }
+           for(var i = 0;i < divs.length;i++){
+               divs[i].style.display = i === initial_index ? "block" : "none"
+           }
+           for(var i = 0;i < links.length;i++){
+               links[i].addEventListener("click",function(e){
+                   e.preventDefault()
+                   var target_index = parseInt(this.getAttribute("data-target"),10)
+                   for(var j = 0;j < divs.length;j++){
+                       divs[j].style.display = j === target_index ? "block" : "none"
+                   }
+                   var new_params = new URLSearchParams(window.location.search)
+                   new_params.set("nav",target_index)
+                   var new_url = window.location.pathname + "?" + new_params.toString()
+                   history.replaceState(null,"",new_url)
+               })
+           }
+       })
+      </script>
+  </body>
+</html>

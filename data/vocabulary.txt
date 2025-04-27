@@ -1,0 +1,348 @@
+动物
+狐狸 hu2li2 fox
+兔子 tu4zi rabbit
+蜗牛 wo1niu2 snail
+蚂蚁 ma3yi3 ant
+蜘蛛 zhi1zhu1 spider
+老鼠 lao3shu3 rat
+老虎 lao3hu3 tiger
+狮子 shi1zi lion
+熊 xiong2 bear
+狗 gou3 dog
+猫 mao1 cat
+牛 niu2 cow
+羊 yang2 sheep
+猪 zhu1 pig
+马 ma3 horse
+鸡 ji1 chicken
+鸭子 ya1zi duck
+鹅 e2 goose
+鱼 yu2 fish
+鸟 niao3 bird
+蛇 she2 snake
+青蛙 qing1wa1 frog
+苍蝇 cang1ying mosquito
+蚊子 wen2zi mosquito
+蟑螂 zhang1lang2 cockroach
+蜜蜂 mi4feng1 bee
+蝴蝶 hu2die2 butterfly
+蜻蜓 qing1ting2 dragonfly
+乌龟 wu1gui1 "turtle, tortoise"
+松鼠 song1shu3 squirrel
+猴子 hou2zi monkey
+骆驼 luo4tuo camel
+大象 da4xiang4 elephant
+袋鼠 dai4shu3 kangaroo
+鲸鱼 jing1yu2 whale
+海豚 hai3tun2 dolphin
+鲨鱼 sha1yu2 shark
+乌鸦 wu1ya1 crow
+猫头鹰 mao1tou2ying1 owl
+鹦鹉 ying1wu3 parrot
+狐狸狗 hu2li2gou3 "Pomeranian (fox-like dog)"
+
+词类
+名词 noun
+代词 pronoun
+动词 verb
+形容词 adjective
+副词 adverb
+数词 numeral
+量词 measure word
+连词 conjunction
+介词 preposition
+助词 particle
+叹词 interjection
+拟声词 onomatopoeia
+
+语法结构
+主语 subject
+谓语 predicate
+宾语 object
+定语 attributive
+状语 adverbial
+补语 complement
+短语 phrase
+分句 clause
+句子 sentence
+
+语音与文字结构
+声调 sheng1diao4 tone
+拼音 pin1yin1 pinyin
+音节 yin1jie2 syllable
+声母 sheng1mu3 initial
+韵母 yun4mu3 final
+轻声 qing1sheng1 "neutral tone"
+发音 fa1yin1 pronunciation
+字母 zi4mu3 letter
+汉字 Han4zi4 character
+笔画 bi3hua4 stroke
+简体字 jian3ti3zi4 simplified
+繁体字 fan2ti3zi4 traditional
+笔顺 bi3shun4 "stroke order"
+音变 yin1bian4 "tone change"
+部首 bu4shou3 radical
+语素 yu3su4 morpheme
+语音 yu3yin1 phoneme
+变调 bian4diao4 tone_change
+字形 zi4xing2 form
+读音 du2yin1 reading
+书写 shu1xie3 writing
+字体 zi4ti3 font
+
+烹饪动作
+煮 zhu3 boil
+炒 chao3 stir_fry
+烤 kao3 roast
+蒸 zheng1 steam
+煎 jian1 pan_fry
+炸 zha4 deep_fry
+烧 shao1 braise
+煲 bao1 stew
+腌 yan1 marinate
+拌 ban4 mix
+切 qie1 cut
+剁 duo4 chop
+刨 pao2 peel
+磨 mo2 grind
+搅拌 jiao3ban4 stir
+倒 dao4 pour
+调 tiao2 season
+和 huo2 knead
+烩 hui4 simmer
+冷冻 leng3dong4 freeze
+
+菜单通用词
+菜单 cai4dan1 menu
+菜 cai4 dish
+主食 zhu3shi2 staple_food
+小吃 xiao3chi1 snack
+套餐 tao4can1 set_meal
+单点 dan1dian3 "à la carte"
+饮料 yin3liao4 drink
+甜点 tian2dian3 dessert
+冷盘 leng3pan2 cold_dish
+热菜 re4cai4 hot_dish
+招牌菜 zhao1pai2cai4 "signature dish"
+推荐 tui1jian4 recommended
+价格 jia4ge2 price
+份 fen4 portion
+素 su4 vegetarian
+荤 hun1 meat_dish
+辣 la4 spicy
+不辣 bu2la4 not_spicy
+微辣 wei1la4 mild_spice
+清淡 qing1dan4 light_flavor
+重口味 zhong4kou3wei4 "strong flavor"
+
+食材与配料
+鸡 ji1 chicken
+鸭 ya1 duck
+牛 niu2 beef
+羊 yang2 lamb
+猪 zhu1 pork
+鱼 yu2 fish
+虾 xia1 shrimp
+蟹 xie4 crab
+鹅 e2 goose
+肠 chang2 sausage
+肉 rou4 meat
+排 pai2 ribs
+肝 gan1 liver
+肚 du3 tripe
+脚 jiao3 feet
+头 tou2 head
+
+蔬菜
+白菜 bai2cai4 napa_cabbage
+青菜 qing1cai4 greens
+土豆 tu3dou4 potato
+茄子 qie2zi eggplant
+西红柿 xi1hong2shi4 tomato
+黄瓜 huang2gua1 cucumber
+蘑菇 mo2gu mushroom
+辣椒 la4jiao1 chili
+豆腐 dou4fu tofu
+海带 hai3dai4 kelp
+木耳 mu4er3 "black fungus"
+芹菜 qin2cai4 celery
+菠菜 bo1cai4 spinach
+洋葱 yang2cong1 onion
+蒜 suan4 garlic
+姜 jiang1 ginger
+葱 cong1 scallion
+香菜 xiang1cai4 cilantro
+
+主食
+米饭 mi3fan4 rice
+炒饭 chao3fan4 fried_rice
+面条 mian4tiao2 noodles
+炒面 chao3mian4 fried_noodles
+馒头 man2tou plain_bun
+包子 bao1zi steamed_bun
+饺子 jiao3zi dumplings
+汤面 tang1mian4 noodle_soup
+米粉 mi3fen3 rice_noodles
+粉丝 fen3si1 "vermicelli noodles"
+粥 zhou1 porridge
+煎饼 jian1bing3 pancake
+锅贴 guo1tie1 potstickers
+春卷 chun1juan3 spring_rolls
+
+常见菜名
+宫保鸡丁 gong1bao3ji1ding1 "kung pao chicken"
+鱼香肉丝 yu2xiang1rou4si1 "shredded pork with garlic sauce"
+麻婆豆腐 ma2po2dou4fu "mapo tofu"
+水煮鱼 shui3zhu3yu2 "poached fish in chili oil"
+红烧牛肉 hong2shao1niu2rou4 "soy-braised beef"
+京酱肉丝 jing1jiang4rou4si1 "shredded pork in bean sauce"
+蚂蚁上树 ma3yi3shang4shu4 "vermicelli with minced pork"
+地三鲜 di4san1xian1 "three earthy treasures (potato, eggplant, pepper)"
+糖醋里脊 tang2cu4li3ji3 "sweet and sour pork"
+葱爆羊肉 cong1bao4yang2rou4 "scallion lamb stir-fry"
+酸辣汤 suan1la4tang1 hot_and_sour_soup
+馄饨 hun2tun wonton
+牛肉面 niu2rou4mian4 "beef noodle soup"
+
+编程词汇
+算法 suan4fa3 algorithm
+数组 shu4zu3 array
+错误 cuo4wu4 error
+类 lei4 class
+编译器 bian1yi4qi4 compiler
+数据结构 shu4ju4jie2gou4 "data structure"
+调试器 tiao2shi4qi4 debugger
+函数 han2shu4 function
+库 ku4 library
+循环 xun2huan2 loop
+面向对象编程 mian4xiang4dui4xiang4bian1cheng2 "object-oriented programming"
+参数 can1shu4 parameter
+递归 di4gui1 recursion
+源代码 yuan2dai4ma3 "source code"
+变量 bian4liang4 variable
+初始化 chu1shi3hua4 initialization
+辅助函数 fu3zhu4han2shu4 helper function
+控制器 kong4zhi4qi4 controller
+模型 mo2xing2 model
+接口 jie1kou3 interface
+用户界面 yong4hu4jie4mian4 UI
+应用程序接口 ying4yong4cheng2xu4jie1kou3 API
+数据库 shu4ju4ku4 database
+浏览器 liu2lan3qi4 browser
+后端 hou4duan1 backend
+前端 qian2duan1 frontend
+中间件 zhong1jian1jian4 middleware
+
+网络技术
+网页 wang3ye4 web page
+网站 wang3zhan4 website
+服务器 fu2wu4qi4 server
+客户端 ke4hu4duan1 client
+脚本 jiao3ben3 script
+框架 kuang4jia4 framework
+库 ku4 library
+路由 lu4you2 routing
+请求 qing3qiu2 request
+响应 xiang3ying4 response
+
+数学通用词汇
+数学 shu4xue2 mathematics
+公式 gong1shi4 formula
+定义 ding4yi4 definition
+定理 ding4li3 theorem
+证明 zheng4ming2 proof
+假设 jia3she4 assumption
+结果 jie2guo3 result
+问题 wen4ti2 problem
+解 jie3 solution
+方程 fang1cheng2 equation
+变量 bian4liang4 variable
+常数 chang2shu4 constant
+未知数 wei4zhi1shu4 unknown
+函数 han2shu4 function
+映射 ying4she4 mapping
+集合 ji2he2 set
+
+几何与空间
+几何 ji3he2 geometry
+维数 wei2shu4 dimension
+空间 kong1jian1 space
+平面 ping2mian4 plane
+直线 zhi2xian4 line
+点 dian3 point
+角 jiao3 angle
+边 bian1 edge
+面 mian4 face
+体 ti3 solid
+图形 tu2xing2 shape
+对称 dui4cheng4 symmetry
+相似 xiang1si4 similarity
+等长 deng3chang2 congruent_length
+垂直 chui2zhi2 perpendicular
+平行 ping2xing2 parallel
+夹角 jia1jiao3 "included angle"
+圆 yuan2 circle
+球 qiu2 sphere
+椭圆 tuo3yuan2 ellipse
+矩形 ju3xing2 rectangle
+正方形 zheng4fang1xing2 square
+三角形 san1jiao3xing2 triangle
+多边形 duo1bian1xing2 polygon
+
+线性代数
+线性 dai4shu4 linear
+线性代数 xian4xing4dai4shu4 linear_algebra
+向量 xiang4liang4 vector
+矩阵 ju3zhen4 matrix
+标量 biao1liang4 scalar
+行 hang2 row
+列 lie4 column
+维度 wei2du4 dimension
+基底 ji1di3 basis
+变换 bian4huan4 transformation
+线性变换 xian4xing4bian4huan4 linear_transformation
+投影 tou2ying3 projection
+特征值 te4zheng1zhi2 eigenvalue
+特征向量 te4zheng1xiang4liang4 eigenvector
+对角化 dui4jiao3hua4 diagonalization
+秩 zhi2 rank
+行列式 hang2lie4shi4 determinant
+逆矩阵 ni4ju3zhen4 inverse_matrix
+
+情绪
+有趣 you3qu4 interesting
+无聊 wu2liao2 boring
+有意思 you3yi4si something interesting (softer than 有趣)
+没意思 mei2yi4si uninteresting
+好玩 hao3wan2 "fun/playful"
+刺激 ci4ji1 exciting
+烦人 fan2ren2 annoying
+讨厌 tao3yan4 hateful/annoying
+感人 gan3ren2 touching
+感动 gan3dong4 "emotionally moved"
+生气 sheng1qi4 angry
+开心 kai1xin1 happy
+伤心 shang1xin1 sad
+难过 nan2guo4 upset
+惊讶 jing1ya4 surprised
+尴尬 gan1ga4 awkward
+无语 wu2yu3 "speechless" (disbelief, mild disapproval)
+羡慕 xian4mu4 envious (positive-leaning)
+嫉妒 ji2du4 jealous (negative-leaning)
+满意 man3yi4 satisfied
+失望 shi1wang4 disappointed
+
+未分类
+查询 cha2xun2 "to check; to inquire; to consult (a document etc); inquiry; query"
+脏话
+狗屎堆
+其言糞土也
+人渣
+笨蛋
+滾蛋
+混賬
+白痴
+蠢蛋
+殘廢
+吹功
+陰戶口交

@@ -337,7 +337,7 @@ get_characters_by_pinyin_rows = ->
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a]]
   rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
 
-update_character_table_html = (data) ->
+update_character_tables_html = (data) ->
   nav_links = []
   i = 0
   make_table = (rows, name) ->
@@ -370,7 +370,7 @@ get_syllable_circle_arrow = do ->
     angle = 2 * Math.PI * i / syllables.length
     arrow_for_angle angle
 
-update_character_table = ->
+update_character_tables = ->
   prelearn = read_csv_file("/home/nonroot/chinese/1/lists/prelearn.csv").map (a) -> [a[0], a[1]]
   prelearn_groups = {}
   for a in prelearn
@@ -385,11 +385,11 @@ update_character_table = ->
   contained = get_characters_contained_rows()
   contained = ([a[0], a[1].join("")] for a in contained)
   character_data = {pinyin, contained, pinyin_by_count, prelearn}
-  [content, nav_links] = update_character_table_html character_data
+  [content, nav_links] = update_character_tables_html character_data
   font = read_text_file "src/NotoSansSC-Light.ttf.base64"
-  html = read_text_file "src/character-table-template.html"
+  html = read_text_file "src/character-tables-template.html"
   html = replace_placeholders html, {font, content, nav_links}
-  fs.writeFileSync "compiled/character-table.html", html
+  fs.writeFileSync "compiled/character-tables.html", html
 
 update_characters_by_pinyin_vertical = (rows) ->
   vertical_rows = format_lines_vertically rows
@@ -964,8 +964,8 @@ run = ->
   #update_lists()
   #update_character_frequency()
   #update_characters_by_pinyin()
-  update_practice_words()
-  #update_character_table()
+  #update_practice_words()
+  update_character_tables()
   #update_cedict_csv()
   #cedict_filter_only()
   #add_translations_and_pinyin 0, 0, 1
