@@ -131,19 +131,29 @@ get_all_characters = () -> read_csv_file("data/characters-strokes-decomposition.
 display_all_characters = () -> console.log get_all_characters().join("")
 
 get_all_characters_with_pinyin = () ->
+  dict = dictionary_index_word_f 0
   result = []
-  a = read_csv_file "data/table-of-general-standard-chinese-characters.csv"
-  b = read_csv_file "data/additional-characters.csv"
-  a = b.concat a
-  a.forEach (b) ->
-    pinyin = b[1].split(", ")[0]
-    result.push [b[0] + pinyin, b[0], pinyin]
-  data = delete_duplicates_stable_with_key(result, 0).map (a) -> [a[1], a[2].replace("u:", "ü")]
+  chars = {}
+  for a in read_csv_file "data/table-of-general-standard-chinese-characters.csv"
+    pinyin = a[1].split(", ")[0]
+    chars[a[0]] = pinyin
+  for a in read_csv_file "data/additional-characters.csv"
+    chars[a[0]] = a[1] unless chars[a[0]]
+  for a in read_csv_file "data/characters-strokes-decomposition.csv"
+    pinyin = dict(a[0])?[0][1]
+    chars[a[0]] = pinyin if pinyin && !chars[a[0]]
+    continue if a.length < 3
+    for b in split_chars(a[2])
+      continue unless b.match hanzi_regexp
+      pinyin = dict(b)?[0][1]
+      chars[b] = pinyin if pinyin && !chars[b]
+  data = ([a, b] for a, b of chars)
   char_index = split_chars read_text_file("data/characters-by-frequency.txt").trim()
   data.sort (a, b) ->
     ia = char_index.indexOf a[0]
     ib = char_index.indexOf b[0]
     (if ia is -1 then Infinity else ia) - (if ib is -1 then Infinity else ib)
+  data
 
 get_character_by_reading_index = () ->
   chars = get_all_characters_with_pinyin()
@@ -330,6 +340,18 @@ hanzi_to_pinyin = (a) ->
   a = a.replace(non_hanzi_regexp, " ").trim()
   find_multiple_word_matches a, 0, 1, split_chars
 
+get_character_pinyin_index = ->
+  index = {}
+  chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars.forEach (a) -> index[a[0]] = a[1].split(",")[0]
+  index
+
+get_character_tone_index = ->
+  index = {}
+  chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
+  chars.forEach (a) -> index[a[0]] = parseInt a[1][a[1].length - 1]
+  index
+
 get_characters_by_pinyin_rows = ->
   by_pinyin = {}
   chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
@@ -337,55 +359,89 @@ get_characters_by_pinyin_rows = ->
   rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a]]
   rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
 
-update_character_tables_html = (data) ->
+all_syllables = """
+a ai an ang ao ba bai ban bang bao bei ben beng bi bian biang biao bie bin bing bo bu
+ca cai can cang cao ce cei cen ceng cha chai chan chang chao che chen cheng chi chong
+chou chu chua chuai chuan chuang chui chun chuo ci cong cou cu cuan cui cun cuo da dai
+dan dang dao de dei den deng di dian diao die ding diu dong dou du duan dui dun duo e ei
+en eng er fa fan fang fei fen feng fo fou fu ga gai gan gang gao ge gei gen geng gong gou
+gu gua guai guan guang gui gun guo ha hai han hang hao he hei hen heng hong hou hu hua
+huai huan huang hui hun huo ji jia jian jiang jiao jie jin jing jiong jiu ju juan jue jun
+ka kai kan kang kao ke kei ken keng kong kou ku kua kuai kuan kuang kui kun kuo la lai
+lan lang lao le lei leng li lia lian liang liao lie lin ling liu lo long lou lu luan lun
+luo lü lüe ma mai man mang mao me mei men meng mi mian miao mie min ming miu mo mou mu
+na nai nan nang nao ne nei nen neng ni nian niang niao nie nin ning niu nong nou nu nuan
+nuo nü nüe o ou pa pai pan pang pao pei pen peng pi pian piao pie pin ping po pou pu qi
+qia qian qiang qiao qie qin qing qiong qiu qu quan que qun ran rang rao re ren reng ri
+rong rou ru rua ruan rui run ruo sa sai san sang sao se sen seng sha shai shan shang shao
+she shei shen sheng shi shou shu shua shuai shuan shuang shui shun shuo si song sou su
+suan sui sun suo ta tai tan tang tao te teng ti tian tiao tie ting tong tou tu tuan tui
+tun tuo wa wai wan wang wei wen weng wo wu xi xia xian xiang xiao xie xin xing xiong xiu
+xu xuan xue xun ya yan yang yao ye yi yin ying yong you yu yuan yue yun za zai zan zang
+zao ze zei zen zeng zha zhai zhan zhang zhao zhe zhei zhen zheng zhi zhong zhou zhu zhua
+zhuai zhuan zhuang zhui zhun zhuo zi zong zou zu zuan zui zun zuo
+""".split " "
+
+circle_arrows = ["→","↗","↑","↖","←","↙","↓","↘"]
+
+get_syllable_circle_arrow = (s) ->
+  s = s.replace(/[0-5]$/, "")
+  i = all_syllables.indexOf s
+  circle_arrows[(Math.round(8 * i / all_syllables.length)) % 8]
+
+class_for_tone = (tone) -> "tone#{tone}"
+
+build_prelearn = ->
+  prelearn = read_csv_file("/home/nonroot/chinese/1/lists/prelearn.csv").map (a) -> [a[0], a[1]]
+  groups = {}
+  for a in prelearn
+    object_array_add groups, a[1], a[0]
+  result = []
+  for k, v of groups
+    arrow = get_syllable_circle_arrow k
+    result.push [k + arrow, v.join("")]
+  result
+
+build_pinyin_sets = ->
+  rows = get_characters_by_pinyin_rows()
+  flat = ([a[0], a[1].join("")] for a in rows)
+  by_count = flat.slice().sort (a, b) -> a[1].length - b[1].length
+  [flat, by_count]
+
+build_contained = (tone_index, pinyin_index) ->
+  rows = get_characters_contained_rows()
+  ([a[0], ([c, tone_index[c]] for c in a[1])] for a in rows)
+
+render_row = ([label, data]) ->
+  if typeof data is "string"
+    "<b><b>#{label}</b><b>#{data}</b></b>"
+  else
+    "<b><b>#{label}</b><b>#{data}</b></b>"
+    #chars = data.map ([c, t]) -> "<b class=\"#{class_for_tone t}\">#{c}</b>"
+    #"<b><b>#{label}</b><b>#{chars.join("")}</b></b>"
+
+update_character_tables_html = (tables) ->
   nav_links = []
   i = 0
   make_table = (rows, name) ->
-    nav_links.push """
-       <a href="#" data-target="#{i}">#{name}</a>
-    """
+    nav_links.push "<a href=\"#\" data-target=\"#{i}\">#{name}</a>"
     i += 1
-    rows = rows.map (a) -> "<b><b>#{a[0]}</b><b>#{a[1]}</b></b>"
-    "<div class=\"#{name}\">" + rows.join("\n") + "</div>"
-  content = (make_table b, a for a, b of data).join "\n"
-  nav_links = nav_links.join "\n"
-  [content, nav_links]
-
-arrow_for_angle = (angle) ->
-  angle = (angle + Math.PI) % (2 * Math.PI) - Math.PI
-  if -Math.PI/8 <= angle < Math.PI/8 then "→"
-  else if Math.PI/8 <= angle < 3*Math.PI/8 then "↗"
-  else if 3*Math.PI/8 <= angle < 5*Math.PI/8 then "↑"
-  else if 5*Math.PI/8 <= angle < 7*Math.PI/8 then "↖"
-  else if 7*Math.PI/8 <= angle or angle < -7*Math.PI/8 then "←"
-  else if -7*Math.PI/8 <= angle < -5*Math.PI/8 then "↙"
-  else if -5*Math.PI/8 <= angle < -3*Math.PI/8 then "↓"
-  else if -3*Math.PI/8 <= angle < -Math.PI/8 then "↘"
-
-get_syllable_circle_arrow = do ->
-  syllables = read_text_file("data/syllables.txt").trim().split(" ")
-  (syllable) ->
-    syllable = syllable.replace(/[0-5]$/, "")
-    i = syllables.indexOf syllable
-    angle = 2 * Math.PI * i / syllables.length
-    arrow_for_angle angle
+    "<div class=\"#{name}\">" + (rows.map render_row).join("\n") + "</div>"
+  content = (make_table v, k for k, v of tables).join "\n"
+  [content, nav_links.join("\n")]
 
 update_character_tables = ->
-  prelearn = read_csv_file("/home/nonroot/chinese/1/lists/prelearn.csv").map (a) -> [a[0], a[1]]
-  prelearn_groups = {}
-  for a in prelearn
-    object_array_add prelearn_groups, a[1], a[0]
-  prelearn = []
-  for a, b of prelearn_groups
-    arrow = get_syllable_circle_arrow a
-    prelearn.push [a + arrow, b.join("")]
-  pinyin = get_characters_by_pinyin_rows()
-  pinyin = ([a[0], a[1].join("")] for a in pinyin)
-  pinyin_by_count = pinyin.slice().sort (a, b) -> a[1].length - b[1].length
-  contained = get_characters_contained_rows()
-  contained = ([a[0], a[1].join("")] for a in contained)
-  character_data = {pinyin, contained, pinyin_by_count, prelearn}
-  [content, nav_links] = update_character_tables_html character_data
+  tone_index = get_character_tone_index()
+  pinyin_index = get_character_pinyin_index()
+  [pinyin, pinyin_by_count] = build_pinyin_sets()
+  prelearn = build_prelearn()
+  contained = build_contained tone_index, pinyin_index
+  tables =
+    pinyin: pinyin
+    contained: contained
+    pinyin_by_count: pinyin_by_count
+    prelearn: prelearn
+  [content, nav_links] = update_character_tables_html tables
   font = read_text_file "src/NotoSansSC-Light.ttf.base64"
   html = read_text_file "src/character-tables-template.html"
   html = replace_placeholders html, {font, content, nav_links}
@@ -649,7 +705,27 @@ grade_text = (a) ->
   rarity_score = median(frequencies.splice(-10)) / all_chars_count
   Math.max 1, Math.round(10 * (count_score + rarity_score))
 
-character_exclusions = "一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹八凵儿囗丁乁"
+character_exclusions = "䒑丅丷一亅⿻㇀乚丨丿⿰�丶㇒㇏⿹乛㇓㇈⿸乀㇍⿺㇋㇂㇊丆⺊ユ⿾⿶⿵⿴⿲コ凵⿳⿽㇌⿷囗㇎㇅㇄厸䶹乛㇓㇈㇅㇄㇈一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹八凵儿囗丁乁"
+
+get_characters_contained_pinyin_rows = ->
+  pinyin_index = get_character_pinyin_index()
+  compositions_index = get_compositions_index()
+  edges = []
+  has_parent = new Set()
+  for parent_char of compositions_index
+    continue unless parent_char.match hanzi_regexp
+    continue if character_exclusions.includes parent_char
+    continue unless pinyin_index[parent_char]
+    for child_char in compositions_index[parent_char] when child_char.match hanzi_regexp
+      continue unless pinyin_index[child_char]
+      edges.push [parent_char, child_char, pinyin_index[child_char]]
+      has_parent.add child_char
+  for parent_char of compositions_index when not has_parent.has parent_char
+    continue unless parent_char.match hanzi_regexp
+    continue if character_exclusions.includes parent_char
+    continue unless pinyin_index[parent_char]
+    edges.push [null, parent_char, pinyin_index[parent_char]]
+  edges
 
 get_characters_contained_rows = ->
   compositions = get_compositions_index()
@@ -659,9 +735,14 @@ get_characters_contained_rows = ->
   rows.sort (a, b) -> a[1].length - b[1].length
 
 update_characters_contained = ->
+  rows = get_characters_contained_pinyin_rows()
+  for a in rows
+    continue unless a[2]
+    a[2] = a[2] + get_syllable_circle_arrow a[2]
+  write_csv_file "data/gridlearner/characters-by-component.csv", rows
   rows = get_characters_contained_rows()
-  lines = (a[0] + " " + a[1] for a in rows).join "\n"
-  #fs.writeFileSync "data/characters-contained.txt", lines
+  lines = (a[0] + " " + a[1].join("") for a in rows).join "\n"
+  fs.writeFileSync "data/characters-contained.txt", lines
   rows = (a[0] + " " + get_char_decompositions(a[0]).join("") for a in rows)
   fs.writeFileSync "data/characters-containing.txt", rows.join "\n"
 
@@ -698,21 +779,6 @@ get_common_words_per_character = (max_words_per_char, max_frequency) ->
     a
   rows = rows.flat 1
   rows = array_deduplicate_key rows, (a) -> a[1]
-
-get_characters_contained_rows = ->
-  compositions = get_compositions_index()
-  rows = []
-  for char of compositions when char.match(hanzi_regexp) and not character_exclusions.includes(char)
-    rows.push [char, compositions[char]]
-  rows.sort (a, b) -> a[1].length - b[1].length
-
-
-update_characters_contained = ->
-  rows = get_characters_contained_rows()
-  lines = (a[0] + " " + a[1] for a in rows).join "\n"
-  fs.writeFileSync "data/characters-contained.txt", lines
-  rows = (a[0] + " " + get_char_decompositions(a[0]).join("") for a in rows)
-  fs.writeFileSync "data/characters-containing.txt", rows.join "\n"
 
 is_file = (path) -> fs.statSync(path).isFile()
 strip_extensions = (filename) -> filename.replace /\.[^.]+$/, ''
@@ -958,14 +1024,24 @@ update_practice_words = ->
   rows = get_practice_words 1000, Infinity
   write_csv_file "data/practice-words.csv", rows
 
+update_gridlearner_data = ->
+  chars = get_all_characters_with_pinyin()
+  batch_size = 750
+  get_batch_index = (i) -> (1 + i / batch_size).toString().padStart 2, "0"
+  for i in [0...chars.length] by batch_size
+    data = ([a[0], a[1]] for a in chars[i...i + batch_size])
+    ii = get_batch_index i
+    write_csv_file "data/gridlearner/characters-pinyin-#{ii}.dsv", data
+
 run = ->
   #update_word_frequency_pinyin()
   #console.log get_all_characters_with_pinyin()
   #update_lists()
-  #update_character_frequency()
+  update_characters_contained()
+  #update_gridlearner_data()
   #update_characters_by_pinyin()
   #update_practice_words()
-  update_character_tables()
+  #update_character_tables()
   #update_cedict_csv()
   #cedict_filter_only()
   #add_translations_and_pinyin 0, 0, 1

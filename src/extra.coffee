@@ -77,27 +77,6 @@ find_component_repetitions = () ->
       if 1 == delete_duplicates(split_chars(b)).length
         console.log a[0], b
 
-update_gridlearner_data = ->
-  words = get_common_words_per_character 5, 32000
-  chars = words.filter((a) -> 1 == a[0].length)
-  batch_size = 750
-  get_batch_index = (i) -> (1 + i / batch_size).toString().padStart 2, "0"
-  for i in [0...chars.length] by batch_size
-    data = ([a[1], a[0]] for a in chars[i...i + batch_size])
-    ii = get_batch_index i
-    write_csv_file "data/gridlearner/characters-pinyin-#{ii}.dsv", data
-  for i in [0...chars.length] by batch_size
-    data = ([a[2], a[0]] for a in chars[i...i + batch_size])
-    ii = get_batch_index i
-    write_csv_file "data/gridlearner/characters-translation-#{ii}.dsv", data
-  for i in [0...words.length] by batch_size
-    data = ([a[1], a[0]] for a in words[i...i + batch_size])
-    ii = get_batch_index i
-    write_csv_file "data/gridlearner/word-pinyin-#{ii}.dsv", data
-  for i in [0...words.length] by batch_size
-    data = ([a[2], a[0]] for a in words[i...i + batch_size])
-    ii = get_batch_index i
-    write_csv_file "data/gridlearner/word-translation-#{ii}.dsv", data
 
 update_characters_by_pinyin_learning = ->
   by_pinyin = {}

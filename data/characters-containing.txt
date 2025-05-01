@@ -167,7 +167,7 @@
 拜 丰,feng1三,san1二,er4
 恬 忄,xin1舌,she2千,qian1口,kou3十,shi2
 盆 分,fen1皿,min3八,ba1刀,dao1
-显 日,ri4业,ye4囗,wei2
+显 日,ri4业,ye4囗,wei2䒑,cao3
 贱 贝,bei4戋,jian1人,ren2戈,ge1弋,yi4
 叙 余,yu2又,you4人,ren2小,xiao3八,ba1
 帯 冖,mi4巾,jin1
@@ -195,7 +195,7 @@
 海 氵,shui3每,mei3㇀,ti2𠂉,jiu3母,mu3
 荷 艹,cao3何,he2十,shi2可,ke3丁,ding1口,kou3
 爹 父,fu4多,duo1八,ba1乂,yi4夕,xi1
-恶 亚,ya4心,xin1业,ye4
+恶 亚,ya4心,xin1业,ye4䒑,cao3
 罡 罒,wang3正,zheng4囗,wei2止,zhi3
 衍 行,xing2氵,shui3彳,chi4亍,chu4丁,ding1㇀,ti2
 敃 民,min2攵,pu1𠂉,jiu3乂,yi4
@@ -211,13 +211,13 @@
 圂 囗,wei2豕,shi3
 除 余,yu2人,ren2小,xiao3八,ba1
 釜 父,fu4王,wang2八,ba1乂,yi4土,tu3十,shi2
-宰 宀,mian2辛,xin1冖,mi4立,li4十,shi2亠,tou2
+宰 宀,mian2辛,xin1冖,mi4立,li4十,shi2亠,tou2䒑,cao3
 笔 毛,mao2𠂉,jiu3二,er4
 艳 丰,feng1色,se4三,san1二,er4⺈,yi4巴,ba1巳,si4
 莹 玉,yu4艹,cao3冖,mi4十,shi2土,tu3
 栾 木,mu4亠,tou2十,shi2
 效 交,jiao1攵,pu1亠,tou2父,fu4八,ba1乂,yi4𠂉,jiu3
-昱 日,ri4立,li4囗,wei2亠,tou2
+昱 日,ri4立,li4囗,wei2亠,tou2䒑,cao3
 昫 日,ri4句,ju4囗,wei2口,kou3
 昭 日,ri4召,zhao4囗,wei2刀,dao1口,kou3
 烝 丞,cheng2灬,huo3水,shui3
@@ -226,7 +226,7 @@
 快 忄,xin1夬,guai4大,da4人,ren2
 㢆 广,guang3里,li3厂,chang3田,tian2土,tu3囗,wei2十,shi2
 贰 弋,yi4二,er4贝,bei4人,ren2
-位 立,li4亠,tou2
+位 立,li4亠,tou2䒑,cao3
 犹 犭,quan3尤,you2尢,wang1
 纯 纟,si1屯,tun2㇀,ti2凵,kan3
 穷 穴,xue2力,li4宀,mian2八,ba1冖,mi4
@@ -235,7 +235,7 @@
 祘 示,shi4二,er4小,xiao3八,ba1
 劫 去,qu4力,li4土,tu3厶,si1十,shi2
 库 广,guang3车,che1厂,chang3十,shi2
-剪 前,qian2刀,dao1刖,yue4月,yue4刂,dao1
+剪 前,qian2刀,dao1䒑,cao3刖,yue4月,yue4刂,dao1
 负 ⺈,yi4贝,bei4人,ren2
 迁 辶,chuo4千,qian1十,shi2
 务 力,li4
@@ -270,7 +270,7 @@
 猗 犭,quan3奇,ji1大,da4可,ke3人,ren2丁,ding1口,kou3
 崇 山,shan1宗,zong1凵,kan3宀,mian2示,shi4冖,mi4二,er4小,xiao3八,ba1
 患 串,chuan4心,xin1吕,lü3口,kou3
-羕 永,yong3土,tu3十,shi2
+羕 永,yong3䒑,cao3土,tu3十,shi2
 萦 糸,mi4艹,cao3冖,mi4十,shi2幺,yao1小,xiao3厶,si1八,ba1
 维 纟,si1隹,zhui1㇀,ti2亠,tou2土,tu3十,shi2
 能 厶,si1月,yue4匕,bi3
@@ -309,7 +309,7 @@
 逮 辶,chuo4隶,li4八,ba1
 都 者,zhe3日,ri4土,tu3十,shi2囗,wei2
 㽞 
-虛 虍,hu1业,ye4七,qi1㇀,ti2
+虛 虍,hu1业,ye4七,qi1㇀,ti2䒑,cao3
 皕 百,bai3白,bai2日,ri4囗,wei2
 匿 若,ruo4艹,cao3右,you4十,shi2口,kou3
 㥑 
@@ -319,12 +319,12 @@
 㳟 共,gong4八,ba1卄,nian4十,shi2
 斛 角,jiao3斗,dou4⺈,yi4土,tu3十,shi2㇀,ti2
 棥 木,mu4爻,yao2十,shi2乂,yi4
-豙 立,li4亠,tou2
+豙 立,li4亠,tou2䒑,cao3
 琶 巴,ba1王,wang2十,shi2㇀,ti2土,tu3巳,si4
 替 曰,yue1夫,fu1二,er4人,ren2囗,wei2
 舄 臼,jiu4灬,huo3
 稍 禾,he2肖,xiao4木,mu4十,shi2月,yue4
-尌 寸,cun4十,shi2豆,dou4口,kou3
+尌 寸,cun4十,shi2豆,dou4䒑,cao3口,kou3
 埶 
 幾 戈,ge1人,ren2幺,yao1厶,si1弋,yi4
 恝 心,xin1丰,feng1刀,dao1三,san1二,er4
@@ -374,12 +374,12 @@
 絭 糸,mi4夫,fu1二,er4人,ren2幺,yao1小,xiao3厶,si1八,ba1
 惟 忄,xin1隹,zhui1亠,tou2土,tu3十,shi2
 浪 氵,shui3良,liang2㇀,ti2艮,gen3
-竘 立,li4句,ju4亠,tou2口,kou3
+竘 立,li4句,ju4亠,tou2䒑,cao3口,kou3
 倩 青,qing1月,yue4土,tu3十,shi2
 萠 艹,cao3朋,peng2十,shi2月,yue4
 捕 扌,shou3甫,fu3㇀,ti2
 浦 氵,shui3甫,fu3㇀,ti2
-倍 咅,pou3立,li4口,kou3亠,tou2
+倍 咅,pou3立,li4口,kou3亠,tou2䒑,cao3
 惢 心,xin1
 䖭 虫,chong2夫,fu1二,er4人,ren2中,zhong1㇀,ti2口,kou3
 席 广,guang3廿,nian4巾,jin1厂,chang3卄,nian4十,shi2
@@ -397,7 +397,7 @@
 满 氵,shui3𬜯,liang3㇀,ti2艹,cao3两,liang3十,shi2从,cong2人,ren2
 䖒 
 㲋 
-僕 菐,pu2业,ye4夫,fu1二,er4人,ren2
+僕 菐,pu2业,ye4䒑,cao3夫,fu1二,er4人,ren2
 粲 米,mi3又,you4木,mu4十,shi2
 瑟 必,bi4王,wang2十,shi2㇀,ti2土,tu3心,xin1
 嵒 品,pin3山,shan1口,kou3凵,kan3
@@ -406,10 +406,10 @@
 移 禾,he2多,duo1木,mu4十,shi2夕,xi1
 断 米,mi3斤,jin1木,mu4十,shi2
 剡 炎,yan2刂,dao1火,huo3人,ren2
-部 咅,pou3立,li4口,kou3亠,tou2
+部 咅,pou3立,li4口,kou3亠,tou2䒑,cao3
 焊 火,huo3旱,han4人,ren2日,ri4干,gan4囗,wei2十,shi2
 寇 宀,mian2元,yuan2攴,pu1冖,mi4兀,wu4儿,er2又,you4
-新 亲,qin1斤,jin1立,li4亠,tou2小,xiao3八,ba1
+新 亲,qin1斤,jin1立,li4亠,tou2䒑,cao3小,xiao3八,ba1
 臺 吉,ji2冖,mi4至,zhi4士,shi4口,kou3十,shi2土,tu3厶,si1
 槀 高,gao1木,mu4亠,tou2口,kou3十,shi2
 臧 戕,qiang1臣,chen2爿,pan2戈,ge1弋,yi4
@@ -430,7 +430,7 @@
 温 氵,shui3㇀,ti2日,ri4皿,min3囗,wei2
 耦 耒,lei3禺,yu2未,wei4木,mu4十,shi2日,ri4禸,rou2囗,wei2厶,si1
 潘 氵,shui3番,fan1㇀,ti2田,tian2米,mi3木,mu4十,shi2囗,wei2
-鹝 鬲,ge2鸟,niao3口,kou3乌,wu1马,ma3
+鹝 鬲,ge2鸟,niao3䒑,cao3口,kou3乌,wu1马,ma3
 隋 左,zuo3月,yue4工,gong1
 訇 言,yan2亠,tou2口,kou3
 荐 艹,cao3存,cun2十,shi2子,zi5了,le5
@@ -469,14 +469,14 @@
 夒 止,zhi3自,zi4巳,si4八,ba1目,mu4囗,wei2
 魏 委,wei3鬼,gui3禾,he2女,nü3木,mu4十,shi2儿,er2厶,si1田,tian2囗,wei2
 颢 景,jing3页,ye4日,ri4京,jing1囗,wei2亠,tou2口,kou3小,xiao3八,ba1贝,bei4人,ren2
-鬳 虍,hu1鬲,ge2七,qi1㇀,ti2口,kou3
-羴 羊,yang2二,er4
+鬳 虍,hu1鬲,ge2七,qi1㇀,ti2䒑,cao3口,kou3
+羴 羊,yang2䒑,cao3二,er4
 憂 
 皛 白,bai2日,ri4囗,wei2
 摩 麻,ma2手,shou3广,guang3林,lin2厂,chang3木,mu4十,shi2
 奭 大,da4皕,bi4人,ren2百,bai3白,bai2日,ri4囗,wei2
 蔺 艹,cao3门,men2隹,zhui1十,shi2亠,tou2土,tu3
-豐 豆,dou4口,kou3
+豐 豆,dou4䒑,cao3口,kou3
 䩗 革,ge2月,yue4
 鲞 鱼,yu2夫,fu1二,er4人,ren2⺈,yi4田,tian2囗,wei2十,shi2
 恣 次,ci4心,xin1欠,qian4㇀,ti2⺈,yi4人,ren2
@@ -491,8 +491,8 @@
 晏 日,ri4安,an1囗,wei2宀,mian2女,nü3冖,mi4
 霸 革,ge2月,yue4
 糜 麻,ma2米,mi3广,guang3林,lin2厂,chang3木,mu4十,shi2
-鍂 金,jin1干,gan4十,shi2
-赣 章,zhang1贡,gong4立,li4早,zao3亠,tou2日,ri4十,shi2囗,wei2工,gong1贝,bei4人,ren2
+鍂 金,jin1䒑,cao3干,gan4十,shi2
+赣 章,zhang1贡,gong4立,li4早,zao3亠,tou2䒑,cao3日,ri4十,shi2囗,wei2工,gong1贝,bei4人,ren2
 縣 三,san1小,xiao3系,xi4二,er4八,ba1糸,mi4幺,yao1厶,si1
 醮 酉,you3焦,jiao1西,xi1儿,er2囗,wei2隹,zhui1灬,huo3亠,tou2土,tu3十,shi2
 靡 麻,ma2非,fei1广,guang3林,lin2厂,chang3木,mu4十,shi2三,san1二,er4
@@ -529,7 +529,7 @@
 四 囗,wei2
 兴 八,ba1
 刖 月,yue4刂,dao1
-严 厂,chang3
+严 䒑,cao3厂,chang3
 妟 日,ri4女,nü3囗,wei2
 尨 尤,you2彡,shan1尢,wang1
 戌 戊,wu4戈,ge1弋,yi4
@@ -559,7 +559,7 @@
 刷 刂,dao1尸,shi1巾,jin1
 戾 犬,quan3大,da4人,ren2
 肯 止,zhi3月,yue4
-拉 扌,shou3立,li4㇀,ti2亠,tou2
+拉 扌,shou3立,li4㇀,ti2亠,tou2䒑,cao3
 宓 宀,mian2必,bi4冖,mi4心,xin1
 攴 又,you4
 肴 有,you3月,yue4
@@ -584,7 +584,7 @@
 江 氵,shui3工,gong1㇀,ti2
 诸 讠,yan2者,zhe3日,ri4土,tu3十,shi2囗,wei2
 乘 禾,he2北,bei3木,mu4十,shi2㇀,ti2匕,bi3
-欮 欠,qian4屮,che4凵,kan3⺈,yi4人,ren2
+欮 欠,qian4䒑,cao3屮,che4凵,kan3⺈,yi4人,ren2
 夏 自,zi4目,mu4囗,wei2
 陏 有,you3月,yue4
 耎 而,er2大,da4人,ren2
@@ -614,7 +614,7 @@
 盈 皿,min3乃,nai3又,you4
 畜 玄,xuan2田,tian2亠,tou2幺,yao1厶,si1囗,wei2十,shi2
 虑 虍,hu1心,xin1七,qi1㇀,ti2
-亲 立,li4亠,tou2小,xiao3八,ba1
+亲 立,li4亠,tou2䒑,cao3小,xiao3八,ba1
 预 予,yu2页,ye4龴,jue2贝,bei4人,ren2
 衮 衣,yi1公,gong1亠,tou2八,ba1厶,si1
 规 夫,fu1见,jian4二,er4人,ren2儿,er2
@@ -622,7 +622,7 @@
 吳 大,da4口,kou3人,ren2
 㒸 豕,shi3
 扇 羽,yu3习,xi2㇀,ti2
-虚 虍,hu1业,ye4七,qi1㇀,ti2
+虚 虍,hu1业,ye4七,qi1㇀,ti2䒑,cao3
 孰 享,xiang3丸,wan2亠,tou2口,kou3子,zi5了,le5九,jiu3
 犀 尸,shi1牛,niu2八,ba1𠂉,jiu3十,shi2
 勘 甚,shen4力,li4八,ba1卄,nian4十,shi2
@@ -654,7 +654,7 @@
 遣 辶,chuo4中,zhong1口,kou3
 鼎 目,mu4爿,pan2片,pian4囗,wei2
 禁 林,lin2示,shi4木,mu4十,shi2二,er4小,xiao3八,ba1
-厨 厂,chang3豆,dou4寸,cun4口,kou3
+厨 厂,chang3豆,dou4寸,cun4䒑,cao3口,kou3
 翕 合,he2羽,yu3口,kou3人,ren2习,xi2㇀,ti2
 悉 心,xin1米,mi3木,mu4十,shi2
 溥 氵,shui3尃,fu1㇀,ti2甫,fu3寸,cun4
@@ -669,26 +669,24 @@
 耤 耒,lei3昔,xi1未,wei4木,mu4十,shi2日,ri4卄,nian4囗,wei2
 豩 豕,shi3
 聚 取,qu3乑,zhong4耳,er3又,you4
-黹 业,ye4巾,jin1八,ba1
+黹 业,ye4䒑,cao3巾,jin1八,ba1
 署 罒,wang3者,zhe3囗,wei2日,ri4土,tu3十,shi2
 廛 广,guang3里,li3八,ba1土,tu3厂,chang3田,tian2囗,wei2十,shi2
 貌 豸,zhi4白,bai2儿,er2日,ri4囗,wei2
 雔 隹,zhui1亠,tou2土,tu3十,shi2
 颠 真,zhen1页,ye4十,shi2具,ju4三,san1八,ba1二,er4贝,bei4人,ren2
 黎 禾,he2木,mu4十,shi2八,ba1
-鲜 鱼,yu2羊,yang2⺈,yi4田,tian2囗,wei2十,shi2二,er4
+鲜 鱼,yu2羊,yang2⺈,yi4田,tian2囗,wei2十,shi2䒑,cao3二,er4
 磨 麻,ma2石,dan4广,guang3林,lin2厂,chang3木,mu4十,shi2口,kou3
 韱 韭,jiu3非,fei1三,san1二,er4
-羲 禾,he2戈,ge1土,tu3十,shi2木,mu4弋,yi4
+羲 禾,he2戈,ge1䒑,cao3土,tu3十,shi2木,mu4弋,yi4
 著 艹,cao3者,zhe3十,shi2日,ri4土,tu3囗,wei2
 薄 艹,cao3溥,pu3十,shi2氵,shui3尃,fu1㇀,ti2甫,fu3寸,cun4
 燮 火,huo3言,yan2又,you4人,ren2亠,tou2口,kou3
 巂 崔,cui1冏,jiong3山,shan1隹,zhui1凵,kan3亠,tou2土,tu3十,shi2八,ba1口,kou3
-㇈ 
 ㇁ 
 亽 
 入 
-丅 
 友 又,you4
 ⺝ 
 尹 
@@ -722,7 +720,7 @@
 孙 子,zi5小,xiao3了,le5八,ba1
 戒 戈,ge1廾,gong3弋,yi4十,shi2
 狂 犭,quan3王,wang2土,tu3十,shi2
-屰 屮,che4凵,kan3
+屰 䒑,cao3屮,che4凵,kan3
 府 广,guang3付,fu4厂,chang3寸,cun4
 耶 耳,er3
 妻 女,nü3十,shi2
@@ -739,11 +737,11 @@
 妥 女,nü3
 杀 小,xiao3八,ba1
 戉 戈,ge1弋,yi4
-妾 立,li4女,nü3亠,tou2
+妾 立,li4女,nü3亠,tou2䒑,cao3
 舍 古,gu3十,shi2口,kou3
 函 凵,kan3八,ba1
 㝵 旦,dan4寸,cun4日,ri4囗,wei2
-罔 亡,wang2亠,tou2
+罔 亡,wang2䒑,cao3亠,tou2
 店 广,guang3占,zhan4厂,chang3口,kou3
 受 冖,mi4又,you4
 夜 亠,tou2
@@ -790,7 +788,7 @@
 戚 戊,wu4戈,ge1弋,yi4上,shang4小,xiao3八,ba1
 勒 革,ge2力,li4
 崩 山,shan1朋,peng2凵,kan3月,yue4
-竟 音,yin1儿,er2立,li4日,ri4亠,tou2囗,wei2
+竟 音,yin1儿,er2立,li4日,ri4亠,tou2䒑,cao3囗,wei2
 虖 虍,hu1乎,hu1七,qi1㇀,ti2
 造 辶,chuo4告,gao4口,kou3𠂉,jiu3
 旋 疋,shu1方,fang1𠂉,jiu3万,wan4人,ren2
@@ -798,24 +796,24 @@
 重 千,qian1里,li3十,shi2田,tian2土,tu3囗,wei2
 悤 囱,cong1心,xin1囗,wei2
 最 取,qu3耳,er3又,you4
-壹 士,shi4冖,mi4豆,dou4十,shi2口,kou3
+壹 士,shi4冖,mi4豆,dou4十,shi2䒑,cao3口,kou3
 禽 离,li2禸,rou2亠,tou2凶,xiong1凵,kan3厶,si1
 窜 穴,xue2串,chuan4宀,mian2八,ba1冖,mi4吕,lü3口,kou3
 隆 生,sheng1𠂉,jiu3土,tu3十,shi2
-羔 灬,huo3土,tu3十,shi2
+羔 灬,huo3䒑,cao3土,tu3十,shi2
 献 南,nan2犬,quan3十,shi2干,gan4大,da4人,ren2
 疑 龴,jue2疋,shu1匕,bi3矢,shi3𠂉,jiu3大,da4人,ren2
 楚 林,lin2疋,shu1木,mu4十,shi2人,ren2
 感 咸,xian2心,xin1戌,qu5口,kou3戊,wu4戈,ge1弋,yi4
-豊 曲,qu1豆,dou4曰,yue1囗,wei2口,kou3
-廉 广,guang3兼,jian1厂,chang3卄,nian4八,ba1十,shi2
+豊 曲,qu1豆,dou4曰,yue1囗,wei2䒑,cao3口,kou3
+廉 广,guang3兼,jian1厂,chang3䒑,cao3卄,nian4八,ba1十,shi2
 频 步,bu4页,ye4止,zhi3贝,bei4人,ren2
 殸 声,sheng1殳,shu1士,shi4十,shi2尸,shi1又,you4
 畾 田,tian2囗,wei2十,shi2
 豪 亠,tou2口,kou3冖,mi4豕,shi3
 暴 日,ri4囗,wei2共,gong4八,ba1卄,nian4十,shi2
 毚 兔,tu4免,mian3⺈,yi4口,kou3
-薛 艹,cao3辛,xin1十,shi2立,li4亠,tou2
+薛 艹,cao3辛,xin1十,shi2立,li4亠,tou2䒑,cao3
 爵 罒,wang3囗,wei2寸,cun4
 矍 瞿,qu2又,you4隹,zhui1目,mu4囗,wei2亠,tou2土,tu3十,shi2
 龴 
@@ -893,13 +891,13 @@
 匊 米,mi3木,mu4十,shi2
 典 
 畀 田,tian2囗,wei2十,shi2
-並 业,ye4
+並 䒑,cao3业,ye4
 首 自,zi4目,mu4囗,wei2
 栗 木,mu4口,kou3十,shi2
 党 儿,er2口,kou3冖,mi4
 难 又,you4隹,zhui1亠,tou2土,tu3十,shi2
 剌 束,shu4刂,dao1木,mu4口,kou3十,shi2
-美 大,da4土,tu3十,shi2人,ren2
+美 大,da4䒑,cao3土,tu3十,shi2人,ren2
 盾 十,shi2目,mu4囗,wei2
 览 见,jian4𠂉,jiu3儿,er2
 武 弋,yi4止,zhi3
@@ -922,7 +920,7 @@
 寅 宀,mian2由,you2八,ba1冖,mi4日,ri4囗,wei2
 習 羽,yu3白,bai2习,xi2㇀,ti2日,ri4囗,wei2
 雩 亏,kui1
-普 日,ri4业,ye4囗,wei2
+普 日,ri4䒑,cao3业,ye4囗,wei2
 畺 田,tian2囗,wei2十,shi2
 禀 示,shi4亠,tou2回,hui2囗,wei2口,kou3二,er4小,xiao3八,ba1
 景 日,ri4京,jing1囗,wei2亠,tou2口,kou3小,xiao3八,ba1
@@ -930,7 +928,7 @@
 系 糸,mi4幺,yao1小,xiao3厶,si1八,ba1
 麃 鹿,lu4灬,huo3广,guang3比,bi3厂,chang3匕,bi3
 察 宀,mian2祭,ji4冖,mi4示,shi4二,er4小,xiao3八,ba1
-鼓 支,zhi1十,shi2豆,dou4口,kou3又,you4
+鼓 支,zhi1十,shi2豆,dou4䒑,cao3口,kou3又,you4
 霍 隹,zhui1亠,tou2土,tu3十,shi2
 霜 雨,yu3相,xiang1巾,jin1木,mu4目,mu4十,shi2囗,wei2
 龠 人,ren2口,kou3卄,nian4十,shi2
@@ -988,7 +986,7 @@
 臾 臼,jiu4人,ren2
 念 今,jin1心,xin1
 黾 口,kou3电,dian4日,ri4囗,wei2
-前 刖,yue4月,yue4刂,dao1
+前 䒑,cao3刖,yue4月,yue4刂,dao1
 肃 
 国 囗,wei2玉,yu4土,tu3十,shi2
 釆 米,mi3木,mu4十,shi2
@@ -997,7 +995,7 @@
 胃 田,tian2月,yue4囗,wei2十,shi2
 胥 疋,shu1月,yue4人,ren2
 害 宀,mian2丰,feng1口,kou3冖,mi4三,san1二,er4
-壴 十,shi2豆,dou4口,kou3
+壴 十,shi2豆,dou4䒑,cao3口,kou3
 保 呆,dai1口,kou3木,mu4十,shi2
 禹 
 复 𠂉,jiu3日,ri4囗,wei2
@@ -1006,7 +1004,7 @@
 翁 公,gong1羽,yu3八,ba1厶,si1习,xi2㇀,ti2
 爱 冖,mi4友,you3又,you4
 舀 臼,jiu4
-晋 亚,ya4日,ri4业,ye4囗,wei2
+晋 亚,ya4日,ri4业,ye4䒑,cao3囗,wei2
 冥 冖,mi4日,ri4六,liu4囗,wei2亠,tou2八,ba1
 斯 其,qi2斤,jin1共,gong4八,ba1卄,nian4十,shi2
 族 矢,shi3方,fang1𠂉,jiu3万,wan4大,da4人,ren2
@@ -1018,7 +1016,7 @@
 惠 申,shen1㇀,ti2心,xin1日,ri4囗,wei2
 香 禾,he2日,ri4木,mu4十,shi2囗,wei2
 敬 苟,gou3攵,pu1艹,cao3句,ju4十,shi2口,kou3𠂉,jiu3乂,yi4
-彭 彡,shan1十,shi2豆,dou4口,kou3
+彭 彡,shan1十,shi2豆,dou4䒑,cao3口,kou3
 敦 享,xiang3攵,pu1亠,tou2口,kou3子,zi5了,le5𠂉,jiu3乂,yi4
 尉 尸,shi1示,shi4寸,cun4二,er4小,xiao3八,ba1
 路 各,ge4口,kou3止,zhi3
@@ -1078,7 +1076,7 @@
 敄 矛,mao2攵,pu1予,yu2龴,jue2𠂉,jiu3乂,yi4
 柔 矛,mao2木,mu4予,yu2龴,jue2十,shi2
 咠 口,kou3耳,er3
-朔 月,yue4屮,che4凵,kan3
+朔 月,yue4䒑,cao3屮,che4凵,kan3
 盍 去,qu4皿,min3土,tu3厶,si1十,shi2
 秦 禾,he2三,san1二,er4木,mu4十,shi2
 监 皿,min3𠂉,jiu3
@@ -1086,9 +1084,9 @@
 累 田,tian2糸,mi4囗,wei2十,shi2幺,yao1小,xiao3厶,si1八,ba1
 敢 耳,er3攵,pu1𠂉,jiu3乂,yi4
 鲁 鱼,yu2日,ri4⺈,yi4田,tian2囗,wei2十,shi2
-善 羊,yang2口,kou3二,er4
+善 羊,yang2䒑,cao3口,kou3二,er4
 異 田,tian2共,gong4囗,wei2十,shi2八,ba1卄,nian4
-意 音,yin1心,xin1立,li4日,ri4亠,tou2囗,wei2
+意 音,yin1心,xin1立,li4日,ri4亠,tou2䒑,cao3囗,wei2
 雷 田,tian2囗,wei2十,shi2
 蜀 罒,wang3囗,wei2虫,chong2中,zhong1㇀,ti2口,kou3
 瞿 隹,zhui1目,mu4囗,wei2亠,tou2土,tu3十,shi2
@@ -1222,7 +1220,7 @@
 聿 二,er4十,shi2
 足 口,kou3人,ren2
 员 口,kou3贝,bei4人,ren2
-亚 业,ye4
+亚 业,ye4䒑,cao3
 达 辶,chuo4大,da4人,ren2
 若 艹,cao3右,you4十,shi2口,kou3
 虎 虍,hu1儿,er2七,qi1㇀,ti2
@@ -1237,11 +1235,11 @@
 爰 友,you3又,you4
 尃 甫,fu3寸,cun4
 宣 宀,mian2亘,gen4冖,mi4旦,dan4日,ri4囗,wei2
-兹 幺,yao1厶,si1
+兹 䒑,cao3幺,yao1厶,si1
 胡 古,gu3月,yue4十,shi2口,kou3
-益 八,ba1皿,min3
+益 䒑,cao3八,ba1皿,min3
 尊 酋,qiu2寸,cun4酉,you3西,xi1儿,er2囗,wei2
-菐 业,ye4夫,fu1二,er4人,ren2
+菐 业,ye4䒑,cao3夫,fu1二,er4人,ren2
 麻 广,guang3林,lin2厂,chang3木,mu4十,shi2
 黄 由,you2八,ba1卄,nian4十,shi2日,ri4囗,wei2
 喿 品,pin3木,mu4口,kou3十,shi2
@@ -1252,7 +1250,7 @@
 川 
 勿 
 予 龴,jue2
-业 
+业 䒑,cao3
 尤 尢,wang1
 仑 人,ren2匕,bi3
 天 大,da4人,ren2
@@ -1288,8 +1286,8 @@
 查 木,mu4旦,dan4十,shi2日,ri4囗,wei2
 差 
 离 禸,rou2亠,tou2凶,xiong1凵,kan3厶,si1
-喜 口,kou3十,shi2豆,dou4
-厥 厂,chang3欠,qian4屮,che4凵,kan3⺈,yi4人,ren2
+喜 口,kou3十,shi2豆,dou4䒑,cao3
+厥 厂,chang3欠,qian4䒑,cao3屮,che4凵,kan3⺈,yi4人,ren2
 亶 旦,dan4亠,tou2回,hui2囗,wei2口,kou3日,ri4
 乃 
 内 人,ren2
@@ -1318,12 +1316,12 @@
 宗 宀,mian2示,shi4冖,mi4二,er4小,xiao3八,ba1
 参 厶,si1大,da4彡,shan1人,ren2
 咢 亏,kui1口,kou3
-音 立,li4日,ri4亠,tou2囗,wei2
+音 立,li4日,ri4亠,tou2䒑,cao3囗,wei2
 帝 亠,tou2冖,mi4巾,jin1
 叟 又,you4
 宾 宀,mian2兵,bing1冖,mi4丘,qiu1八,ba1斤,jin1
 堇 廿,nian4口,kou3卄,nian4十,shi2土,tu3
-登 豆,dou4口,kou3
+登 豆,dou4䒑,cao3口,kou3
 詹 八,ba1言,yan2⺈,yi4厂,chang3亠,tou2口,kou3
 㐅 
 巳 
@@ -1358,7 +1356,7 @@
 甚 八,ba1卄,nian4十,shi2
 昆 日,ri4比,bi3囗,wei2匕,bi3
 秋 禾,he2火,huo3木,mu4十,shi2人,ren2
-兼 卄,nian4八,ba1十,shi2
+兼 䒑,cao3卄,nian4八,ba1十,shi2
 留 刀,dao1田,tian2囗,wei2十,shi2
 曼 曰,yue1罒,wang3又,you4囗,wei2
 焦 隹,zhui1灬,huo3亠,tou2土,tu3十,shi2
@@ -1378,16 +1376,16 @@
 有 月,yue4
 生 𠂉,jiu3土,tu3十,shi2
 军 冖,mi4车,che1十,shi2
-豆 口,kou3
+豆 䒑,cao3口,kou3
 光 兀,wu4儿,er2
 昔 日,ri4卄,nian4十,shi2囗,wei2
 宛 宀,mian2夗,yuan4冖,mi4夕,xi1
 旁 亠,tou2冖,mi4方,fang1万,wan4
 耑 山,shan1而,er2凵,kan3
 昷 日,ri4皿,min3囗,wei2
-鬲 口,kou3
+鬲 䒑,cao3口,kou3
 曾 
-童 立,li4里,li3亠,tou2田,tian2土,tu3囗,wei2十,shi2
+童 立,li4里,li3亠,tou2䒑,cao3田,tian2土,tu3囗,wei2十,shi2
 中 口,kou3
 瓦 
 开 廾,gong3十,shi2
@@ -1405,12 +1403,12 @@
 行 彳,chi4亍,chu4丁,ding1
 告 口,kou3𠂉,jiu3
 周 土,tu3口,kou3十,shi2
-辛 立,li4十,shi2亠,tou2
+辛 立,li4十,shi2亠,tou2䒑,cao3
 享 亠,tou2口,kou3子,zi5了,le5
 卒 十,shi2亠,tou2从,cong2人,ren2
 敖 士,shi4方,fang1攵,pu1十,shi2万,wan4𠂉,jiu3乂,yi4
 真 十,shi2具,ju4三,san1八,ba1二,er4
-章 立,li4早,zao3亠,tou2日,ri4十,shi2囗,wei2
+章 立,li4早,zao3亠,tou2䒑,cao3日,ri4十,shi2囗,wei2
 粦 米,mi3舛,chuan3木,mu4十,shi2夕,xi1
 需 而,er2
 襄 亠,tou2口,kou3井,jing3廾,gong3十,shi2
@@ -1432,9 +1430,9 @@
 云 二,er4厶,si1
 亡 亠,tou2
 风 
-夹 大,da4人,ren2
+夹 大,da4䒑,cao3人,ren2
 余 人,ren2小,xiao3八,ba1
-咅 立,li4口,kou3亠,tou2
+咅 立,li4口,kou3亠,tou2䒑,cao3
 曷 曰,yue1囗,wei2
 是 日,ri4囗,wei2人,ren2
 雨 巾,jin1
@@ -1453,7 +1451,7 @@
 亥 亠,tou2人,ren2
 夋 厶,si1八,ba1
 扁 卄,nian4十,shi2
-金 干,gan4十,shi2
+金 䒑,cao3干,gan4十,shi2
 髟 彡,shan1三,san1二,er4厶,si1
 鹿 广,guang3比,bi3厂,chang3匕,bi3
 黑 土,tu3口,kou3灬,huo3十,shi2
@@ -1475,7 +1473,6 @@
 票 示,shi4口,kou3二,er4小,xiao3八,ba1
 廾 十,shi2
 夕 
-䒑 
 爫 
 至 土,tu3厶,si1十,shi2
 同 口,kou3
@@ -1484,7 +1481,7 @@
 甫 
 单 日,ri4十,shi2囗,wei2
 其 共,gong4八,ba1卄,nian4十,shi2
-辟 辛,xin1尸,shi1口,kou3立,li4十,shi2亠,tou2
+辟 辛,xin1尸,shi1口,kou3立,li4十,shi2亠,tou2䒑,cao3
 九 
 几 
 小 八,ba1
@@ -1548,9 +1545,9 @@
 戈 弋,yi4
 方 万,wan4
 皿 
-羊 二,er4
+羊 䒑,cao3二,er4
 斤 
-立 亠,tou2
+立 亠,tou2䒑,cao3
 且 
 灬 
 冫 ㇀,ti2
@@ -1565,7 +1562,6 @@
 人 
 ⺼ 
 革 
-丷 
 穴 宀,mian2八,ba1冖,mi4
 尸 
 白 日,ri4囗,wei2
