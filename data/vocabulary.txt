@@ -1,3 +1,35 @@
+causality / logical linkage
+因 yin1 "because of"
+因为 yin1wei4 "because"
+由于 you2yu2 "due to"
+所以 suo3yi3 "therefore"
+即 ji2 "namely"
+既 ji4 "already/since" (used in 既然)
+虽 sui1 "although" (in 虽然)
+而 er2 "and/but/yet"
+但 dan4 "but"
+然而 ran2er2 "however"
+却 que4 "but/instead"
+time or sequence indicators
+后 lai2 "later" (e.g. 后来)
+后来 hou4lai2 "afterwards"
+之后 zhi1hou4 "after"
+以前 yi3qian2 "before"
+先 xian1 "first"
+再 zai4 "again/then"
+然后 ran2hou4 "then"
+便 bian4 "then/thereupon"
+
+structural particles & emphatic modifiers
+的 de5 (noun modifier)
+得 de5 (complement marker)
+地 de5 (adverbial marker)
+被 bei4 (passive marker)
+把 ba3 (disposal structure)
+将 jiang1 (future/disposal/formal 把)
+所 suo3 (used with verbs to make nominal phrases)
+乃 nai3 "thus/so" (very formal/literary)
+
 动物
 狐狸 hu2li2 fox
 兔子 tu4zi rabbit

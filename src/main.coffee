@@ -490,6 +490,22 @@ get_compositions_index = ->
     compositions[a] = b.sort frequency_sorter
   compositions
 
+get_full_compositions_index = ->
+  full_decompositions = get_full_decompositions()
+  compositions = {}
+  for [char, components] in full_decompositions
+    for component in components
+      c = compositions[component]
+      if c
+        unless c.includes char
+          c.push char
+      else
+        compositions[component] = [char]
+  frequency_sorter = sort_by_character_f get_character_frequency_index()
+  for component, chars of compositions
+    compositions[component] = chars.sort frequency_sorter
+  compositions
+
 get_decompositions_index = () -> index_key_value read_csv_file("data/characters-strokes-decomposition.csv"), 0, 2
 
 get_full_decompositions = () ->
@@ -705,16 +721,17 @@ grade_text = (a) ->
   rarity_score = median(frequencies.splice(-10)) / all_chars_count
   Math.max 1, Math.round(10 * (count_score + rarity_score))
 
-character_exclusions = "䒑丅丷一亅⿻㇀乚丨丿⿰�丶㇒㇏⿹乛㇓㇈⿸乀㇍⿺㇋㇂㇊丆⺊ユ⿾⿶⿵⿴⿲コ凵⿳⿽㇌⿷囗㇎㇅㇄厸䶹乛㇓㇈㇅㇄㇈一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹八凵儿囗丁乁"
+character_exclusions_gridlearner = "灬罒彳𠂉⺈辶卝埶冃丏卝宀冖亠䒑丅丷一亅⿻㇀乚丨丿⿰�丶㇒㇏⿹乛㇓㇈⿸乀㇍⿺㇋㇂㇊丆⺊ユ⿾⿶⿵⿴⿲コ凵⿳⿽㇌⿷囗㇎㇅㇄厸䶹乛㇓㇈㇅㇄㇈一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹凵囗乁"
+character_exclusions = "丅丷一亅⿻㇀乚丨丿⿰�丶㇒㇏⿹乛㇓㇈⿸乀㇍⿺㇋㇂㇊丆⺊ユ⿾⿶⿵⿴⿲コ凵⿳⿽㇌⿷囗㇎㇅㇄厸䶹乛㇓㇈㇅㇄㇈一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹凵囗乁"
 
-get_characters_contained_pinyin_rows = ->
+get_characters_contained_pinyin_rows = (exclusions = []) ->
   pinyin_index = get_character_pinyin_index()
-  compositions_index = get_compositions_index()
+  compositions_index = get_full_compositions_index()
   edges = []
   has_parent = new Set()
   for parent_char of compositions_index
     continue unless parent_char.match hanzi_regexp
-    continue if character_exclusions.includes parent_char
+    continue if exclusions.includes parent_char
     continue unless pinyin_index[parent_char]
     for child_char in compositions_index[parent_char] when child_char.match hanzi_regexp
       continue unless pinyin_index[child_char]
@@ -722,25 +739,26 @@ get_characters_contained_pinyin_rows = ->
       has_parent.add child_char
   for parent_char of compositions_index when not has_parent.has parent_char
     continue unless parent_char.match hanzi_regexp
-    continue if character_exclusions.includes parent_char
+    continue if exclusions.includes parent_char
     continue unless pinyin_index[parent_char]
     edges.push [null, parent_char, pinyin_index[parent_char]]
   edges
 
-get_characters_contained_rows = ->
+get_characters_contained_rows = (exclusions) ->
   compositions = get_compositions_index()
   rows = []
-  for char of compositions when char.match(hanzi_regexp) and not character_exclusions.includes(char)
+  for char of compositions when char.match(hanzi_regexp) and not exclusions.includes(char)
     rows.push [char, compositions[char]]
   rows.sort (a, b) -> a[1].length - b[1].length
 
 update_characters_contained = ->
   rows = get_characters_contained_pinyin_rows()
-  for a in rows
+  rows_gridlearner = get_characters_contained_pinyin_rows character_exclusions_gridlearner
+  for a in rows_gridlearner
     continue unless a[2]
     a[2] = a[2] + get_syllable_circle_arrow a[2]
-  write_csv_file "data/gridlearner/characters-by-component.csv", rows
-  rows = get_characters_contained_rows()
+  write_csv_file "data/gridlearner/characters-by-component.csv", rows_gridlearner
+  rows = get_characters_contained_rows character_exclusions
   lines = (a[0] + " " + a[1].join("") for a in rows).join "\n"
   fs.writeFileSync "data/characters-contained.txt", lines
   rows = (a[0] + " " + get_char_decompositions(a[0]).join("") for a in rows)
