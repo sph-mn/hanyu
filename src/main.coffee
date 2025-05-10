@@ -430,6 +430,13 @@ update_character_tables_html = (tables) ->
   content = (make_table v, k for k, v of tables).join "\n"
   [content, nav_links.join("\n")]
 
+get_characters_by_pinyin_rows_flat = ->
+  result = []
+  for a in get_characters_by_pinyin_rows()
+    for b in a[1]
+      result.push [a[0], b]
+  result
+
 update_character_tables = ->
   tone_index = get_character_tone_index()
   pinyin_index = get_character_pinyin_index()
@@ -445,7 +452,20 @@ update_character_tables = ->
   font = read_text_file "src/NotoSansSC-Light.ttf.base64"
   html = read_text_file "src/character-tables-template.html"
   html = replace_placeholders html, {font, content, nav_links}
-  fs.writeFileSync "compiled/character-tables.html", html
+  #fs.writeFileSync "compiled/character-tables.html", html
+  for key, value of tables
+    tables[key] = (b.reverse() for b in value)
+  prelearn2 = []
+  for a in prelearn
+    for b in split_chars a[0]
+      prelearn2.push [b, a[1]]
+  write_csv_file "tmp/prelearn.csv", prelearn2
+  by_pinyin = get_characters_by_pinyin_rows_flat()
+  by_syllable = []
+  for a in by_pinyin
+    syllable = a[0].replace /[0-5]$/, ""
+    by_syllable.push [syllable, a[1], a[0]]
+  write_csv_file "data/gridlearner/characters-by-syllable.csv", by_syllable
 
 update_characters_by_pinyin_vertical = (rows) ->
   vertical_rows = format_lines_vertically rows
@@ -460,9 +480,16 @@ update_characters_by_pinyin = () ->
   write_csv_file "data/characters-by-pinyin.csv", rows
   rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
   write_csv_file "data/characters-by-pinyin-by-count.csv", rows
-  rows = rows.filter (a) -> a[1].length < 4
-  rows = rows.sort (b, a) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
-  write_csv_file "data/characters-by-pinyin-rare.csv", rows
+  #rows = rows.filter (a) -> a[1].length < 4
+  #rows = rows.sort (b, a) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
+  #write_csv_file "data/characters-by-pinyin-rare.csv", rows
+  rare_rows = []
+  for p in Object.keys(by_pinyin)
+    if by_pinyin[p].length < 3
+      for c in by_pinyin[p]
+        rare_rows.push [c, p]
+  rare_rows = rare_rows.sort (a, b) -> a[1].localeCompare(b[1]) || a[0].localeCompare(b[0])
+  write_csv_file "data/characters-pinyin-rare.csv", rare_rows
 
 sort_by_array_with_index = (a, sorting, index) ->
   a.sort (a, b) -> sorting.indexOf(a[index]) - sorting.indexOf(b[index])
@@ -744,7 +771,7 @@ get_characters_contained_pinyin_rows = (exclusions = []) ->
     edges.push [null, parent_char, pinyin_index[parent_char]]
   edges
 
-get_characters_contained_rows = (exclusions) ->
+get_characters_contained_rows = (exclusions = character_exclusions) ->
   compositions = get_compositions_index()
   rows = []
   for char of compositions when char.match(hanzi_regexp) and not exclusions.includes(char)
@@ -1044,7 +1071,7 @@ update_practice_words = ->
 
 update_gridlearner_data = ->
   chars = get_all_characters_with_pinyin()
-  batch_size = 750
+  batch_size = 300
   get_batch_index = (i) -> (1 + i / batch_size).toString().padStart 2, "0"
   for i in [0...chars.length] by batch_size
     data = ([a[0], a[1]] for a in chars[i...i + batch_size])
@@ -1055,9 +1082,9 @@ run = ->
   #update_word_frequency_pinyin()
   #console.log get_all_characters_with_pinyin()
   #update_lists()
-  update_characters_contained()
+  #update_characters_contained()
   #update_gridlearner_data()
-  #update_characters_by_pinyin()
+  update_characters_by_pinyin()
   #update_practice_words()
   #update_character_tables()
   #update_cedict_csv()
