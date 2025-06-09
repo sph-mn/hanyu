@@ -57,28 +57,28 @@
       <div id="about" class="hidden">
         word search
         <ul>
-          <li>contains over 60000 translations, with words sorted by frequency of use. it is not designed to serve as a comprehensive dictionary</li>
-          <li>certain non-essential word types, including regional dialects, archaic terms, and domain-specific vocabulary, are not included</li>
-          <li>search results are sorted by word frequency and length</li>
-          <li>for latin character input, searches are performed in pinyin and optionally in translations if the 'translations' checkbox is checked. the 'split' checkbox has no effect in these cases</li>
-          <li>searches partial matches for chinese character input. if the 'split' checkbox is checked, input is split into words and exact matches are searched. the 'translations' checkbox has no effect in these cases</li>
-          <li>supports regular expressions, except when the 'split' checkbox is checked for chinese characters. for example, '^word' searches at the beginning of entries, 'word$' searches at the end, and '.' can be used as a wildcard</li>
-          <li>result word length may be limited based on the input length</li>
-          <li>result lines can be copied and saved directly as a machine-readable space-separated dsv file, which can then be opened as a spreadsheet</li>
-          <li>word frequency data is sourced from SUBTLEX-CH
+          <li>includes over 60000 translations, sorted by frequency of use; not intended as a comprehensive dictionary</li>
+          <li>excludes some less common categories, such as regional variants, archaic forms, and specialized vocabulary</li>
+          <li>results are ranked by frequency and word length</li>
+          <li>for latin input, searches match pinyin and optionally translations if the "translations" checkbox is selected; the "split" checkbox is ignored</li>
+          <li>for chinese input, partial matches are returned; with "split" checked, input is segmented and exact matches are searched; "translations" is ignored</li>
+          <li>supports regular expressions, unless "split" is enabled for chinese input; "^word" matches word starts, "word$" matches word ends, "." is a wildcard</li>
+          <li>output may be truncated based on input length</li>
+          <li>results can be copied as space-separated DSV, readable by spreadsheets</li>
+          <li>frequency data is based on SUBTLEX-CH</li>
           <li>translations are sourced from <a href="https://www.mdbg.net/chinese/dictionary?page=cc-cedict" target="_blank">cc-cedict</a></li>
           <li><a href="https://github.com/sph-mn/hanyu" target="_blank">project homepage</a></li>
         </ul>
         character lookup
         <ul>
-          <li>supports search by character and pinyin, numeric tone marks only</li>
-          <li>comma separate search terms to search for multiple queries at once</li>
-          <li>the containing and contained checkboxes have no effect for latin character terms</li>
-          <li>graphics are sourced from <a href="https://github.com/parsimonhi/animCJK" target="_blank">animcjk</a></li>
+          <li>search by character or pinyin, with numeric tone marks</li>
+          <li>comma-separate multiple queries</li>
+          <li>"containing" and "contained" checkboxes have no effect for latin input</li>
+          <li>graphics from <a href="https://github.com/parsimonhi/animCJK" target="_blank">animcjk</a></li>
         </ul>
         general
         <ul>
-          <li>only simplified characters are supported</li>
+          <li>supports only simplified characters</li>
           <li><a href="https://github.com/sph-mn/hanyu" target="_blank">project homepage</a></li>
         </ul>
         <div id="about_link_close">close</div>

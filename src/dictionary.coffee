@@ -204,72 +204,73 @@ class word_search_class
   word_data: __word_data__
   result_limit: 150
   make_result_html: (data) ->
-    glossary = data[2].join("; ").replace /\"/g, "'"
-    attributes = (if 1 == data[0].length then " class=\"single\"" else "")
-    "<div><div#{attributes}>#{data[0]}</div> #{data[1]} \"#{glossary}\"</div>"
+    glossary = data[2].join "; "
+    glossary = glossary.replace /\"/g, "'"
+    attr = if data[0].length == 1 then " class=\"single\"" else ""
+    "<div><span#{attr}>#{data[0]}</span> #{data[1]} \"#{glossary}\"</div>"
   reset: ->
     dom.word_input.value = ""
     dom.word_results.innerHTML = ""
   filter: =>
-    dom.word_results.innerHTML = ""
-    values = dom.word_input.value.split(",").map (a) -> a.trim()
-    values = values.filter (a) -> a.length > 0
-    return unless values.length
-    regexps = values.map((value) =>
+    values = dom.word_input.value.split(",").map (v) -> v.trim().toLowerCase()
+    values = values.filter (v) -> v.length > 0
+    unless values.length
+      dom.word_results.innerHTML = ""
+      return
+    regexps = values.map (value) =>
       if dom.search_split.checked and !dom.search_translations.checked
-        characters = Array.from value.replace(/[^\u4E00-\u9FA5]/ig, "")
-        words = []
+        chars = Array.from value.replace /[^\u4E00-\u9FA5]/ig, ""
+        words = new Set()
         i = 0
-        while i < characters.length
+        while i < chars.length
           j = i + 1
-          while j < Math.min(i + 5, characters.length) + 1
-            words.push characters.slice(i, j).join("")
+          while j <= Math.min i + 5, chars.length
+            words.add chars.slice(i, j).join ""
             j += 1
           i += 1
-        words = delete_duplicates words
-        words = words.sort (a, b) -> b.length - a.length
-        regexp = new RegExp("(^" + words.join("$)|(^") + "$)")
-        (entry) -> regexp.test entry[0]
-      else if /[a-zA-Z0-9]/.test(value)
-        if dom.search_translations.checked
-          if value.length > 2
-            regexp = new RegExp(value.replace(/u/ig, "(u|ü)"), "i")
-            (entry) -> entry[2].some((a) -> regexp.test(a))
+        words = Array.from(words).sort (a, b) -> b.length - a.length
+        regexp = new RegExp "(^" + words.join("$)|(^") + "$)"
+        (a) -> regexp.test a[0]
+      else if /^[a-z0-9]/i.test value
+        pattern = value.replace /v/g, "ü"
+        if dom.search_translations.checked && value.length > 2
+          regexp = new RegExp pattern, "i"
+          (a) -> a[2].some (g) -> regexp.test g
         else
           length_limit = value.length * 2.5
-          regexp = new RegExp("\\b" + value, "i")
-          (entry) ->
-            length_limit >= entry[1].length and (regexp.test(entry[1]) or regexp.test(entry[1].replace(/[0-4]/g, "")))
-      else if !dom.search_translations.checked
-        regexp = new RegExp(value)
-        (entry) -> regexp.test(entry[0])
-    ).filter((a) -> a)
+          regexp = new RegExp "\\b" + pattern, "i"
+          if /\d/.test pattern then (a) -> length_limit >= a[1].length && regexp.test a[1]
+          else (a) -> length_limit >= a[1].length && regexp.test a[3]
+      else unless dom.search_translations.checked
+        regexp = new RegExp value
+        (a) -> regexp.test a[0]
+    .filter (f) -> f?
     matches = []
     for entry in @word_data
-      break unless matches.length < @result_limit
-      for matcher in regexps
-        matches.push entry if matcher entry
+      break if matches.length >= @result_limit
+      for fn in regexps
+        if fn entry
+          matches.push entry
+          break
     if dom.search_split.checked
-      matches = matches.sort (a, b) -> b[0].length - a[0].length
-    html = ""
-    html += @make_result_html entry for entry in matches
-    dom.word_results.innerHTML = html || "no word results"
+      matches.sort (a, b) -> b[0].length - a[0].length
+    html = matches.map(@make_result_html).join ""
+    dom.word_results.innerHTML = html or "no word results"
   constructor: (app) ->
-    param_input = app.url_params.get "word_input"
-    dom.character_input.value = param_input if param_input
+    param = app.url_params.get "word_input"
+    dom.word_input.value = param if param?
     filter_debounced = debounce @filter, 150
     dom.word_reset.addEventListener "click", @reset
     dom.word_input.addEventListener "keyup", filter_debounced
     dom.word_input.addEventListener "change", @filter
     dom.search_translations.addEventListener "change", @filter
     dom.search_split.addEventListener "change", @filter
-    dom.word_results.addEventListener "click", (event) ->
-      # make a character search when clicking on single character words
-      target = event.target
-      if target.classList.contains "single"
-        char = target.innerHTML
-        unless dom.character_input.value.includes char
-          dom.character_input.value = char
+    dom.word_results.addEventListener "click", (e) =>
+      t = e.target
+      if t.classList.contains "single"
+        c = t.innerHTML
+        unless dom.character_input.value.includes c
+          dom.character_input.value += c
           app.character_search.filter()
     @filter
 

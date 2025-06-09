@@ -261,6 +261,7 @@ sort_by_word_frequency = (frequency_index, word_key, data) ->
 dictionary_cedict_to_json = (data) ->
   JSON.stringify data.map (a) ->
     a[2] = a[2].split "/"
+    a.push a[1].replace /[0-4]/g, ""
     a
 
 update_dictionary = () ->
@@ -918,8 +919,22 @@ cedict_glossary = (a) ->
     /\(loanword/
     /\(neologism/
     /\(archaic/
+    /\(arch\./
     /\(dialect/
     /\(vulgar/
+    /\(tcm\)/
+    / tcm\)/
+    /\(brand\)/
+    / brand\)/
+    /hotel chain\)/
+    /hotel company\)/
+    /\(cantonese\)/
+    /\(company\)/
+    / islam\)/
+    /\(hong kong/
+    /\(chinese medicine\)/
+    /\(shanghainese/
+    / dialect\)/
   ]
   a = a.split("/").map (a) -> a.toLowerCase().split(";")
   a = a.flat().map (a) -> a.trim()
@@ -1104,6 +1119,7 @@ module.exports = {
   traditional_to_simplified
   pinyin_to_hanzi
   hanzi_to_pinyin
+  update_cedict_csv
   mark_to_number
   update_characters_by_pinyin
   update_characters_learning

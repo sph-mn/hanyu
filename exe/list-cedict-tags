@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cat data/cedict.csv | lines-filter -o '(' ')' | ruby -e '$stdin.each_line{|a| puts a[/\(.*?\)/]}' |sort
