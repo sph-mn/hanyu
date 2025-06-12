@@ -15,7 +15,7 @@ class syllable_circle_class
     n = chars.length
     cols = Math.ceil(Math.sqrt(n))
     rows = Math.ceil(n / cols)
-    font_size = 42
+    font_size = 52
     size = font_size + 8
     box_w = cols * size
     box_h = rows * size

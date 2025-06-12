@@ -750,7 +750,7 @@ grade_text = (a) ->
   Math.max 1, Math.round(10 * (count_score + rarity_score))
 
 character_exclusions_gridlearner = "灬罒彳𠂉⺈辶卝埶冃丏卝宀冖亠䒑丅丷一亅⿻㇀乚丨丿⿰�丶㇒㇏⿹乛㇓㇈⿸乀㇍⿺㇋㇂㇊丆⺊ユ⿾⿶⿵⿴⿲コ凵⿳⿽㇌⿷囗㇎㇅㇄厸䶹乛㇓㇈㇅㇄㇈一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹凵囗乁"
-character_exclusions = "丅丷一亅⿻㇀乚丨丿⿰�丶㇒㇏⿹乛㇓㇈⿸乀㇍⿺㇋㇂㇊丆⺊ユ⿾⿶⿵⿴⿲コ凵⿳⿽㇌⿷囗㇎㇅㇄厸䶹乛㇓㇈㇅㇄㇈一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹凵囗乁"
+character_exclusions = "⿱丅丷一亅⿻㇀乚丨丿⿰�丶㇒㇏⿹乛㇓㇈⿸乀㇍⿺㇋㇂㇊丆⺊ユ⿾⿶⿵⿴⿲コ凵⿳⿽㇌⿷囗㇎㇅㇄厸䶹乛㇓㇈㇅㇄㇈一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹凵囗乁"
 
 get_characters_contained_pinyin_rows = (exclusions = []) ->
   pinyin_index = get_character_pinyin_index()
@@ -1093,13 +1093,76 @@ update_gridlearner_data = ->
     ii = get_batch_index i
     write_csv_file "data/gridlearner/characters-pinyin-#{ii}.dsv", data
 
+collect_characters_by_syllable_containment = ->
+  chars_with_pinyin = get_all_characters_with_pinyin()
+  pinyin_index = index_key_value chars_with_pinyin, 0, 1
+  char_syllable = {}
+  for c, p of pinyin_index
+    char_syllable[c] = p.replace(/[0-5]$/, "")
+  exclusions = split_chars(character_exclusions + character_exclusions_gridlearner)
+  raw_comp = get_full_compositions_index()
+  comp_index = {}
+  for k, v of raw_comp when not exclusions.includes k
+    comp_index[k] = v.filter (x) -> not exclusions.includes x
+  result = []
+  for base, carriers of comp_index
+    base_syl = char_syllable[base]
+    continue unless base_syl
+    related = carriers.filter (c) -> char_syllable[c] is base_syl
+    continue unless related.length
+    result.push [base, base_syl, related.join("")]
+  write_csv_file "data/characters-shared-component-and-syllable.dsv", result
+
+find_longest_containment_chains = ->
+  # 1  build a directed graph “is-component-of”
+  exclusions = split_chars(character_exclusions + character_exclusions_gridlearner)
+  raw_comp = get_full_compositions_index()
+  graph = {}
+  for k, v of raw_comp when not exclusions.includes k
+    carriers = v.filter (c) -> not exclusions.includes c
+    graph[k] = carriers if carriers.length
+
+  # 2  memoised DFS → longest path starting at each node
+  memo = {}
+  longest_from = (node) ->
+    return memo[node] if memo[node]?
+    best = [node]
+    for nxt in graph[node] or []
+      path = [node].concat longest_from nxt
+      best = path if path.length > best.length
+    memo[node] = best
+
+  for n of graph
+    longest_from n    # fill memo
+
+  # 3  collect unique maximal chains
+  chains = []
+  seen = new Set()
+  for chain in Object.values memo
+    id = chain.join ""
+    continue if seen.has id
+    chains.push chain
+    seen.add id
+
+  # (optional) remove chains that are strict sub-chains of longer ones
+  is_sub = (a, b) -> 0 <= b.join("").indexOf a.join("")
+  chains = chains.filter (c) -> not chains.some (d) -> d isnt c and d.length > c.length and is_sub c, d
+
+  # 4  sort longest → shortest and return
+  chains = chains.sort (a, b) -> b.length - a.length
+  chains = (a.join("") for a in chains when a.length > 2)
+
+  fs.writeFileSync "data/characters-series.txt", chains.join("\n")
+
 run = ->
+  #find_longest_containment_chains()
+  collect_characters_by_syllable_containment()
   #update_word_frequency_pinyin()
   #console.log get_all_characters_with_pinyin()
   #update_lists()
   #update_characters_contained()
   #update_gridlearner_data()
-  update_characters_by_pinyin()
+  #update_characters_by_pinyin()
   #update_practice_words()
   #update_character_tables()
   #update_cedict_csv()
