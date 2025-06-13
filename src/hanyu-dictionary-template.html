@@ -33,7 +33,8 @@
      #character_results{display:flex;flex-wrap:wrap;align-items:center}
      #character_results > * > svg{width:8rem;height:8rem}
      #character_results > * > svg > path{stroke-width:8;stroke:#fff;fill:none}
-     #character_results > * > svg > text{fill:#aaa;font-size:5rem;cursor:default}
+     #character_results > * > svg > text{visibility:hidden}
+     #character_results > * > svg:hover > text{visibility:visible;fill:#aaa;font-size:5rem;cursor:default}
      #character_results > * > .m{text-align:center;position:relative;top:-20px;height:0}
      #character_results > * > .m > *{display:inline-block;visibility:hidden}
      #character_results > * > .m > .text_char:hover{cursor:pointer}

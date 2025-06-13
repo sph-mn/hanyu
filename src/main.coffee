@@ -1110,7 +1110,7 @@ collect_characters_by_syllable_containment = ->
     continue unless base_syl
     related = carriers.filter (c) -> char_syllable[c] is base_syl
     continue unless related.length
-    result.push [base, base_syl, related.join("")]
+    result.push [base + related.join("")]
   write_csv_file "data/characters-shared-component-and-syllable.dsv", result
 
 find_longest_containment_chains = ->

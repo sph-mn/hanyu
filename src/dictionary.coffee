@@ -270,7 +270,7 @@ class word_search_class
       if t.classList.contains "single"
         c = t.innerHTML
         unless dom.character_input.value.includes c
-          dom.character_input.value += c
+          dom.character_input.value += ", " + c
           app.character_search.filter()
     @filter
 
