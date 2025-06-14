@@ -948,35 +948,33 @@ update_gridlearner_data = ->
     ii = get_batch_index i
     write_csv_file "data/gridlearner/characters-pinyin-#{ii}.dsv", data
 
-find_longest_containment_chains = ->
-  exclusions = split_chars(character_exclusions + character_exclusions_gridlearner)
-  raw_comp = get_full_compositions_index()
+update_characters_series = ->
+  rows = read_csv_file "data/gridlearner/characters-by-component.csv"
   graph = {}
-  for k, v of raw_comp when not exclusions.includes k
-    carriers = v.filter (c) -> not exclusions.includes c
-    graph[k] = carriers if carriers.length
+  for [p,c] in rows
+    object_array_add graph, p, c
+  max_start_degree = 30
   memo = {}
-  longest_from = (node) ->
-    return memo[node] if memo[node]?
-    best = [node]
-    for nxt in graph[node] or []
-      path = [node].concat longest_from nxt
-      best = path if path.length > best.length
-    memo[node] = best
-  for n of graph
-    longest_from n
+  longest = (n) ->
+    return memo[n] if memo[n]?
+    kids = graph[n] or []
+    return memo[n] = [[n]] unless kids.length
+    memo[n] = ( [n].concat longest(k).reduce ((a,b)-> if b.length>a.length then b else a) ) for k in kids
+  nodes = delete_duplicates_stable (rows.map((r)->r[0]).concat rows.map((r)->r[1]))
   chains = []
+  for n in nodes when (graph[n]?.length||0) and graph[n].length <= max_start_degree
+    chains = chains.concat longest n
   seen = new Set()
-  for chain in Object.values memo
-    id = chain.join ""
+  uniq = []
+  for ch in chains when ch.length > 2
+    id = ch.join ""
     continue if seen.has id
-    chains.push chain
+    uniq.push ch
     seen.add id
-  is_sub = (a, b) -> 0 <= b.join("").indexOf a.join("")
-  chains = chains.filter (c) -> not chains.some (d) -> d isnt c and d.length > c.length and is_sub c, d
-  chains = chains.sort (a, b) -> b.length - a.length
-  chains = (a.join("") for a in chains when a.length > 2)
-  fs.writeFileSync "data/characters-series.txt", chains.join("\n")
+  sub = (a,b)-> b.join("").includes a.join("")
+  uniq = uniq.filter (c)-> not uniq.some (d)-> d isnt c and d.length>c.length and sub c,d
+  uniq = uniq.sort (a,b)-> b.length - a.length
+  fs.writeFileSync "data/characters-series.txt", uniq.map((c)->c.join "").join "\n"
 
 similar_initial = (s1, s2) ->
   pairs =
@@ -1038,7 +1036,8 @@ update_characters_links = ->
   write_csv_file "data/character-links.csv", output_rows
 
 run = ->
-  update_characters_links()
+  update_characters_series()
+  #update_characters_links()
   #find_longest_containment_chains()
   #collect_characters_by_syllable_containment()
 
