@@ -643,40 +643,44 @@ get_char_decompositions = do ->
     b = b.filter((a) -> !strokes[a] || strokes[a] > 1)
     b.map((a) -> [a, get_char_pinyin(a)]).filter (a) -> a[1]
 
-characters_add_learning_data = (rows) -> # [[character, pinyin], ...] -> [array, ...]
+characters_add_learning_data = (rows) ->
   reading_count_index = get_character_reading_count_index()
   character_by_reading_index = get_character_by_reading_index()
   get_character_example_words = get_character_example_words_f()
-  rows = array_deduplicate_key(rows, (a) -> a[0])
-  syllables = delete_duplicates rows.map((a) -> a[1].split(", ")).flat()
+  compositions_index = get_compositions_index()
+  pinyin_index = get_character_pinyin_index()
+  rows = array_deduplicate_key rows, (a) -> a[0]
+  max_same_reading_characters = 16
+  max_containing_characters = 5
   add_same_reading_characters = (rows) ->
-    max_same_reading_characters = 24
     rows.map (a) ->
-      b = (character_by_reading_index[a[1]] or []).slice(0, max_same_reading_characters)
-      b = b.filter (b) -> a[0] != b
+      b = (character_by_reading_index[a[1]] or []).slice 0, max_same_reading_characters
+      b = b.filter (c) -> c isnt a[0]
       a.push b.join ""
-      a
-  add_syllable_arrows = (rows) ->
-    rows.map (a) ->
-      arrow = get_syllable_circle_arrow a[1]
-      a.push arrow
       a
   add_contained_characters = (rows) ->
     rows.map (a) ->
-      b = get_char_decompositions a[0]
-      c = b.map((c) -> c.join(" ")).join(", ")
-      a.push c
+      comps = get_char_decompositions a[0]
+      a.push comps.map((c) -> c.join " ").join ", "
+      a
+  add_containing_characters = (rows) ->
+    rows.map (a) ->
+      carriers = (compositions_index[a[0]] or []).slice 0, max_containing_characters
+      formatted = carriers
+        .filter (c) -> pinyin_index[c]?
+        .map (c) -> "#{c} #{pinyin_index[c]}"
+      a.push formatted.join ", "
       a
   add_example_words = (rows) ->
     rows.map (a) ->
-      words = get_character_example_words(a[0], a[1])
-      a.push(words.slice(1, 5).map((b) -> b[0]).join(" "))
-      a.push(words.slice(0, 5).map((b) -> b.join(" ")).join("\n"))
+      words = get_character_example_words a[0], a[1]
+      a.push words.slice(1, 5).map((b) -> b[0]).join " "
+      a.push words.slice(0, 5).map((b) -> b.join " ").join "\n"
       a
   rows = add_contained_characters rows
-  rows = add_same_reading_characters(rows)
+  rows = add_containing_characters rows
+  rows = add_same_reading_characters rows
   rows = add_sort_field rows
-  rows = add_syllable_arrows rows
   rows = add_example_words rows
   rows
 
@@ -782,9 +786,6 @@ get_characters_contained_rows = (exclusions = character_exclusions) ->
 update_characters_contained = ->
   rows = get_characters_contained_pinyin_rows()
   rows_gridlearner = get_characters_contained_pinyin_rows character_exclusions_gridlearner
-  for a in rows_gridlearner
-    continue unless a[2]
-    a[2] = a[2] + get_syllable_circle_arrow a[2]
   write_csv_file "data/gridlearner/characters-by-component.csv", rows_gridlearner
   rows = get_characters_contained_rows character_exclusions
   lines = (a[0] + " " + a[1].join("") for a in rows).join "\n"
@@ -1036,7 +1037,7 @@ update_characters_links = ->
   write_csv_file "data/character-links.csv", output_rows
 
 run = ->
-  update_characters_series()
+  update_characters_contained()
   #update_characters_links()
   #find_longest_containment_chains()
   #collect_characters_by_syllable_containment()

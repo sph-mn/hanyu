@@ -317,7 +317,7 @@
 辇 车,che1夫,fu1二,er4人,ren2十,shi2
 旉 甫,fu3方,fang1万,wan4
 㳟 共,gong4八,ba1卄,nian4十,shi2
-斛 角,jiao3斗,dou4⺈,yi4土,tu3十,shi2㇀,ti2
+斛 角,jiao3斗,dou4⺈,yi4用,yong4二,er4㇀,ti2
 棥 木,mu4爻,yao2十,shi2乂,yi4
 豙 立,li4亠,tou2䒑,cao3
 琶 巴,ba1王,wang2十,shi2㇀,ti2土,tu3巳,si4
@@ -339,7 +339,7 @@
 俊 厶,si1八,ba1
 冠 冖,mi4元,yuan2寸,cun4兀,wu4儿,er2
 派 氵,shui3㇀,ti2
-疏 止,zhi3亠,tou2
+疏 𤴔,li2㐬,lu4止,zhi3亠,tou2
 缊 纟,si1㇀,ti2日,ri4皿,min3囗,wei2
 科 禾,he2斗,dou4木,mu4十,shi2㇀,ti2
 背 北,bei3月,yue4㇀,ti2匕,bi3
@@ -347,7 +347,7 @@
 沃 氵,shui3夭,yao1㇀,ti2大,da4人,ren2
 拿 合,he2手,shou3口,kou3人,ren2
 沛 氵,shui3㇀,ti2巾,jin1
-觜 此,ci3角,jiao3止,zhi3匕,bi3⺈,yi4土,tu3十,shi2
+觜 此,ci3角,jiao3止,zhi3匕,bi3⺈,yi4用,yong4二,er4
 奥 米,mi3大,da4木,mu4十,shi2人,ren2
 哭 犬,quan3口,kou3大,da4人,ren2
 㗊 口,kou3
@@ -649,7 +649,7 @@
 颉 吉,ji2页,ye4士,shi4口,kou3十,shi2贝,bei4人,ren2
 猪 犭,quan3者,zhe3日,ri4土,tu3十,shi2囗,wei2
 孱 尸,shi1孨,zhuan3子,zi5孖,zi1了,le5
-流 氵,shui3㇀,ti2亠,tou2
+流 氵,shui3㐬,lu4㇀,ti2亠,tou2
 㼌 瓜,gua1厶,si1
 遣 辶,chuo4中,zhong1口,kou3
 鼎 目,mu4爿,pan2片,pian4囗,wei2
@@ -936,6 +936,7 @@
 ⺕ 
 七 ㇀,ti2
 丄 
+⺆ 
 彑 
 叉 又,you4
 屮 凵,kan3
@@ -1030,7 +1031,6 @@
 巤 囗,wei2乂,yi4
 ⺄ 
 乙 
-⺆ 
 尢 
 卄 十,shi2
 ⺌ 
@@ -1194,7 +1194,7 @@
 遂 辶,chuo4豕,shi3
 蒦 艹,cao3十,shi2
 鼻 自,zi4畀,bi4目,mu4囗,wei2田,tian2十,shi2
-解 角,jiao3⺈,yi4土,tu3十,shi2
+解 角,jiao3⺈,yi4用,yong4二,er4
 鼠 臼,jiu4
 卩 
 㔾 
@@ -1206,7 +1206,6 @@
 丬 ㇀,ti2
 曰 囗,wei2
 未 木,mu4十,shi2
-用 二,er4
 吕 口,kou3
 尼 尸,shi1匕,bi3
 失 夫,fu1二,er4人,ren2
@@ -1254,6 +1253,7 @@
 尤 尢,wang1
 仑 人,ren2匕,bi3
 天 大,da4人,ren2
+用 二,er4
 弗 弓,gong1
 奴 女,nü3又,you4
 正 止,zhi3
@@ -1466,7 +1466,7 @@
 走 土,tu3十,shi2人,ren2
 京 亠,tou2口,kou3小,xiao3八,ba1
 果 日,ri4木,mu4囗,wei2十,shi2
-角 ⺈,yi4土,tu3十,shi2
+角 ⺈,yi4用,yong4二,er4
 齿 止,zhi3凵,kan3人,ren2
 ⻗ 
 翏 羽,yu3习,xi2㇀,ti2彡,shan1
