@@ -643,45 +643,57 @@ get_char_decompositions = do ->
     b = b.filter((a) -> !strokes[a] || strokes[a] > 1)
     b.map((a) -> [a, get_char_pinyin(a)]).filter (a) -> a[1]
 
-characters_add_learning_data = (rows) ->
-  reading_count_index = get_character_reading_count_index()
+characters_add_learning_data = (rows, allowed_chars = null) ->
+  reading_count_index        = get_character_reading_count_index()
   character_by_reading_index = get_character_by_reading_index()
   get_character_example_words = get_character_example_words_f()
-  compositions_index = get_compositions_index()
-  pinyin_index = get_character_pinyin_index()
-  rows = array_deduplicate_key rows, (a) -> a[0]
-  max_same_reading_characters = 16
-  max_containing_characters = 5
-  add_same_reading_characters = (rows) ->
-    rows.map (a) ->
-      b = (character_by_reading_index[a[1]] or []).slice 0, max_same_reading_characters
-      b = b.filter (c) -> c isnt a[0]
-      a.push b.join ""
-      a
-  add_contained_characters = (rows) ->
-    rows.map (a) ->
-      comps = get_char_decompositions a[0]
-      a.push comps.map((c) -> c.join " ").join ", "
-      a
-  add_containing_characters = (rows) ->
-    rows.map (a) ->
-      carriers = (compositions_index[a[0]] or []).slice 0, max_containing_characters
+  compositions_index         = get_compositions_index()
+  pinyin_index               = get_character_pinyin_index()
+  dictionary_lookup          = dictionary_index_word_f 0
+  primary_pinyin             = (c) -> pinyin_index[c] ? (dictionary_lookup(c)?[0][1])
+  rows                       = array_deduplicate_key rows, (r) -> r[0]
+  max_same                   = 16
+  max_containing             = 5
+  in_scope                   = (c) -> (not allowed_chars?) or allowed_chars.has c
+
+  add_same_reading = (rows) ->
+    rows.map (r) ->
+      chars = (character_by_reading_index[r[1]] or []).filter(in_scope).slice 0, max_same
+      chars = chars.filter (c) -> c isnt r[0]
+      r.push chars.join ""
+      r
+
+  add_contained = (rows) ->
+    rows.map (r) ->
+      comps = get_char_decompositions(r[0]).map (x) -> x[0]
+      comps = comps.filter(in_scope)
+      formatted = comps
+        .map (c) -> pp = primary_pinyin c; if pp then "#{c} #{pp}" else null
+        .filter Boolean
+      r.push formatted.join ", "
+      r
+
+  add_containing = (rows) ->
+    rows.map (r) ->
+      carriers = (compositions_index[r[0]] or []).filter(in_scope).slice 0, max_containing
       formatted = carriers
-        .filter (c) -> pinyin_index[c]?
-        .map (c) -> "#{c} #{pinyin_index[c]}"
-      a.push formatted.join ", "
-      a
-  add_example_words = (rows) ->
-    rows.map (a) ->
-      words = get_character_example_words a[0], a[1]
-      a.push words.slice(1, 5).map((b) -> b[0]).join " "
-      a.push words.slice(0, 5).map((b) -> b.join " ").join "\n"
-      a
-  rows = add_contained_characters rows
-  rows = add_containing_characters rows
-  rows = add_same_reading_characters rows
+        .map (c) -> pp = primary_pinyin c; if pp then "#{c} #{pp}" else null
+        .filter Boolean
+      r.push formatted.join ", "
+      r
+
+  add_examples = (rows) ->
+    rows.map (r) ->
+      words = get_character_example_words r[0], r[1]
+      r.push words.slice(1, 5).map((w) -> w[0]).join " "
+      r.push words.slice(0, 5).map((w) -> w.join " ").join "\n"
+      r
+
+  rows = add_contained rows
+  rows = add_containing rows
+  rows = add_same_reading rows
   rows = add_sort_field rows
-  rows = add_example_words rows
+  rows = add_examples rows
   rows
 
 fix_dependency_order = (items, char_key) ->
@@ -719,12 +731,21 @@ sort_by_frequency_and_dependency = (data, char_key) ->
   data
 
 update_characters_learning = ->
-  rows = get_all_standard_characters_with_pinyin()
-  rows = sort_by_frequency_and_dependency rows, 0
-  rows = characters_add_learning_data rows
-  write_csv_file "data/characters-learning.csv", rows
-  rows = ([i + 1, a[0], a[1], a[5], a[3]] for a, i in rows)
-  write_csv_file "data/characters-learning-reduced.csv", rows
+  all_rows = get_all_standard_characters_with_pinyin()
+  all_rows = sort_by_frequency_and_dependency all_rows, 0
+  mid      = Math.ceil all_rows.length / 2
+  first    = all_rows.slice 0, mid
+  second   = all_rows.slice mid
+  first_set = new Set first.map (r) -> r[0]
+  first_out  = characters_add_learning_data first, first_set
+  second_out = characters_add_learning_data second
+  write_set = (rows, suffix) ->
+    base = "data/characters-learning"
+    write_csv_file "#{base}#{suffix}.csv", rows
+    reduced = ([i + 1, r[0], r[1], r[5], r[3]] for r, i in rows)
+    write_csv_file "#{base}-reduced#{suffix}.csv", reduced
+  write_set first_out, ""
+  write_set second_out, "-extended"
 
 update_syllables_character_count = () ->
   # number of characters with the same reading

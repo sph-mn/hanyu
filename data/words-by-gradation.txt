@@ -25,6 +25,17 @@ time, temporal references
 现在 xian4zai4 now
 暂时 zan4shi2 temporarily
 
+entirety, wholeness
+整个 zheng3ge4 "whole, entire (used with a measure word)"
+全 quán "whole, complete, entire"
+全体 quan2ti3 "entire, all members (of a group)"
+所有 suo3you3 "all, every"
+完全 wan2quan2 "completely, entirely" (already present)
+全部 quan2bu4 "entirely, all of" (already present)
+通通 tong1tong1 "all, entirely" (colloquial)
+一共 yi1gong4 "altogether, in total"
+总共 zong3gong4 "in total, altogether"
+
 frequency, repetition
 总是 zong3shi4 always
 常常 chang2chang2 "often"
@@ -189,3 +200,56 @@ lexical scales
 不重要 bu2zhong4yao4 unimportant
 重要 zhong4yao4 important
 非常重要 fei1chang2zhong4yao4 "very important"
+
+indefinite determiners and pronouns
+任何 ren4he2 any
+任意 ren4yi4 "any, arbitrary"
+某些 mou3xie1 "some, certain ones"
+无论 wu2lun4 "no matter (what/which)"
+什么都 shen2me dou1 "anything at all"
+任何东西 ren4he2dong1xi "anything"
+任何地方 ren4he2di4fang "anywhere"
+哪些 na3xie1 "which ones"
+哪一个 na3yi2ge4 "which one"
+
+intensity and emphasis
+简直 jian3zhi2 "simply, really"
+的确 di2que4 indeed
+果然 guo3ran2 "as expected"
+实在 shi2zai4 really
+毫不 hao2bu4 "not at all"
+并不 bing4bu4 "not at all"
+根本不 gen1ben3bu4 "absolutely not"
+一点也不 yi1dian3ye3bu4 "not in the slightest"
+
+additive and exclusion logic
+也 ye3 also
+都 dou1 all
+还 hai2 still
+再 zai4 again
+又 you4 again
+并且 bing4qie3 "and also"
+而且 er2qie3 "moreover"
+不但 bu2dan4 "not only"
+反之 fan3zhi1 conversely
+
+conditional and hypothetical
+如果 ru2guo3 if
+要是 yao4shi4 "if (casual)"
+假如 jia3ru2 suppose
+万一 wan4yi1 "in case"
+除非 chu2fei1 unless
+
+subjectivity and judgment
+看来 kan4lai2 "it seems"
+恐怕 kong3pa4 "I'm afraid, probably"
+据说 ju4shuo1 "it is said"
+据我所知 ju4wo3suo3zhi1 "as far as I know"
+听说 ting1shuo1 "I heard"
+
+polarity and lexical opposites
+有无 you3wu2 "have or not"
+是非 shi4fei1 "right and wrong"
+对错 dui4cuo4 "right and wrong"
+成败 cheng2bai4 "success and failure"
+利弊 li4bi4 "advantages and disadvantages"
