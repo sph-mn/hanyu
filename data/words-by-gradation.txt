@@ -253,3 +253,22 @@ polarity and lexical opposites
 对错 dui4cuo4 "right and wrong"
 成败 cheng2bai4 "success and failure"
 利弊 li4bi4 "advantages and disadvantages"
+
+typicality and normativity
+通常 tong1chang2 "usually, normally"
+一般 yi4ban1 generally
+平时 ping2shi2 normally
+平常 ping2chang2 "ordinarily, usually"
+往往 wang3wang3 "often, frequently"
+
+expectation, evaluation, surprise
+果然 guo3ran2 "as expected" (already added)
+居然 ju1ran2 "unexpectedly, actually"
+竟然 jing4ran2 "actually, to one's surprise"
+没想到 mei2xiang3dao4 "unexpectedly"
+本来 ben3lai2 "originally, supposed to"
+按理说 an4li3shuo1 "logically speaking"
+照理说 zhao4li3shuo1 "normally, theoretically"
+看来 kan4lai2 "it seems" (already added)
+实际上 shi2ji4shang4 "in fact, actually"
+事实上 shi4shi2shang4 "actually, in reality"

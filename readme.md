@@ -1,7 +1,7 @@
 # chinese language data and dictionary
 
 # dictionary
-dictionary that sorts results by word frequency and character count, with character stroke order lookup. the application is contained in a single file under compiled/ and also works offline. it is also hosted [here](http://sph.mn/other/chinese/hanyu-dictionary.html).
+dictionary that sorts results by word frequency and character count, with character stroke order lookup. the application is contained in a single file under compiled/ and also works offline. it is also hosted [here](https://sph.mn/other/chinese/tools/hanyu-dictionary.html).
 
 # data files
 see under data/
