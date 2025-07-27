@@ -647,22 +647,20 @@ characters_add_learning_data = (rows, allowed_chars = null) ->
   reading_count_index        = get_character_reading_count_index()
   character_by_reading_index = get_character_by_reading_index()
   get_character_example_words = get_character_example_words_f()
-  compositions_index         = get_compositions_index()
-  pinyin_index               = get_character_pinyin_index()
-  dictionary_lookup          = dictionary_index_word_f 0
-  primary_pinyin             = (c) -> pinyin_index[c] ? (dictionary_lookup(c)?[0][1])
-  rows                       = array_deduplicate_key rows, (r) -> r[0]
-  max_same                   = 16
-  max_containing             = 5
-  in_scope                   = (c) -> (not allowed_chars?) or allowed_chars.has c
-
+  compositions_index = get_compositions_index()
+  pinyin_index = get_character_pinyin_index()
+  dictionary_lookup = dictionary_index_word_f 0
+  primary_pinyin = (c) -> pinyin_index[c] ? (dictionary_lookup(c)?[0][1])
+  rows = array_deduplicate_key rows, (r) -> r[0]
+  max_same = 16
+  max_containing = 5
+  in_scope = (c) -> (not allowed_chars?) or allowed_chars.has c
   add_same_reading = (rows) ->
     rows.map (r) ->
       chars = (character_by_reading_index[r[1]] or []).filter(in_scope).slice 0, max_same
       chars = chars.filter (c) -> c isnt r[0]
       r.push chars.join ""
       r
-
   add_contained = (rows) ->
     rows.map (r) ->
       comps = get_char_decompositions(r[0]).map (x) -> x[0]
@@ -672,7 +670,6 @@ characters_add_learning_data = (rows, allowed_chars = null) ->
         .filter Boolean
       r.push formatted.join ", "
       r
-
   add_containing = (rows) ->
     rows.map (r) ->
       carriers = (compositions_index[r[0]] or []).filter(in_scope).slice 0, max_containing
@@ -681,19 +678,27 @@ characters_add_learning_data = (rows, allowed_chars = null) ->
         .filter Boolean
       r.push formatted.join ", "
       r
-
   add_examples = (rows) ->
     rows.map (r) ->
       words = get_character_example_words r[0], r[1]
       r.push words.slice(1, 5).map((w) -> w[0]).join " "
       r.push words.slice(0, 5).map((w) -> w.join " ").join "\n"
       r
-
+  add_reading_classification = (rows) ->
+    rows.map (r) ->
+      reading = r[1]
+      chars = (character_by_reading_index[reading] or []).filter(in_scope)
+      if chars.length == 1 then label = "unique"
+      else if chars.length <= 3 then label ="rare"
+      else label = ""
+      r.push label
+      r
   rows = add_contained rows
   rows = add_containing rows
   rows = add_same_reading rows
   rows = add_sort_field rows
   rows = add_examples rows
+  rows = add_reading_classification rows
   rows
 
 fix_dependency_order = (items, char_key) ->
@@ -961,6 +966,7 @@ update_practice_words = ->
   rows = get_practice_words 1000, Infinity
   write_csv_file "data/practice-words.csv", rows
 
+###
 update_gridlearner_data = ->
   chars = get_all_characters_with_pinyin()
   batch_size = 300
@@ -969,6 +975,55 @@ update_gridlearner_data = ->
     data = ([a[0], a[1]] for a in chars[i...i + batch_size])
     ii = get_batch_index i
     write_csv_file "data/gridlearner/characters-pinyin-#{ii}.dsv", data
+###
+
+update_gridlearner_data = ->
+  all_rows = sort_by_frequency_and_dependency get_all_standard_characters_with_pinyin(), 0
+  mid = Math.ceil all_rows.length / 2
+  top4000 = new Set all_rows.slice(0, mid).map (r) -> r[0]
+  top8000 = new Set all_rows.map (r) -> r[0]
+
+  pin_idx         = get_character_pinyin_index()
+  full_comps      = get_full_compositions_index()
+  dedup_stable    = (a) -> delete_duplicates_stable a
+
+  contained_rows = (pool) ->
+    out = []
+    for comp, carriers of full_comps when pool.has comp
+      carriers.forEach (parent) ->
+        py = pin_idx[parent]
+        out.push [comp, parent, py] if py?
+    dedup_stable out
+
+  containing_rows = (pool) ->
+    out = []
+    for comp, carriers of full_comps
+      for parent in carriers
+        continue unless pool.has parent
+        py = pin_idx[parent]
+        out.push [comp, parent, py] if py?
+    dedup_stable out
+
+  by_pinyin_rows = (pool) ->
+    groups = {}
+    pool.forEach (c) ->
+      py = pin_idx[c]
+      return unless py
+      (groups[py] ?= []).push c
+    order = Object.keys(groups).sort (a, b) -> groups[b].length - groups[a].length or a.localeCompare b
+    rows  = []
+    order.forEach (py) -> groups[py].forEach (c) -> rows.push [py, c, py]
+    rows
+
+  write = (tag, rows) -> write_csv_file "data/gridlearner/characters-#{tag}.csv", rows
+
+  write "top4000-contained",  contained_rows  top4000
+  write "top4000-containing", containing_rows top4000
+  write "top4000-by-pinyin",  by_pinyin_rows  top4000
+  write "top8000-contained",  contained_rows  top8000
+  write "top8000-containing", containing_rows top8000
+  write "top8000-by-pinyin",  by_pinyin_rows  top8000
+
 
 update_characters_series = ->
   rows = read_csv_file "data/gridlearner/characters-by-component.csv"
@@ -1058,7 +1113,7 @@ update_characters_links = ->
   write_csv_file "data/character-links.csv", output_rows
 
 run = ->
-  update_characters_contained()
+  update_gridlearner_data()
   #update_characters_links()
   #find_longest_containment_chains()
   #collect_characters_by_syllable_containment()
