@@ -453,7 +453,6 @@ update_character_tables = ->
   font = read_text_file "src/NotoSansSC-Light.ttf.base64"
   html = read_text_file "src/character-tables-template.html"
   html = replace_placeholders html, {font, content, nav_links}
-  #fs.writeFileSync "compiled/character-tables.html", html
   for key, value of tables
     tables[key] = (b.reverse() for b in value)
   prelearn2 = []
@@ -461,12 +460,6 @@ update_character_tables = ->
     for b in split_chars a[0]
       prelearn2.push [b, a[1]]
   write_csv_file "tmp/prelearn.csv", prelearn2
-  by_pinyin = get_characters_by_pinyin_rows_flat()
-  by_syllable = []
-  for a in by_pinyin
-    syllable = a[0].replace /[0-5]$/, ""
-    by_syllable.push [syllable, a[1], a[0]]
-  write_csv_file "data/gridlearner/characters-by-syllable.csv", by_syllable
 
 update_characters_by_pinyin_vertical = (rows) ->
   vertical_rows = format_lines_vertically rows
@@ -982,48 +975,60 @@ update_gridlearner_data = ->
   mid = Math.ceil all_rows.length / 2
   top4000 = new Set all_rows.slice(0, mid).map (r) -> r[0]
   top8000 = new Set all_rows.map (r) -> r[0]
-
-  pin_idx         = get_character_pinyin_index()
-  full_comps      = get_full_compositions_index()
-  dedup_stable    = (a) -> delete_duplicates_stable a
-
+  pin_idx = get_character_pinyin_index()
+  full_comps = get_full_compositions_index()
+  full_decomps = get_full_decompositions_index()
+  dedup_stable = (a) -> delete_duplicates_stable a
+  excluded = new Set split_chars character_exclusions_gridlearner
+  ok_char = (c) -> typeof c is "string" and c.length is 1 and c.match(hanzi_regexp) and not excluded.has c
   contained_rows = (pool) ->
     out = []
-    for comp, carriers of full_comps when pool.has comp
-      carriers.forEach (parent) ->
-        py = pin_idx[parent]
-        out.push [comp, parent, py] if py?
+    pool.forEach (parent) ->
+      return unless ok_char parent
+      comps = full_decomps[parent] or []
+      for child in comps when ok_char child
+        py = pin_idx[child] ? "-"
+        out.push [parent, child, py]
     dedup_stable out
-
   containing_rows = (pool) ->
     out = []
-    for comp, carriers of full_comps
-      for parent in carriers
-        continue unless pool.has parent
-        py = pin_idx[parent]
-        out.push [comp, parent, py] if py?
+    for comp, parents of full_comps when ok_char comp
+      for parent in parents when pool.has(parent) and ok_char parent
+        py = pin_idx[parent] ? "-"
+        out.push [comp, parent, py]
     dedup_stable out
-
   by_pinyin_rows = (pool) ->
     groups = {}
     pool.forEach (c) ->
+      return unless ok_char c
       py = pin_idx[c]
       return unless py
       (groups[py] ?= []).push c
     order = Object.keys(groups).sort (a, b) -> groups[b].length - groups[a].length or a.localeCompare b
-    rows  = []
+    rows = []
     order.forEach (py) -> groups[py].forEach (c) -> rows.push [py, c, py]
     rows
-
+  by_syllable_rows = (pool) ->
+    groups = {}
+    pool.forEach (c) ->
+      return unless ok_char c
+      py = pin_idx[c]
+      return unless py
+      syl = py.replace /[0-5]$/, ""
+      (groups[syl] ?= []).push [c, py]
+    order = Object.keys(groups).sort (a, b) -> groups[b].length - groups[a].length or a.localeCompare b
+    rows = []
+    order.forEach (syl) -> groups[syl].forEach ([c, py]) -> rows.push [syl, c, py]
+    rows
   write = (tag, rows) -> write_csv_file "data/gridlearner/characters-#{tag}.csv", rows
-
-  write "top4000-contained",  contained_rows  top4000
-  write "top4000-containing", containing_rows top4000
-  write "top4000-by-pinyin",  by_pinyin_rows  top4000
-  write "top8000-contained",  contained_rows  top8000
-  write "top8000-containing", containing_rows top8000
-  write "top8000-by-pinyin",  by_pinyin_rows  top8000
-
+  #write "top4000-contained",   contained_rows  top4000
+  write "top4000-containing",  containing_rows top4000
+  write "top4000-by-pinyin",   by_pinyin_rows  top4000
+  write "top4000-by-syllable", by_syllable_rows top4000
+  #write "top8000-contained",   contained_rows  top8000
+  write "top8000-containing",  containing_rows top8000
+  write "top8000-by-pinyin",   by_pinyin_rows  top8000
+  write "top8000-by-syllable", by_syllable_rows top8000
 
 update_characters_series = ->
   rows = read_csv_file "data/gridlearner/characters-by-component.csv"
