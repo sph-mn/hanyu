@@ -959,8 +959,7 @@ update_practice_words = ->
   rows = get_practice_words 1000, Infinity
   write_csv_file "data/practice-words.csv", rows
 
-###
-update_gridlearner_data = ->
+update_gridlearner_characters_by_pinyin = ->
   chars = get_all_characters_with_pinyin()
   batch_size = 300
   get_batch_index = (i) -> (1 + i / batch_size).toString().padStart 2, "0"
@@ -968,7 +967,6 @@ update_gridlearner_data = ->
     data = ([a[0], a[1]] for a in chars[i...i + batch_size])
     ii = get_batch_index i
     write_csv_file "data/gridlearner/characters-pinyin-#{ii}.dsv", data
-###
 
 update_gridlearner_data = ->
   all_rows = sort_by_frequency_and_dependency get_all_standard_characters_with_pinyin(), 0
@@ -1029,6 +1027,21 @@ update_gridlearner_data = ->
   write "top8000-containing",  containing_rows top8000
   write "top8000-by-pinyin",   by_pinyin_rows  top8000
   write "top8000-by-syllable", by_syllable_rows top8000
+  unique_rows = (pool) ->
+    counts = {}
+    pool.forEach (ch) ->
+      py = pin_idx[ch]
+      return unless py?
+      counts[py] = (counts[py] or 0) + 1
+    rows = []
+    pool.forEach (ch) ->
+      py = pin_idx[ch]
+      return unless py?
+      return unless counts[py] is 1
+      rows.push [ch, py]
+    rows.sort (a, b) -> a[1].localeCompare(b[1]) or a[0].localeCompare(b[0])
+  write "top4000-unique", unique_rows top4000
+  write "top8000-unique", unique_rows top8000
 
 update_characters_series = ->
   rows = read_csv_file "data/gridlearner/characters-by-component.csv"
