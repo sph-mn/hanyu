@@ -138,7 +138,7 @@ get_all_characters_with_pinyin = () ->
     pinyin = a[1].split(", ")[0]
     chars[a[0]] = pinyin
   for a in read_csv_file "data/additional-characters.csv"
-    chars[a[0]] = a[1] unless chars[a[0]]
+    chars[a[0]] = a[1]
   for a in read_csv_file "data/characters-strokes-decomposition.csv"
     pinyin = dict(a[0])?[0][1]
     chars[a[0]] = pinyin if pinyin && !chars[a[0]]
@@ -674,8 +674,14 @@ characters_add_learning_data = (rows, allowed_chars = null) ->
   add_examples = (rows) ->
     rows.map (r) ->
       words = get_character_example_words r[0], r[1]
-      r.push words.slice(1, 5).map((w) -> w[0]).join " "
-      r.push words.slice(0, 5).map((w) -> w.join " ").join "\n"
+      if words.length && r[0] == words[0][0]
+        char_word = words[0]
+        words = words.slice(1, 5)
+      else
+        char_word = null
+        words = words
+      r.push words.map((w) -> w[0]).join " "
+      r.push words.concat(if char_word then [char_word] else []).map((w) -> w.join " ").join "\n"
       r
   add_reading_classification = (rows) ->
     rows.map (r) ->
@@ -1130,8 +1136,18 @@ update_characters_links = ->
       ]
   write_csv_file "data/character-links.csv", output_rows
 
+
+dsv_characters_add_pinyin = (character_index) ->
+  pinyin_index = get_character_pinyin_index() # {char → "xx4"}
+  rows = read_csv_file(0).map (a) ->
+    pinyin = pinyin_index[a[character_index]]
+    return a unless pinyin
+    a.concat [pinyin]
+  write_csv_file 1, rows
+
 run = ->
-  update_gridlearner_data()
+  dsv_characters_add_pinyin 0
+  #update_gridlearner_data()
   #update_characters_links()
   #find_longest_containment_chains()
   #collect_characters_by_syllable_containment()
