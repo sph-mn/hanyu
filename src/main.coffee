@@ -1160,6 +1160,7 @@ module.exports = {
   object_array_add
   get_all_characters_with_pinyin
   update_dictionary
+  update_hover_dictionary
   update_characters_data
   traditional_to_simplified
   pinyin_to_hanzi

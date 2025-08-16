@@ -1,0 +1,14 @@
+{
+  "name": "hanyu-hover",
+  "version": "1.0.0",
+  "license": "cc-by-sa",
+  "devDependencies": {
+    "csv": "*",
+    "web-ext": "^8.9.0"
+  },
+  "scripts": {
+    "start": "web-ext run --start-url https://zh.wikipedia.org/zh-hans/",
+    "lint": "web-ext lint",
+    "build": "web-ext build"
+  }
+}

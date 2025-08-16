@@ -1,0 +1,33 @@
+{
+  "manifest_version": 2,
+  "name": "hanyu-hover",
+  "version": "0.1",
+  "description": "Hover to see Chinese word definitions",
+  "icons": {
+    "128": "icons/icon-128.png"
+  },
+  "permissions": ["storage", "tabs", "<all_urls>"],
+  "browser_action": {
+    "default_title": "hanyu-hover",
+    "default_icon": "icons/toolbar-on.png"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "css": ["content.css"],
+    "run_at": "document_idle"
+  }],
+  "web_accessible_resources": ["NotoSansSC-Light.ttf"],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{944e5f40-6d61-4207-8e60-a173e1a390ba}"
+    }
+  }
+}

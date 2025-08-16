@@ -1,0 +1,8 @@
+@font-face{
+  font-family:"NotoSansSC";
+  src:url("NotoSansSC-Light.ttf") format("truetype");
+  font-weight:100;
+  font-style:normal;
+  font-display:swap
+}
+[data-minzhint]{font-family:"NotoSansSC",sans-serif}

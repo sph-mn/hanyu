@@ -60,6 +60,9 @@ creative commons share-alike
   * update-svg-graphics regenerates the character svg graphics. it is usually with sub-commands "simplify_parallel" and then "merge" to merge result files from ./tmp to data/characters-svg-animcjk-simple.json.
 * the main code file is js/main.coffee
 
+# firefox hover dictionary
+see [other/hanyu-hover](other/hanyu-hover)
+
 # hanzi-convert
 a command-line utility to convert text. at this point, some of the conversions might be quite slow.
 
