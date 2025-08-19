@@ -5,6 +5,8 @@ pinyin_utils = require "pinyin-utils"
 on_error = (a) -> if a then console.error a
 read_text_file = (a) -> fs.readFileSync a, "utf8"
 array_from_newline_file = (path) -> read_text_file(path).toString().trim().split("\n")
+csv_parse = require "csv-parse/sync"
+read_csv_file = (path, delimiter) -> csv_parse.parse read_text_file(path), {delimiter: delimiter || " ", relax_column_count: true}
 
 write_csv_file = (path, data) ->
   csv = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
@@ -104,8 +106,12 @@ cedict_merge_definitions = (a) ->
     else table[key] = [index, a]
   Object.values(table).sort((a, b) -> a[0] - b[0]).map((a) -> a[1])
 
-cedict_additions = (a) ->
-  a.push ["你", "ni3", ["you"]]
+cedict_overrides = (a) ->
+  data = read_csv_file "data/additional-translations.csv"
+  for b in data
+    index = a.findIndex (c) -> c[0] == b[0]
+    continue unless index >= 0
+    a[index] = [b[0], b[1], b.slice(2)]
   a
 
 cedict_filter_only = () ->
@@ -164,8 +170,8 @@ update_cedict_csv = () ->
     unless glossary.length then return null
     [word, pinyin, glossary]
   data = data.filter (a) -> a
-  data = cedict_additions data
   data = cedict_merge_definitions data
+  data = cedict_overrides data
   data.forEach (a) -> a[2] = a[2].join "; "
   data = sort_by_word_frequency_with_pinyin frequency_index, 0, 1, data
   data = data.filter (a, index) -> index < 3000 || a[0].length < 3
@@ -174,7 +180,6 @@ update_cedict_csv = () ->
 module.exports = {
   cedict_glossary
   cedict_merge_definitions
-  cedict_additions
   cedict_filter_only
   update_cedict_csv
 }

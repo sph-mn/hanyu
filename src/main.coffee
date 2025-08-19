@@ -911,7 +911,10 @@ update_word_frequency_pinyin = ->
     entry = dict word
     continue unless entry
     pinyin = entry[0][1]
-    [word, pinyin]
+    translation = entry[0][2]
+    [word, pinyin, translation]
+  write_csv_file "data/words-by-frequency-with-pinyin-translation.csv", result
+  result = ([a[0], a[1]] for a in result)
   write_csv_file "data/words-by-frequency-with-pinyin.csv", result
 
 get_practice_words = (num_attempts, max_freq) ->
@@ -1160,7 +1163,6 @@ module.exports = {
   object_array_add
   get_all_characters_with_pinyin
   update_dictionary
-  update_hover_dictionary
   update_characters_data
   traditional_to_simplified
   pinyin_to_hanzi
@@ -1173,4 +1175,5 @@ module.exports = {
   grade_text_files
   run
   update_lists
+  update_word_frequency_pinyin
 }
