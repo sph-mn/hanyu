@@ -148,7 +148,7 @@ get_all_characters_with_pinyin = () ->
       pinyin = dict(b)?[0][1]
       chars[b] = pinyin if pinyin && !chars[b]
   data = ([a, b] for a, b of chars)
-  char_index = split_chars read_text_file("data/characters-by-frequency.txt").trim()
+  char_index = array_from_newline_file "data/characters-by-frequency.txt"
   data.sort (a, b) ->
     ia = char_index.indexOf a[0]
     ib = char_index.indexOf b[0]
@@ -890,7 +890,7 @@ update_character_frequency = ->
     chr = parts[0]
     if chr.length is 1
       chars.push chr
-  fs.writeFileSync "data/characters-by-frequency.txt", chars.join ""
+  fs.writeFileSync "data/characters-by-frequency.txt", chars.join "\n"
 
 update_word_frequency = ->
   buf = fs.readFileSync "/tmp/SUBTLEX-CH-WF"
@@ -906,6 +906,18 @@ update_word_frequency = ->
 
 update_word_frequency_pinyin = ->
   words = array_from_newline_file "data/words-by-frequency.txt"
+  additional_words = (a[0] for a in read_csv_file("data/cedict.csv"))
+  words_set = new Set words
+  additional_words = (a for a in additional_words when not words_set.has a)
+  cfi = get_character_frequency_index()
+  cfi_length = Object.keys(cfi).length
+  additional_words.sort (a, b) ->
+    a_score = 0
+    b_score = 0
+    a_score += (cfi[c] || cfi_length for c in split_chars(a))
+    b_score += (cfi[c] || cfi_length for c in split_chars(b))
+    a_score - b_score
+  words = words.concat additional_words
   dict = dictionary_index_word_f 0
   result = for word in words
     entry = dict word
