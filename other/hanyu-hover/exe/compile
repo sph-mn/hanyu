@@ -34,11 +34,11 @@ update_hover_dictionary = function() {
   var script, word_data;
   word_data = read_csv_file("../../data/cedict.csv");
   word_data = dictionary_cedict_to_json(word_data);
-  script = read_text_file("content-template.js");
+  script = read_text_file("js/content-template.js");
   script = replace_placeholders(script, {
     word_data
   });
-  return fs.writeFileSync("content.js", script);
+  return fs.writeFileSync("compiled/content.js", script);
 };
 
 update_hover_dictionary()
