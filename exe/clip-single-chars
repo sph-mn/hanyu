@@ -1,0 +1,4 @@
+#!/bin/sh
+# arguments: from_number to_number
+
+cat cedict-single-chars-remaining.txt | body 900 1000 | clip

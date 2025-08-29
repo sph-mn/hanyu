@@ -1,0 +1,8 @@
+#!/usr/bin/ruby
+
+$stdin.each_line{|a|
+  a = a.strip.split ";"
+  first = a.shift.strip.split(" ")
+  rest = a.map{|b| first[0] + b}
+  puts ([first.join(" ")] + rest).join("\n")
+}

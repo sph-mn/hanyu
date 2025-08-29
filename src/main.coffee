@@ -148,7 +148,7 @@ get_all_characters_with_pinyin = () ->
       pinyin = dict(b)?[0][1]
       chars[b] = pinyin if pinyin && !chars[b]
   data = ([a, b] for a, b of chars)
-  char_index = array_from_newline_file "data/characters-by-frequency.txt"
+  char_index = array_from_newline_file "data/subtlex-characters-by-frequency.txt"
   data.sort (a, b) ->
     ia = char_index.indexOf a[0]
     ib = char_index.indexOf b[0]
@@ -881,7 +881,7 @@ update_lists = (paths) ->
 iconv = require "iconv-lite"
 
 update_character_frequency = ->
-  buf = fs.readFileSync "/tmp/SUBTLEX-CH-CHR"
+  buf = fs.readFileSync "/tmp/subtlex-ch-chr"
   text = iconv.decode buf, "gb2312"
   lines = text.split "\n"
   chars = []
@@ -890,7 +890,7 @@ update_character_frequency = ->
     chr = parts[0]
     if chr.length is 1
       chars.push chr
-  fs.writeFileSync "data/characters-by-frequency.txt", chars.join "\n"
+  fs.writeFileSync "data/subtlex-characters-by-frequency.txt", chars.join "\n"
 
 update_word_frequency = ->
   buf = fs.readFileSync "/tmp/SUBTLEX-CH-WF"
@@ -902,10 +902,10 @@ update_word_frequency = ->
     word = parts[0]
     continue unless word.match /[\u4e00-\u9fff]/  # skip PUA and non-CJK
     words.push word
-  fs.writeFileSync "data/words-by-frequency.txt", words.join "\n"
+  fs.writeFileSync "data/subtlex-words-by-frequency.txt", words.join "\n"
 
 update_word_frequency_pinyin = ->
-  words = array_from_newline_file "data/words-by-frequency.txt"
+  words = array_from_newline_file "data/subtlex-words-by-frequency.txt"
   additional_words = (a[0] for a in read_csv_file("data/cedict.csv"))
   words_set = new Set words
   additional_words = (a for a in additional_words when not words_set.has a)
@@ -1151,7 +1151,6 @@ update_characters_links = ->
       ]
   write_csv_file "data/character-links.csv", output_rows
 
-
 dsv_characters_add_pinyin = (character_index) ->
   pinyin_index = get_character_pinyin_index() # {char → "xx4"}
   rows = read_csv_file(0).map (a) ->
@@ -1161,7 +1160,8 @@ dsv_characters_add_pinyin = (character_index) ->
   write_csv_file 1, rows
 
 run = ->
-  dsv_characters_add_pinyin 0
+  update_character_frequency()
+  #dsv_characters_add_pinyin 0
   #update_gridlearner_data()
   #update_characters_links()
   #find_longest_containment_chains()
