@@ -1,3 +1,5 @@
+character_exclusions_gridlearner = "灬罒彳𠂉⺈辶卝埶冃丏卝宀冖亠䒑丅丷一亅⿻㇀乚丨丿⿰�丶㇒㇏⿹乛㇓㇈⿸乀㇍⿺㇋㇂㇊丆⺊ユ⿾⿶⿵⿴⿲コ凵⿳⿽㇌⿷囗㇎㇅㇄厸䶹乛㇓㇈㇅㇄㇈一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹凵囗乁"
+character_exclusions = "⿱丅丷一亅⿻㇀乚丨丿⿰�丶㇒㇏⿹乛㇓㇈⿸乀㇍⿺㇋㇂㇊丆⺊ユ⿾⿶⿵⿴⿲コ凵⿳⿽㇌⿷囗㇎㇅㇄厸䶹乛㇓㇈㇅㇄㇈一亅㇀ 乚丨丿丶㇒㇏㇇乛㇓乀㇍㇂㇊丆二⺊卜十冂ユコ㇄㇅㇎㇌乜㇋厸丫䶹凵囗乁"
 h = require "./helper"
 fs = require "fs"
 node_path = require "path"
@@ -5,234 +7,163 @@ iconv = require "iconv-lite"
 coffee = require "coffeescript"
 lookup = require "./lookup"
 
-get_all_standard_characters_with_pinyin = ->
-  standard_rows = h.read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (row) -> [row[0], row[1].split(",")[0]]
-  additional_rows = h.read_csv_file("data/additional-characters.csv").filter((row) -> !character_exclusions.includes(row[0])).map (row) -> [row[0], row[1].split(",")[0]]
-  standard_rows.concat additional_rows
+update_all_characters_with_pinyin = ->
+  primary_pinyin_f = lookup.make_primary_pinyin_f()
+  order_f = lookup.make_char_freq_dep_index_from_file_f()
+  if Object.keys(order_f.index_map).length is 0 then order_f = lookup.make_char_freq_dep_index_f()
+  character_set = new Set()
+  h.read_csv_file("data/table-of-general-standard-chinese-characters.csv").forEach (row) -> character_set.add row[0]
+  h.read_csv_file("data/additional-characters.csv").forEach (row) -> unless character_exclusions.includes row[0] then character_set.add row[0]
+  h.read_csv_file("data/characters-strokes-decomposition.csv").forEach (row) ->
+    character_set.add row[0]
+    return unless row.length >= 3
+    h.split_chars(row[2]).forEach (c) -> if c.match h.hanzi_regexp then character_set.add c
+  pairs = Array.from(character_set).map (c) -> [c, primary_pinyin_f c]
+  pairs.sort (a, b) -> (order_f.index_map[a[0]] ? 9e15) - (order_f.index_map[b[0]] ? 9e15)
+  h.write_csv_file "data/characters-pinyin-by-frequency-dependency.csv", pairs
 
-get_all_characters = ->
-  Object.keys lookup.stroke_count_index()
-
-get_all_characters_sorted_by_frequency = ->
-  frequency_index_map = lookup.char_freq_index()
-  Object.keys(frequency_index_map).sort (a, b) -> frequency_index_map[a] - frequency_index_map[b]
-
-sort_by_index_and_character_f = (index_map, character_key) ->
-  comparator = sort_by_character_f index_map
-  (row_a, row_b) -> comparator row_a[character_key], row_b[character_key]
-
-sort_by_character_f = (index_map) ->
-  (char_a, char_b) ->
-    index_a = index_map[char_a]
-    index_b = index_map[char_b]
-    if index_a is undefined and index_b is undefined
-      (char_a.length - char_b.length) || char_a.localeCompare(char_b) || char_b.localeCompare(char_a)
-    else if index_a is undefined then 1
-    else if index_b is undefined then -1
-    else index_a - index_b
-
-sort_by_character_frequency = (frequency_index_map, character_key, rows) ->
-  rows.sort sort_by_index_and_character_f frequency_index_map, character_key
-
-dictionary_cedict_to_json = (rows) ->
-  JSON.stringify rows.map (row) ->
-    row[2] = row[2].split "/"
-    row.push row[1].replace /[0-4]/g, ""
-    row
-
-get_character_pinyin_index = ->
-  characters = get_all_characters()
-  index_map = {}
-  characters.forEach (ch) ->
-    py = lookup.primary_pinyin ch
-    if py? and not py.endsWith "5"
-      index_map[ch] = py
-  index_map
+get_all_characters_with_pinyin = -> h.read_csv_file("data/characters-pinyin-by-frequency-dependency.csv")
 
 get_characters_by_pinyin_rows = ->
+  primary_pinyin_f = lookup.make_primary_pinyin_f()
   groups = {}
-  get_all_characters().forEach (ch) ->
-    py = lookup.primary_pinyin ch
-    return unless py? and not py.endsWith "5"
-    h.object_array_add groups, py, ch
-  rows = Object.keys(groups).map (py) -> [py, groups[py]]
+  get_all_characters().forEach (c) ->
+    p = primary_pinyin_f c
+    return unless p? and not p.endsWith "5"
+    (groups[p] ?= []).push c
+  rows = Object.keys(groups).map (p) -> [p, groups[p]]
   rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
 
-get_compositions_index = ->
-  compositions_map = lookup.full_compositions_index()
-  frequency_sorter = sort_by_character_f lookup.char_freq_index()
-  for component, parents of compositions_map
-    compositions_map[component] = parents.sort frequency_sorter
-  compositions_map
-
-get_full_decompositions_index = ->
-  lookup.full_decompositions_index()
-
-get_stroke_count_index = ->
-  lookup.stroke_count_index()
-
-get_char_pinyin = do ->
-  dictionary_lookup = lookup.dictionary_index_word_f 0
-  (ch) ->
-    entries = dictionary_lookup ch
-    return entries[0][1] if entries and entries.length
-    lookup.primary_pinyin ch
-
-get_char_decompositions = do ->
-  decompositions_index = lookup.full_decompositions_index()
-  stroke_index_map = lookup.stroke_count_index()
-  (ch) ->
-    parts = decompositions_index[ch]
-    return [] unless parts
-    parts = parts.filter (c) -> !stroke_index_map[c] or stroke_index_map[c] > 1
-    parts.map((c) -> [c, get_char_pinyin(c)]).filter (p) -> p[1]
-
-get_character_reading_count_index = ->
-  result = {}
-  h.read_csv_file("data/characters-pinyin-count.csv").forEach (row) -> result[row[0] + row[1]] = parseInt row[2],10
-  result
-
-get_character_example_words_f = ->
-  (char, pinyin, frequency_limit) ->
-    limit = if frequency_limit? then frequency_limit else Infinity
-    lookup.top_examples char, limit
+get_char_decompositions = (c) ->
+  f = lookup.make_char_decompositions_f lookup.make_primary_pinyin_f()
+  f c
 
 sort_by_frequency_and_dependency = (rows, char_key) ->
-  dependency_frequency_index = lookup.char_freq_dep_index()
-  rows.sort (a, b) ->
-    ia = dependency_frequency_index[a[char_key]]
-    ib = dependency_frequency_index[b[char_key]]
-    (if ia? then ia else 9e15) - (if ib? then ib else 9e15)
+  order_f = lookup.make_char_freq_dep_index_from_file_f()
+  if Object.keys(order_f.index_map).length is 0 then order_f = lookup.make_char_freq_dep_index_f()
+  rows.sort (a, b) -> (order_f.index_map[a[char_key]] ? 9e15) - (order_f.index_map[b[char_key]] ? 9e15)
+
+dictionary_cedict_to_json = (rows) ->
+  JSON.stringify rows.map (r) ->
+    r[2] = r[2].split "/"
+    r.push r[1].replace /[0-4]/g, ""
+    r
 
 update_character_frequency = ->
   buf = fs.readFileSync "/tmp/subtlex-ch-chr"
   text = iconv.decode buf, "gb2312"
   lines = text.split "\n"
-  chars = []
+  out = []
   for line in lines when line.trim() and not line.startsWith("Character") and not line.startsWith("Total")
     parts = line.trim().split /\s+/
-    chr = parts[0]
-    if chr.length is 1
-      chars.push chr
-  fs.writeFileSync "data/subtlex-characters-by-frequency.txt", chars.join "\n"
+    c = parts[0]
+    if c.length is 1 then out.push c
+  fs.writeFileSync "data/subtlex-characters-by-frequency.txt", out.join "\n"
+
+update_characters_by_frequency_dependency = ->
+  order_f = lookup.make_char_freq_dep_index_f()
+  ordered = Object.keys(order_f.index_map).sort (a, b) -> order_f.index_map[a] - order_f.index_map[b]
+  rows = ordered.map (c, i) -> [i + 1, c]
+  h.write_csv_file "data/characters-by-frequency-dependency.csv", rows
 
 update_word_frequency_pinyin = ->
+  char_freq_f = lookup.make_char_freq_index_f()
+  dict_f = lookup.make_dictionary_index_word_f 0
   words = h.array_from_newline_file "data/subtlex-words-by-frequency.txt"
-  additional_words = (a[0] for a in h.read_csv_file("data/cedict.csv"))
-  words_set = new Set words
-  additional_words = (a for a in additional_words when not words_set.has a)
-  cfi = lookup.char_freq_index()
-  cfi_length = Object.keys(cfi).length
-  additional_words.sort (a, b) ->
-    a_score = 0
-    b_score = 0
-    a_score += (cfi[c] || cfi_length for c in h.split_chars(a))
-    b_score += (cfi[c] || cfi_length for c in h.split_chars(b))
-    a_score - b_score
-  words = words.concat additional_words
-  dict = dictionary_index_word_f 0
-  result = for word in words
-    entry = dict word
-    continue unless entry
-    pinyin = entry[0][1]
-    translation = entry[0][2]
-    [word, pinyin, translation]
+  add = (r[0] for r in h.read_csv_file "data/cedict.csv")
+  seen = new Set words
+  add = (w for w in add when not seen.has w)
+  cap = Object.keys(char_freq_f.index_map).length
+  add.sort (a, b) ->
+    sa = 0
+    sb = 0
+    sa += (char_freq_f.index_map[c] or cap for c in h.split_chars a)
+    sb += (char_freq_f.index_map[c] or cap for c in h.split_chars b)
+    sa - sb
+  words = words.concat add
+  result = for w in words
+    e = dict_f w
+    continue unless e
+    [w, e[0][1], e[0][2]]
   h.write_csv_file "data/words-by-frequency-with-pinyin-translation.csv", result
-  result = ([a[0], a[1]] for a in result)
-  h.write_csv_file "data/words-by-frequency-with-pinyin.csv", result
+  h.write_csv_file "data/words-by-frequency-with-pinyin.csv", ([r[0], r[1]] for r in result)
 
-update_characters_by_pinyin = () ->
-  by_pinyin = {}
-  chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))
-  chars.forEach (a) -> h.object_array_add by_pinyin, a[1], a[0]
-  rows = Object.keys(by_pinyin).map (a) -> [a, by_pinyin[a].join("")]
-  rows = rows.sort (a, b) -> a[0].localeCompare(b[0]) || b[1].length - a[1].length
-  h.write_csv_file "data/characters-by-pinyin.csv", rows
-  rows = rows.sort (a, b) -> b[1].length - a[1].length || a[0].localeCompare(b[0])
-  h.write_csv_file "data/characters-by-pinyin-by-count.csv", rows
-  rare_rows = []
-  for p in Object.keys(by_pinyin)
-    if by_pinyin[p].length < 3
-      for c in by_pinyin[p]
-        rare_rows.push [c, p]
-  rare_rows = rare_rows.sort (a, b) -> a[1].localeCompare(b[1]) || a[0].localeCompare(b[0])
-  h.write_csv_file "data/characters-pinyin-rare.csv", rare_rows
+update_characters_by_pinyin = ->
+  rows = get_characters_by_pinyin_rows()
+  joined = rows.map (r) -> [r[0], r[1].join ""]
+  a = joined.sort (x, y) -> x[0].localeCompare(y[0]) || y[1].length - x[1].length
+  h.write_csv_file "data/characters-by-pinyin.csv", a
+  b = joined.slice().sort (x, y) -> y[1].length - x[1].length || x[0].localeCompare(y[0])
+  h.write_csv_file "data/characters-by-pinyin-by-count.csv", b
+  rare = []
+  rows.forEach (r) -> if r[1].length < 3 then r[1].forEach (c) -> rare.push [c, r[0]]
+  rare = rare.sort (x, y) -> x[1].localeCompare(y[1]) || x[0].localeCompare(y[0])
+  h.write_csv_file "data/characters-pinyin-rare.csv", rare
 
 update_characters_data = ->
-  graphics_data = JSON.parse h.read_text_file "data/characters-svg-animcjk-simple.json"
-  character_data = h.read_csv_file "data/characters-strokes-decomposition.csv"
-  compositions_index = get_compositions_index()
-  dictionary_lookup = dictionary_index_word_f 0
-  character_frequency_index = lookup.char_freq_index()
-  result = []
-  for a, i in character_data
-    [char, strokes, decomposition] = a
-    strokes = parseInt strokes, 10
-    svg_paths = graphics_data[char] || ""
-    compositions = compositions_index[char] || []
-    entries = dictionary_lookup char
-    if entries and entries.length
-      entry = entries[0]
-      pinyin = entry[1]
-    else pinyin = ""
-    result.push [char, strokes, pinyin, decomposition || "", compositions.join(""), svg_paths]
-  result = sort_by_character_frequency character_frequency_index, 0, result
-  fs.writeFileSync "data/characters-svg.json", JSON.stringify result
+  dict_f = lookup.make_dictionary_index_word_f 0
+  char_freq_f = lookup.make_char_freq_index_f()
+  contained_by_f = lookup.make_contained_by_map_f()
+  graphics = JSON.parse h.read_text_file "data/characters-svg-animcjk-simple.json"
+  rows = h.read_csv_file "data/characters-strokes-decomposition.csv"
+  contain_sorted = {}
+  Object.keys(contained_by_f.index_map).forEach (k) ->
+    v = contained_by_f.index_map[k]
+    contain_sorted[k] = v.slice().sort (a, b) -> (char_freq_f.index_map[a] ? 9e15) - (char_freq_f.index_map[b] ? 9e15) or a.localeCompare b
+  out = []
+  for r in rows
+    c = r[0]
+    s = parseInt r[1],10
+    d = r[2] or ""
+    svg = graphics[c] or ""
+    comps = contain_sorted[c] or []
+    e = dict_f c
+    p = if e and e.length then e[0][1] else ""
+    out.push [c, s, p, d, comps.join(""), svg]
+  out = out.sort (x, y) -> (char_freq_f.index_map[x[0]] ? 9e15) - (char_freq_f.index_map[y[0]] ? 9e15)
+  fs.writeFileSync "data/characters-svg.json", JSON.stringify out
 
-characters_add_learning_data = (rows, allowed_chars = null) ->
-  reading_count_index = get_character_reading_count_index()
-  character_by_reading_index = get_character_by_reading_index()
-  get_character_example_words = get_character_example_words_f()
-  compositions_index = get_compositions_index()
-  pinyin_index = get_character_pinyin_index()
-  dictionary_lookup = dictionary_index_word_f 0
-  primary_pinyin = (c) -> pinyin_index[c] ? (dictionary_lookup(c)?[0][1])
-  rows = h.array_deduplicat_key rows, (r) -> r[0]
+characters_add_learning_data = (rows, allowed_chars=null) ->
+  char_by_reading_f = lookup.make_char_by_reading_index_f()
+  primary_pinyin_f = lookup.make_primary_pinyin_f()
+  char_decompositions_f = lookup.make_char_decompositions_f primary_pinyin_f
+  contained_by_f = lookup.make_contained_by_map_f()
+  rows = h.array_deduplicate_key rows, (r) -> r[0]
   max_same = 16
   max_containing = 5
   in_scope = (c) -> (not allowed_chars?) or allowed_chars.has c
   add_same_reading = (rows) ->
     rows.map (r) ->
-      chars = (character_by_reading_index[r[1]] or []).filter(in_scope).slice 0, max_same
-      chars = chars.filter (c) -> c isnt r[0]
-      r.push chars.join ""
+      cs = (char_by_reading_f.index_map[r[1]] or []).filter(in_scope).slice 0, max_same
+      cs = cs.filter (c) -> c isnt r[0]
+      r.push cs.join ""
       r
   add_contained = (rows) ->
     rows.map (r) ->
-      comps = get_char_decompositions(r[0]).map (x) -> x[0]
+      comps = (char_decompositions_f r[0]).map (x) -> x[0]
       comps = comps.filter(in_scope)
-      formatted = comps
-        .map (c) -> pp = primary_pinyin c; if pp then "#{c} #{pp}" else null
-        .filter Boolean
+      formatted = comps.map((c) -> p = primary_pinyin_f c; if p then "#{c} #{p}" else null).filter Boolean
       r.push formatted.join ", "
       r
   add_containing = (rows) ->
     rows.map (r) ->
-      carriers = (compositions_index[r[0]] or []).filter(in_scope).slice 0, max_containing
-      formatted = carriers
-        .map (c) -> pp = primary_pinyin c; if pp then "#{c} #{pp}" else null
-        .filter Boolean
+      carriers = (contained_by_f r[0]).filter(in_scope).slice 0, max_containing
+      formatted = carriers.map((c) -> p = primary_pinyin_f c; if p then "#{c} #{p}" else null).filter Boolean
       r.push formatted.join ", "
       r
   add_examples = (rows) ->
+    top_examples_f = lookup.make_top_examples_f()
     rows.map (r) ->
-      words = get_character_example_words r[0], r[1]
-      if words.length && r[0] == words[0][0]
-        char_word = words[0]
-        words = words.slice(1, 5)
-      else
-        char_word = null
-        words = words
-      r.push words.map((w) -> w[0]).join " "
-      r.push words.concat(if char_word then [char_word] else []).map((w) -> w.join " ").join "\n"
+      words = top_examples_f r[0], 4
+      main = if words.length and r[0] is words[0][0] then words[0] else null
+      others = if main then words.slice 1, 5 else words
+      r.push others.map((w) -> w[0]).join " "
+      r.push words.concat(if main then [main] else []).map((w) -> w.join " ").join "\n"
       r
   add_reading_classification = (rows) ->
     rows.map (r) ->
-      reading = r[1]
-      chars = (character_by_reading_index[reading] or []).filter(in_scope)
-      if chars.length == 1 then label = "unique"
-      else if chars.length <= 3 then label ="rare"
-      else label = ""
+      cs = (char_by_reading_f.index_map[r[1]] or []).filter(in_scope)
+      label = if cs.length is 1 then "unique" else if cs.length <= 3 then "rare" else ""
       r.push label
       r
   add_sort_field = (rows) ->
@@ -247,13 +178,13 @@ characters_add_learning_data = (rows, allowed_chars = null) ->
   rows
 
 update_characters_learning = ->
-  all_rows = get_all_standard_characters_with_pinyin()
+  all_rows = get_all_characters_with_pinyin()
   all_rows = sort_by_frequency_and_dependency all_rows, 0
-  mid      = Math.ceil all_rows.length / 2
-  first    = all_rows.slice 0, mid
-  second   = all_rows.slice mid
+  mid = Math.ceil all_rows.length / 2
+  first = all_rows.slice 0, mid
+  second = all_rows.slice mid
   first_set = new Set first.map (r) -> r[0]
-  first_out  = characters_add_learning_data first, first_set
+  first_out = characters_add_learning_data first, first_set
   second_out = characters_add_learning_data second
   write_set = (rows, suffix) ->
     base = "data/characters-learning"
@@ -265,19 +196,15 @@ update_characters_learning = ->
 
 update_lists = (paths) ->
   nav_links = []
-  paths = (a for a in paths when h.is_file a)
+  paths = (p for p in paths when h.is_file p)
   content = for path, i in paths
     rows = h.read_csv_file path
-    parts = for row in rows
-      [head, tail...] = row
+    parts = for r in rows
+      [head, tail...] = r
       tail = tail.join " "
-      """
-      <b><b>#{head}</b><b>#{tail}</b></b>
-      """
+      "<b><b>#{head}</b><b>#{tail}</b></b>"
     label = h.strip_extensions node_path.basename path
-    nav_links.push """
-       <a href="#" data-target="#{i}">#{label}</a>
-    """
+    nav_links.push "<a href=\"#\" data-target=\"#{i}\">#{label}</a>"
     "<div>" + parts.join("\n") + "</div>"
   content = content.join "\n"
   nav_links = nav_links.join "\n"
@@ -287,37 +214,38 @@ update_lists = (paths) ->
   fs.writeFileSync "tmp/lists.html", html
 
 update_gridlearner_data = ->
-  all_rows = sort_by_frequency_and_dependency get_all_standard_characters_with_pinyin(), 0
+  primary_pinyin_f = lookup.make_primary_pinyin_f()
+  full_comps_map = lookup.make_full_compositions_index_f().index_map
+  full_decomps_map = lookup.make_full_decompositions_index_f().index_map
+  all_rows = sort_by_frequency_and_dependency get_all_characters_with_pinyin(), 0
   mid = Math.ceil all_rows.length / 2
   top4000 = new Set all_rows.slice(0, mid).map (r) -> r[0]
   top8000 = new Set all_rows.map (r) -> r[0]
-  pin_idx = get_character_pinyin_index()
-  full_comps = get_full_compositions_index()
-  full_decomps = get_full_decompositions_index()
-  dedup_stable = (a) -> h.delete_duplicates_stable a
   excluded = new Set h.split_chars character_exclusions_gridlearner
-  ok_char = (c) -> typeof c is "string" and c.length is 1 and c.match(h.hanzi_regexp) and not excluded.has c
+  ok = (c) -> typeof c is "string" and c.length is 1 and c.match(h.hanzi_regexp) and not excluded.has c
+  pin = (c) -> primary_pinyin_f c
+  dedup = (a) -> h.delete_duplicates_stable a
   contained_rows = (pool) ->
     out = []
     pool.forEach (parent) ->
-      return unless ok_char parent
-      comps = full_decomps[parent] or []
-      for child in comps when ok_char child
-        py = pin_idx[child] ? "-"
+      return unless ok parent
+      comps = full_decomps_map[parent] or []
+      for child in comps when ok child
+        py = pin(child) ? "-"
         out.push [parent, child, py]
-    dedup_stable out
+    dedup out
   containing_rows = (pool) ->
     out = []
-    for comp, parents of full_comps when ok_char comp
-      for parent in parents when pool.has(parent) and ok_char parent
-        py = pin_idx[parent] ? "-"
+    for comp, parents of full_comps_map when ok comp
+      for parent in parents when pool.has(parent) and ok parent
+        py = pin(parent) ? "-"
         out.push [comp, parent, py]
-    dedup_stable out
+    dedup out
   by_pinyin_rows = (pool) ->
     groups = {}
     pool.forEach (c) ->
-      return unless ok_char c
-      py = pin_idx[c]
+      return unless ok c
+      py = pin c
       return unless py
       (groups[py] ?= []).push c
     order = Object.keys(groups).sort (a, b) -> groups[b].length - groups[a].length or a.localeCompare b
@@ -327,8 +255,8 @@ update_gridlearner_data = ->
   by_syllable_rows = (pool) ->
     groups = {}
     pool.forEach (c) ->
-      return unless ok_char c
-      py = pin_idx[c]
+      return unless ok c
+      py = pin c
       return unless py
       syl = py.replace /[0-5]$/, ""
       (groups[syl] ?= []).push [c, py]
@@ -345,34 +273,35 @@ update_gridlearner_data = ->
   write "top8000-by_syllable", by_syllable_rows top8000
   unique_rows = (pool) ->
     counts = {}
-    pool.forEach (ch) ->
-      py = pin_idx[ch]
+    pool.forEach (c) ->
+      py = pin c
       return unless py?
       counts[py] = (counts[py] or 0) + 1
     rows = []
-    pool.forEach (ch) ->
-      py = pin_idx[ch]
+    pool.forEach (c) ->
+      py = pin c
       return unless py?
       return unless counts[py] is 1
-      rows.push [ch, py]
+      rows.push [c, py]
     rows.sort (a, b) -> a[1].localeCompare(b[1]) or a[0].localeCompare(b[0])
   write "top4000-unique", unique_rows top4000
   write "top8000-unique", unique_rows top8000
 
 update_dictionary = ->
-  word_rows = h.read_csv_file "data/cedict.csv"
-  word_data = dictionary_cedict_to_json word_rows
+  rows = h.read_csv_file "data/cedict.csv"
+  word_data = dictionary_cedict_to_json rows
   character_data = h.read_text_file "data/characters-svg.json"
-  script_source = h.read_text_file "src/dictionary.coffee"
-  script_compiled = coffee.compile(script_source, bare: true).trim()
-  script_filled = h.replace_placeholders script_compiled, {word_data, character_data}
-  font_base64 = h.read_text_file "src/NotoSansSC-Light.ttf.base64"
-  html_template = h.read_text_file "src/hanyu-dictionary-template.html"
-  html_filled = h.replace_placeholders html_template, {font: font_base64, script: script_filled}
-  fs.writeFileSync "compiled/hanyu-dictionary.html", html_filled
+  src = h.read_text_file "src/dictionary.coffee"
+  compiled = coffee.compile(src, bare: true).trim()
+  script = h.replace_placeholders compiled, {word_data, character_data}
+  font = h.read_text_file "src/NotoSansSC-Light.ttf.base64"
+  html = h.read_text_file "src/hanyu-dictionary-template.html"
+  html = h.replace_placeholders html, {font, script}
+  fs.writeFileSync "compiled/hanyu-dictionary.html", html
 
 run = ->
-  update_character_frequency()
+  #update_gridlearner_data()
+  #update_all_characters_with_pinyin()
 
 module.exports = {
   run
@@ -384,4 +313,5 @@ module.exports = {
   update_characters_data
   update_word_frequency_pinyin
   update_character_frequency
+  update_characters_by_frequency_dependency
 }

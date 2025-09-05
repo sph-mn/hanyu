@@ -126,7 +126,7 @@ non_pinyin_regexp = /[^a-z0-5]/g
 is_file = (path) -> fs.statSync(path).isFile()
 strip_extensions = (filename) -> filename.replace /\.[^.]+$/, ''
 
-module.export = {
+module.exports = {
   all_syllables
   read_text_file
   read_csv_file

@@ -2,7 +2,7 @@ h = require "./helper"
 fs = require "fs"
 
 get_word_frequency_index_with_pinyin = () ->
-  frequency = array_from_newline_file "data/words-by-frequency-with-pinyin.csv"
+  frequency = h.array_from_newline_file "data/words-by-frequency-with-pinyin.csv"
   frequency_index = {}
   frequency.forEach (a, i) ->
     a = a.replace " ", ""
@@ -84,26 +84,9 @@ cedict_glossary = (a) ->
   a = a.flat().map (a) -> a.trim()
   a.filter (a) -> !filter_regexp.some((b) -> a.match b)
 
-cedict_merge_definitions = (a) ->
-  table = {}
-  a.forEach (a, index) ->
-    key = a[0] + "#" + a[1]
-    if table[key]
-      table[key][1][2] = table[key][1][2].concat a[2]
-    else table[key] = [index, a]
-  Object.values(table).sort((a, b) -> a[0] - b[0]).map((a) -> a[1])
-
-cedict_overrides = (a) ->
-  data = h.read_csv_file "data/additional-translations.csv"
-  for b in data
-    index = a.findIndex (c) -> c[0] == b[0]
-    continue unless index >= 0
-    a[index] = [b[0], b[1], b.slice(2)]
-  a
-
 cedict_filter_only = () ->
   cedict = h.read_text_file "data/foreign/cedict_ts.u8"
-  frequency_array = array_from_newline_file "data/words-by-frequency.txt"
+  frequency_array = h.array_from_newline_file "data/words-by-frequency.txt"
   frequency = {}
   frequency_array.forEach (a, i) -> frequency[a] = i
   rows = cedict.split "\n"
@@ -116,7 +99,7 @@ cedict_filter_only = () ->
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
     pinyin = pinyin.split(" ").map (a) ->
-      pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3").replace("45", "4").replace("25", "2")
+      h.pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3").replace("45", "4").replace("25", "2")
     pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary(parsed[4]).join("/")
     line = [word_traditional, word, "[#{pinyin}]", "/#{glossary}/"].join(" ")
@@ -139,29 +122,42 @@ cedict_filter_only = () ->
   index_lines = index_lines.concat index_lines_traditional
   fs.writeFile "data/cedict-filtered.idx", index_lines.join("\n"), on_error
 
-update_cedict_csv = () ->
+cedict_merge_definitions = (rows) ->
+  table = {}
+  rows.forEach (r, i) ->
+    k = r[0] + "#" + r[1]
+    if table[k] then table[k][1][2] = table[k][1][2].concat r[2] else table[k] = [i, r]
+  Object.values(table).sort((a, b) -> a[0] - b[0]).map((x) -> x[1])
+
+cedict_overrides = (rows) ->
+  overrides = h.read_csv_file "data/additional-translations.csv"
+  overrides = overrides.map (r) -> [r[0], r[1], r.slice(2)]
+  override_words = new Set overrides.map (r) -> r[0]
+  base = rows.filter (r) -> not override_words.has r[0]
+  base.concat overrides
+
+update_cedict_csv = ->
   cedict = h.read_text_file "data/cedict-filtered.u8"
   frequency_index = get_word_frequency_index_with_pinyin()
   lines = cedict.split "\n"
   data = lines.map (line) ->
-    if "#" is line[0] then return null
+    return null if "#" is line[0]
     line = line.trim()
     parsed = line.match(/^([^ ]+) ([^ ]+) \[([^\]]+)\] \/(.*)\//)
     word = parsed[2]
-    if word.match(/[a-zA-Z0-9]/) then return null
+    return null if word.match /[a-zA-Z0-9]/
     pinyin = parsed[3]
-    pinyin = h.pinyin_split2(pinyin).map (a) ->
-      pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3").replace("45", "4").replace("25", "2")
-    pinyin = pinyin.join("").toLowerCase()
+    pinyin = h.pinyin_split2(pinyin).map((s)-> h.pinyin_utils.markToNumber(s).replace("u:", "ü").replace("35","3").replace("45","4").replace("25","2")).join("").toLowerCase()
     glossary = cedict_glossary parsed[4]
-    unless glossary.length then return null
+    return null unless glossary.length
     [word, pinyin, glossary]
-  data = data.filter (a) -> a
+  data = data.filter (r) -> r
   data = cedict_merge_definitions data
   data = cedict_overrides data
-  data.forEach (a) -> a[2] = a[2].join "; "
+  data = cedict_merge_definitions data
+  data.forEach (r) -> r[2] = r[2].join "; "
   data = sort_by_word_frequency_with_pinyin frequency_index, 0, 1, data
-  data = data.filter (a, index) -> index < 3000 || a[0].length < 3
+  data = data.filter (r, i) -> i < 3000 or r[0].length < 3
   h.write_csv_file "data/cedict.csv", data
 
 module.exports = {
