@@ -1,18 +1,5 @@
+h = require "./helper"
 fs = require "fs"
-csv_stringify = require "csv-stringify/sync"
-pinyin_utils = require "pinyin-utils"
-
-on_error = (a) -> if a then console.error a
-read_text_file = (a) -> fs.readFileSync a, "utf8"
-array_from_newline_file = (path) -> read_text_file(path).toString().trim().split("\n")
-csv_parse = require "csv-parse/sync"
-read_csv_file = (path, delimiter) -> csv_parse.parse read_text_file(path), {delimiter: delimiter || " ", relax_column_count: true}
-
-write_csv_file = (path, data) ->
-  csv = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
-  fs.writeFile path, csv, on_error
-
-pinyin_split2 = (a) -> a.replace(/[0-5]/g, (a) -> a + " ").trim().split " "
 
 get_word_frequency_index_with_pinyin = () ->
   frequency = array_from_newline_file "data/words-by-frequency-with-pinyin.csv"
@@ -107,7 +94,7 @@ cedict_merge_definitions = (a) ->
   Object.values(table).sort((a, b) -> a[0] - b[0]).map((a) -> a[1])
 
 cedict_overrides = (a) ->
-  data = read_csv_file "data/additional-translations.csv"
+  data = h.read_csv_file "data/additional-translations.csv"
   for b in data
     index = a.findIndex (c) -> c[0] == b[0]
     continue unless index >= 0
@@ -115,7 +102,7 @@ cedict_overrides = (a) ->
   a
 
 cedict_filter_only = () ->
-  cedict = read_text_file "data/foreign/cedict_ts.u8"
+  cedict = h.read_text_file "data/foreign/cedict_ts.u8"
   frequency_array = array_from_newline_file "data/words-by-frequency.txt"
   frequency = {}
   frequency_array.forEach (a, i) -> frequency[a] = i
@@ -153,7 +140,7 @@ cedict_filter_only = () ->
   fs.writeFile "data/cedict-filtered.idx", index_lines.join("\n"), on_error
 
 update_cedict_csv = () ->
-  cedict = read_text_file "data/cedict-filtered.u8"
+  cedict = h.read_text_file "data/cedict-filtered.u8"
   frequency_index = get_word_frequency_index_with_pinyin()
   lines = cedict.split "\n"
   data = lines.map (line) ->
@@ -163,7 +150,7 @@ update_cedict_csv = () ->
     word = parsed[2]
     if word.match(/[a-zA-Z0-9]/) then return null
     pinyin = parsed[3]
-    pinyin = pinyin_split2(pinyin).map (a) ->
+    pinyin = h.pinyin_split2(pinyin).map (a) ->
       pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3").replace("45", "4").replace("25", "2")
     pinyin = pinyin.join("").toLowerCase()
     glossary = cedict_glossary parsed[4]
@@ -175,7 +162,7 @@ update_cedict_csv = () ->
   data.forEach (a) -> a[2] = a[2].join "; "
   data = sort_by_word_frequency_with_pinyin frequency_index, 0, 1, data
   data = data.filter (a, index) -> index < 3000 || a[0].length < 3
-  write_csv_file "data/cedict.csv", data
+  h.write_csv_file "data/cedict.csv", data
 
 module.exports = {
   cedict_glossary
