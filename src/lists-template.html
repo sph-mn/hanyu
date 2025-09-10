@@ -19,6 +19,12 @@
      @media print {
        nav{display:none}
      }
+     nav .dropdown{position:relative;display:inline-block}
+     nav .dropdown button{font-size:14px;background:#000;color:#ddd;border:1px solid #555;padding:4px 8px}
+     nav .dropdown .options{position:absolute;left:0;top:100%;display:none;background:#000;border:1px solid #555;min-width:500px;z-index:10}
+     nav .dropdown.open .options{display:block}
+     nav .dropdown .options div{padding:4px 8px;cursor:pointer}
+     nav .dropdown .options div.active{text-decoration:underline}
     </style>
   </head>
   <body>
@@ -37,30 +43,61 @@
        }
       </style>
       <script>
+       function crel(tag,a,b){var el=document.createElement(tag);if(typeof a==="string"){el.textContent=a}else if(a){for(var k in a){if(k==="class"){el.setAttribute("class",a[k])}else{el.setAttribute(k,a[k])}}}if(b!=null){el.textContent=b}return el}
+       class emitter_class{constructor(){this.l={}}on(t,f){(this.l[t]||(this.l[t]=[])).push(f);return this}off(t,f){if(!this.l[t])return this;this.l[t]=this.l[t].filter(x=>x!==f);return this}emit(t){var a=[].slice.call(arguments,1);(this.l[t]||[]).forEach(f=>f.apply(null,a));return this}}
+       class dropdown_class extends emitter_class{
+         constructor(container,label){
+           super()
+           this.container=container
+           this.container.classList.add("dropdown")
+           this.button=crel("button",label)
+           this.options_container=crel("div",{"class":"options"})
+           this.button.addEventListener("click",()=>{this.container.classList.toggle("open");this.emit("click")})
+           document.addEventListener("click",(event)=>{if(!this.container.classList.contains("open"))return;if(this.container.contains(event.target))return;this.container.classList.remove("open")})
+           this.container.appendChild(this.button)
+           this.container.appendChild(this.options_container)
+         }
+         set_selection(value){
+           if(this.selection&&this.options[this.selection])this.options[this.selection].classList.remove("active")
+           this.selection=value
+           this.options[value].classList.add("active")
+         }
+         set_options(options){
+           this.options_container.innerHTML=""
+           this.options={}
+           for(var i=0;i<options.length;i++){
+             var a=options[i]
+             var b=crel("div",a[0])
+             this.options[a[1]]=b
+             var o=this;(function(a){b.addEventListener("click",function(){o.container.classList.remove("open");o.set_selection(a[1]);o.emit("change",a[1])})})(a)
+             this.options_container.appendChild(b)
+           }
+         }
+       }
        document.addEventListener("DOMContentLoaded",function(){
-           var links = document.querySelectorAll("nav a")
-           var divs = document.querySelectorAll("body > section > div")
-           var params = new URLSearchParams(window.location.search)
-           var initial_index = parseInt(params.get("nav"),10)
-           if(isNaN(initial_index) || initial_index < 0 || initial_index >= divs.length){
-               initial_index = 0
-           }
-           for(var i = 0;i < divs.length;i++){
-               divs[i].style.display = i === initial_index ? "block" : "none"
-           }
-           for(var i = 0;i < links.length;i++){
-               links[i].addEventListener("click",function(e){
-                   e.preventDefault()
-                   var target_index = parseInt(this.getAttribute("data-target"),10)
-                   for(var j = 0;j < divs.length;j++){
-                       divs[j].style.display = j === target_index ? "block" : "none"
-                   }
-                   var new_params = new URLSearchParams(window.location.search)
-                   new_params.set("nav",target_index)
-                   var new_url = window.location.pathname + "?" + new_params.toString()
-                   history.replaceState(null,"",new_url)
-               })
-           }
+         var links=document.querySelectorAll("nav a")
+         var divs=document.querySelectorAll("body > section > div")
+         var params=new URLSearchParams(window.location.search)
+         var initial_index=parseInt(params.get("nav"),10)
+         if(isNaN(initial_index)||initial_index<0||initial_index>=divs.length){initial_index=0}
+         function show_index(idx){
+           for(var i=0;i<divs.length;i++){divs[i].style.display=i===idx?"block":"none"}
+           var new_params=new URLSearchParams(window.location.search)
+           new_params.set("nav",idx)
+           history.replaceState(null,"",window.location.pathname+"?"+new_params.toString())
+         }
+         show_index(initial_index)
+         var nav=document.querySelector("nav")
+         var container=document.createElement("div")
+         var label="文件"
+         var dd=new dropdown_class(container,label)
+         var opts=[]
+         for(var i=0;i<links.length;i++){opts.push([links[i].textContent,String(i)])}
+         dd.set_options(opts)
+         dd.on("change",function(v){var idx=parseInt(v,10);show_index(idx)})
+         dd.set_selection(String(initial_index))
+         nav.innerHTML=""
+         nav.appendChild(container)
        })
       </script>
   </body>

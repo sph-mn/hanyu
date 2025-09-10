@@ -1,7 +1,7 @@
 # hanyu-hover
 mandarin chinese hover dictionary for firefox.
 
-installable using the .xpi file (drag and drop onto firefox).
+installable using the .xpi file (drag and drop onto firefox) under dist.
 
 features:
 - mandarin only
