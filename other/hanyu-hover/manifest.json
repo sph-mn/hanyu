@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "hanyu-hover",
-  "version": "0.2",
+  "version": "0.3",
   "description": "Hover to see Chinese word definitions",
   "icons": {
     "128": "icons/icon-128.png"
