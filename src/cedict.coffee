@@ -78,7 +78,13 @@ cedict_glossary = (a) ->
     /\(hong kong/
     /\(chinese medicine\)/
     /\(shanghainese/
+    /\(slang/
+    / slang\)/
     / dialect\)/
+    /masturbate/
+    /masturbation/
+    /clitoris/
+    /penis/
   ]
   a = a.split("/").map (a) -> a.toLowerCase().split(";")
   a = a.flat().map (a) -> a.trim()
