@@ -193,19 +193,16 @@ make_top_examples_f = ->
     if word_text.length is 1 then char_word_map[word_text] = row
     else h.delete_duplicates(h.split_chars word_text).forEach (character) -> (contains_map_local[character] ?= []).push row
   cache = {}
-  f = (character, frequency_limit) ->
+  f = (character, max_list_len) ->
     v = cache[character]
     unless v?
-      v = []
-      char_row = char_word_map[character]
-      if char_row? then v.push char_row
       list = contains_map_local[character] or []
-      v = v.concat list
-      cache[character] = v
-    if frequency_limit? and frequency_limit >= 0
-      base_len = if char_word_map[character]? then 1 else 0
-      v.slice 0, base_len + frequency_limit
-    else v
+      cache[character] = list
+      v = list
+    result = if max_list_len? and max_list_len >= 0 then v.slice 0, max_list_len else v
+    char_row = char_word_map[character]
+    if char_row? then result = result.concat [char_row]
+    result
   f
 
 make_char_by_reading_index_f = ->

@@ -101,7 +101,7 @@ update_characters_by_pinyin = ->
   h.write_csv_file "data/characters-pinyin-rare.csv", rare
 
 update_characters_data = ->
-  dict_f = lookup.make_dictionary_index_word_f 0
+  primary_pinyin_f = lookup.make_primary_pinyin_f()
   char_freq_f = lookup.make_char_freq_index_f()
   contained_by_f = lookup.make_contained_by_map_f()
   graphics = JSON.parse h.read_text_file "data/characters-svg-animcjk-simple.json"
@@ -117,8 +117,7 @@ update_characters_data = ->
     d = r[2] or ""
     svg = graphics[c] or ""
     comps = contain_sorted[c] or []
-    e = dict_f c
-    p = if e and e.length then e[0][1] else ""
+    p = primary_pinyin_f c
     out.push [c, s, p, d, comps.join(""), svg]
   out = out.sort (x, y) -> (char_freq_f.index_map[x[0]] ? 9e15) - (char_freq_f.index_map[y[0]] ? 9e15)
   fs.writeFileSync "data/characters-svg.json", JSON.stringify out
@@ -155,10 +154,7 @@ characters_add_learning_data = (rows, allowed_chars=null) ->
     top_examples_f = lookup.make_top_examples_f()
     rows.map (r) ->
       words = top_examples_f r[0], 4
-      main = if words.length and r[0] is words[0][0] then words[0] else null
-      others = if main then words.slice 1, 5 else words
-      r.push others.map((w) -> w[0]).join " "
-      r.push words.concat(if main then [main] else []).map((w) -> w.join " ").join "\n"
+      r.push words.map((w) -> w.join " ").join "\n"
       r
   add_reading_classification = (rows) ->
     rows.map (r) ->
@@ -299,7 +295,15 @@ update_dictionary = ->
   html = h.replace_placeholders html, {font, script}
   fs.writeFileSync "compiled/hanyu-dictionary.html", html
 
+add_missing_pinyin = ->
+  rows = h.read_csv_file "data/characters-strokes-decomposition.csv"
+  primary_pinyin = lookup.make_primary_pinyin_f()
+  for a in rows
+    console.log a
+
 run = ->
+  update_characters_data()
+  #add_missing_pinyin()
   #update_gridlearner_data()
   #update_all_characters_with_pinyin()
 
