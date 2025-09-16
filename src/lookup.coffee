@@ -135,6 +135,12 @@ make_primary_pinyin_f = (word_limit=30000) ->
       pinyin = pinyin_list[position_index]
       (counts_by_character[character] ?= {})
       counts_by_character[character][pinyin] = (counts_by_character[character][pinyin] or 0) + 1
+  for character, m of counts_by_character
+    keys = Object.keys m
+    hasNon5 = keys.some (k) -> not k.endsWith("5")
+    if hasNon5
+      for k in keys when k.endsWith("5")
+        delete m[k]
   standard_pairs = load_standard_characters_with_pinyin()
   standard_map = {}
   standard_pairs.forEach (row) -> standard_map[row[0]] = row[1]
@@ -143,7 +149,7 @@ make_primary_pinyin_f = (word_limit=30000) ->
     v = cache[character]
     return v if v?
     m = counts_by_character[character]
-    if m?
+    if m? and Object.keys(m).length > 0
       v = Object.keys(m).sort((a, b) -> m[b] - m[a] or a.localeCompare b)[0]
     else
       v = standard_map[character] ? ""

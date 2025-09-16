@@ -63,7 +63,7 @@ update_character_frequency = ->
 update_characters_by_frequency_dependency = ->
   order_f = lookup.make_char_freq_dep_index_f()
   ordered = Object.keys(order_f.index_map).sort (a, b) -> order_f.index_map[a] - order_f.index_map[b]
-  rows = ordered.map (c, i) -> [i + 1, c]
+  rows = ordered.map (c, i) -> [c]
   h.write_csv_file "data/characters-by-frequency-dependency.csv", rows
 
 update_word_frequency_pinyin = ->
@@ -302,7 +302,9 @@ add_missing_pinyin = ->
     console.log a
 
 run = ->
-  update_characters_data()
+  #update_all_characters_with_pinyin()
+  update_characters_by_frequency_dependency()
+  #update_characters_data()
   #add_missing_pinyin()
   #update_gridlearner_data()
   #update_all_characters_with_pinyin()
