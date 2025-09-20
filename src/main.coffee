@@ -301,9 +301,18 @@ add_missing_pinyin = ->
   for a in rows
     console.log a
 
+dsv_add_pinyin = (character_index) ->
+  primary_pinyin = lookup.make_primary_pinyin_f()
+  rows = h.read_csv_file(0).map (a) ->
+    pinyin = primary_pinyin a[character_index]
+    a[1] = pinyin
+    a
+  h.write_csv_file 1, rows
+
 run = ->
+  dsv_add_pinyin 0
   #update_all_characters_with_pinyin()
-  update_characters_by_frequency_dependency()
+  #update_characters_by_frequency_dependency()
   #update_characters_data()
   #add_missing_pinyin()
   #update_gridlearner_data()

@@ -123,36 +123,59 @@ make_char_freq_dep_index_from_file_f = ->
   f
 
 make_primary_pinyin_f = (word_limit=30000) ->
-  rows = load_words_with_pinyin().slice 0, word_limit
-  counts_by_character = {}
-  rows.forEach (row) ->
-    word_text = row[0]
-    pinyin_text = row[1]
-    character_list = h.split_chars word_text
-    pinyin_list = h.pinyin_split2 pinyin_text
-    return unless character_list.length == pinyin_list.length
-    for character, position_index in character_list
-      pinyin = pinyin_list[position_index]
-      (counts_by_character[character] ?= {})
-      counts_by_character[character][pinyin] = (counts_by_character[character][pinyin] or 0) + 1
-  for character, m of counts_by_character
-    keys = Object.keys m
-    hasNon5 = keys.some (k) -> not k.endsWith("5")
-    if hasNon5
-      for k in keys when k.endsWith("5")
-        delete m[k]
-  standard_pairs = load_standard_characters_with_pinyin()
-  standard_map = {}
-  standard_pairs.forEach (row) -> standard_map[row[0]] = row[1]
+  build_counts = ->
+    rows = load_words_with_pinyin()
+    counts_by_character = {}
+    rows.forEach (row) ->
+      word_text = row[0]
+      pinyin_text = row[1]
+      character_list = h.split_chars word_text
+      pinyin_list = h.pinyin_split2 pinyin_text
+      return unless character_list.length == pinyin_list.length
+      for character, position_index in character_list
+        pinyin = pinyin_list[position_index]
+        (counts_by_character[character] ?= {})
+        counts_by_character[character][pinyin] = (counts_by_character[character][pinyin] or 0) + 1
+    counts_by_character
+  prune_neutral = (counts) ->
+    for character, m of counts
+      keys = Object.keys m
+      hasNon5 = keys.some (k) -> not k.endsWith("5")
+      if hasNon5
+        for k in keys when k.endsWith("5")
+          delete m[k]
+    counts
+  build_standard_map = ->
+    pairs = load_standard_characters_with_pinyin()
+    m = {}
+    pairs.forEach (row) -> m[row[0]] = row[1]
+    m
+  build_additional_map = ->
+    pairs = h.read_csv_file "data/additional-characters.csv"
+    m = {}
+    pairs.forEach (row) ->
+      ch = row[0]
+      py = row[1]
+      return unless ch? and py?
+      m[ch] = py
+    m
+  select_from_counts = (m) ->
+    if m? and Object.keys(m).length > 0
+      Object.keys(m).sort((a, b) -> m[b] - m[a] or a.localeCompare b)[0]
+    else
+      null
+  counts = prune_neutral build_counts()
+  standard_map = build_standard_map()
+  additional_map = build_additional_map()
   cache = {}
   f = (character) ->
     v = cache[character]
     return v if v?
-    m = counts_by_character[character]
-    if m? and Object.keys(m).length > 0
-      v = Object.keys(m).sort((a, b) -> m[b] - m[a] or a.localeCompare b)[0]
+    if additional_map[character]?
+      v = additional_map[character]
     else
-      v = standard_map[character] ? ""
+      v = select_from_counts(counts[character])
+      v = standard_map[character] ? "" unless v?
     cache[character] = v
     v
   f
