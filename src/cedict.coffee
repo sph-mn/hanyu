@@ -85,6 +85,48 @@ cedict_glossary = (a) ->
     /masturbation/
     /clitoris/
     /penis/
+    /\(name\)/
+    /\(chewing gum company\)/
+    /allianz, german financial service company/
+    /\bkodak\b/
+    /\bbmw\b/
+    /\bboeing\b/
+    /\bkraft\b/
+    /\bcisco systems\b/
+    /\brenault\b/
+    /\bmoody's\b/
+    /\bgoogle\b/
+    /\bavon\b/
+    /\bmcdonnell douglas\b/
+    /\bpaypal\b/
+    /\bheineken\b/
+    /\badvantech\b/
+    /\bbosch\b/
+    /\bpfizer\b/
+    /\bsina\b/
+    /\bbandai\b/
+    /\bheinz\b/
+    /\bjingdong\b/
+    /bmorishita jintan company\b/
+    /\bevian\b/
+    /\buber\b/
+    /\bpeak sport products\b/
+    /\bdji\b/
+    /\bnetflix\b/
+    /\ballianz\b/
+    /\bsohu\b/
+    /\bsogou\b/
+    /\bnec\b/
+    /\beachnet\b/
+    /\bparker pen company\b/
+    /btaobao\b/
+    /\bwrigley\b/
+    /\bvanke\b/
+    /\bchina mengniu dairy company limited\b/
+    /bcoolpad group ltd\b/
+    /\bmaxsun\b/
+    /\bshangke corporation\b/
+    /\btianjin faw xiali motor company\b/
   ]
   a = a.split("/").map (a) -> a.toLowerCase().split(";")
   a = a.flat().map (a) -> a.trim()

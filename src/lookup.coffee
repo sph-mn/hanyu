@@ -214,6 +214,7 @@ make_char_decompositions_f = (primary_pinyin_f=make_primary_pinyin_f()) ->
   f
 
 make_top_examples_f = ->
+  single_position_begin = true
   rows = load_words_with_pinyin_translation()
   char_word_map = {}
   contains_map_local = {}
@@ -230,7 +231,9 @@ make_top_examples_f = ->
       v = list
     result = if max_list_len? and max_list_len >= 0 then v.slice 0, max_list_len else v
     char_row = char_word_map[character]
-    if char_row? then result = result.concat [char_row]
+    if char_row?
+      if single_position_begin then result = [char_row].concat result
+      else result = result.concat [char_row]
     result
   f
 
