@@ -17,6 +17,7 @@ random_element = (a) -> a[random_integer 0, a.length - 1]
 n_times = (n, f) -> [...Array(n).keys()].map f
 remove_non_chinese_characters = (a) -> a.replace /[^\p{Script=Han}]/ug, ""
 traditional_to_simplified = (a) -> hanzi_tools.simplify a
+simplified_to_traditional = (a) -> hanzi_tools.traditionalize a
 pinyin_split2 = (a) -> a.replace(/[0-5]/g, (a) -> a + " ").trim().split " "
 median = (a) -> a.slice().sort((a, b) -> a - b)[Math.floor(a.length / 2)]
 sum = (a) -> a.reduce ((a, b) -> a + b), 0
@@ -26,6 +27,7 @@ object_array_add_unique = (object, key, value) ->
   if object[key] then object[key].push value unless object[key].includes value
   else object[key] = [value]
 array_intersection = (a, b) -> a.filter (a) -> b.includes(a)
+compact = (a) -> a.filter (b) -> b
 
 write_csv_file = (path, data) ->
   csv = csv_stringify.stringify(data, {delimiter: " "}, on_error).trim()
@@ -139,10 +141,12 @@ module.exports = {
   n_times
   remove_non_chinese_characters
   traditional_to_simplified
+  simplified_to_traditional
   pinyin_split2
   median
   sum
   mean
+  compact
   object_array_add
   object_array_add_unique
   array_intersection

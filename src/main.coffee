@@ -309,8 +309,15 @@ dsv_add_pinyin = (character_index) ->
     a
   h.write_csv_file 1, rows
 
+update_all_characters_with_pinyin = ->
+  chars = h.read_csv_file("data/characters-by-frequency-dependency.csv")
+  traditional = for [a, ...b] in chars
+    b = h.simplified_to_traditional a
+    [b, a] unless b is a
+  h.write_csv_file "data/characters-traditional.csv", h.compact traditional
+
 run = ->
-  dsv_add_pinyin 0
+  update_all_characters_with_pinyin()
   #update_all_characters_with_pinyin()
   #update_characters_by_frequency_dependency()
   #update_characters_data()
