@@ -2,138 +2,25 @@ indefinite, universal, negative pronouns
 大家 da4jia1 everyone
 所有人 suo3you3ren2 "everyone, all people"
 每个人 mei3ge4ren2 "every person"
-任何人 ren4he2ren2 anyone
-谁都 shei2dou1 "anyone, everyone"
 有人 you3ren2 someone
 某人 mou3ren2 "someone, a certain person"
+谁都 shei2dou1 "anyone, everyone"
+任何人 ren4he2ren2 anyone
 没人 mei2ren2 "no one"
 没有人 mei2you3ren2 "no one, nobody"
 无人 wu2ren2 "no one"
 随便 sui2bian4 "whatever, any"
 
-time, temporal references
-最近 zui4jin4 recently
-近来 jin4lai2 lately
-如今 ru2jin1 nowadays
-这阵子 zhe4zhen4zi "these days"
-很快 hen3kuai4 soon
-一会儿 yi1hui4r "in a moment"
-以前 yi3qian2 "in the past"
-将来 jiang1lai2 "in the future"
-目前 mu4qian2 "at present"
-当前 dang1qian2 currently
-现在 xian4zai4 now
-暂时 zan4shi2 temporarily
-
-entirety, wholeness
-整个 zheng3ge4 "whole, entire (used with a measure word)"
-全 quán "whole, complete, entire"
-全体 quan2ti3 "entire, all members (of a group)"
-所有 suo3you3 "all, every"
-完全 wan2quan2 "completely, entirely" (already present)
-全部 quan2bu4 "entirely, all of" (already present)
-通通 tong1tong1 "all, entirely" (colloquial)
-一共 yi1gong4 "altogether, in total"
-总共 zong3gong4 "in total, altogether"
-
-frequency, repetition
-总是 zong3shi4 always
-常常 chang2chang2 "often"
-经常 jing1chang2 frequently
-有时候 you3shi2hou4 "sometimes"
-有时 you3shi2 sometimes
-偶尔 ou3er3 occasionally
-不常 bu4chang2 seldom
-很少 hen3shao3 rarely
-几乎不 ji1hu1bu4 hardly
-从不 cong2bu4 never
-从来不 cong2lai2bu4 never
-一向 yi2xiang4 "always"
-一直 yi4zhi2 consistently
-一向 yi2xiang4 "always (habitual)" (already present)
-一直以来 yi4zhi2yi3lai2 "all along"
-
-degree constructions
-稍微 shao1wei1 slightly
-有点儿 you3dian3r "a bit"
-一点点 yi1dian3dian3 "a tiny bit"
-非常 fei1chang2 very
-十分 shi2fen1 "very, extremely"
-极其 ji2qi2 exceedingly
-比较 bi3jiao4 relatively
-尤其 you2qi2 especially
-更 geng4 more
-更加 geng4jia1 "even more"
-最 zui4 "the most"
-部分地 bu4fen4de partly
-微妙地 wei1miao4de subtly
-稍稍 shao1shao1 "slightly, just a little"
-略微 lüèwei1 "a bit, slightly"
-太 tai4 "too, overly"
-挺 ting3 "quite, pretty"
-相当 xiang1dang1 "quite, considerably"
-过于 guo4yu2 "too much"
-过分 guo4fen4 "excessively"
-异常 yi4chang2 "exceptionally, unusually"
-极了 ji2le "extremely"
-有些 you3xie1 "somewhat"
-完全 wan2quan2 "completely, entirely"
-全部 quan2bu4 "entirely, all of"
-彻底 che4di3 "thoroughly"
-尽 jin4 "to the fullest extent"
-大多 da4duo1 "mostly, for the most part"
-多半 duo1ban4 "mostly, most likely, probably"
-大部分地 da4bu4fen4de "mostly, in large part"
-
-limiting, quantifying, approximation
-仅 jin3 "only"
-只 zhi3 "only"
-光 guang1 "only/merely"
-不过 bu2guo4 "only, no more than"
-至多 zhi4duo1 "at most"
-最多 zui4duo1 "most, at most"
-至少 zhi4shao3 "at least"
-起 qi3 "starting from" (e.g. 起价)
-左右 zuo3you4 "around"
-
-comparative, gradual improvement degree
-好点了 hao3dian3 le "a little better"
-好多了 hao3duo1 le "much better"
-好一些了 hao3yi1xie1 le "somewhat better"
-好些了 hao3xie1 le "quite better"
-稍微 shao1wei1 "slightly"
-略略 lüe4lüe4 "just a bit"
-有点 you3dian3 "somewhat"
-一点儿 yi1dian3r "a little"
-渐渐 jian4jian4 "gradually"
-越来越 yue4lai2yue4 "more and more"
-稍 shao1 "slightly"
-
-aspectual gradation
-逐渐 zhu2jian4 gradually
-一点一点 yi4dian3yi4dian3 "little by little"
-越来越 yue4lai2yue4 "more and more"
-日益 ri4yi4 "increasingly"
-突然 tu1ran2 suddenly
-一下子 yi1xia4zi "all at once"
-
-possibility, certainty
-也许 ye3xu3 maybe
-可能 ke3neng2 "possible, probably"
-应该 ying1gai1 should
-必然 bi4ran2 inevitably
-肯定 ken3ding4 "definitely, certainly"
-一定 yi2ding4 certainly, must
-大概 da4gai4 "probably, approximately"
-似乎 si4hu1 "it seems"
-明显地 ming2xian3de obviously
-隐约 yin3yue1 "faintly, vaguely"
-从不 cong2bu4 never
-不可能 bu4ke3neng2 impossible
-绝不 jue2bu4 "absolutely not"
-或许 huo4xu3 maybe
-未必 wei4bi4 "not necessarily"
-不一定 bu4yi2ding4 "not necessarily"
+additive and exclusion logic
+也 ye3 also
+都 dou1 all
+又 you4 again
+再 zai4 again
+还 hai2 still
+并且 bing4qie3 "and also"
+而且 er2qie3 "moreover"
+不但 bu2dan4 "not only"
+反之 fan3zhi1 conversely
 
 contrast, concession, turn of thought
 但是 dan4shi4 but
@@ -142,37 +29,189 @@ contrast, concession, turn of thought
 虽然 sui1ran2 although
 尽管 jin3guan3 "even though"
 即使 ji2shi3 "even if"
-反而 fan3er2 "on the contrary"
 却 que4 "yet, however"
+反而 fan3er2 "on the contrary"
 
 cause, reason, purpose
 因为 yin1wei4 because
+所以 suo3yi3 so
 由于 you2yu2 "due to"
 因此 yin1ci3 therefore
-所以 suo3yi3 so
 为了 wei4le "in order to"
 导致 dao3zhi4 "to lead to"
 结果 jie2guo3 "as a result"
 
-focus, emphasis, restriction
-只是 zhi3shi4 "only, just"
-仅仅 jin3jin3 "merely, just"
-特别 te4bie2 especially
-主要 zhu3yao4 mainly
-甚至 shen4zhi4 even
-连 lian2 even
-只要 zhi3yao4 "as long as"
-就 jiu4 "only, just "
-才 cai2 only
-唯独 wei2du2 "only, solely"
+conditional and hypothetical
+如果 ru2guo3 if
+要是 yao4shi4 "if (casual)"
+假如 jia3ru2 suppose
+万一 wan4yi1 "in case"
+除非 chu2fei1 unless
+
+possibility, certainty
+可能 ke3neng2 "possible, probably"
+也许 ye3xu3 maybe
+大概 da4gai4 "probably, approximately"
+一定 yi2ding4 certainly, must
+肯定 ken3ding4 "definitely, certainly"
+应该 ying1gai1 should
+似乎 si4hu1 "it seems"
+必然 bi4ran2 inevitably
+明显地 ming2xian3de obviously
+隐约 yin3yue1 "faintly, vaguely"
+不可能 bu4ke3neng2 impossible
+绝不 jue2bu4 "absolutely not"
+从不 cong2bu4 never
+或许 huo4xu3 maybe
+未必 wei4bi4 "not necessarily"
+不一定 bu4yi2ding4 "not necessarily"
 
 sequence, logic, ordering
 首先 shou3xian1 "first of all"
 然后 ran2hou4 then
 接着 jie1zhe next
-最后 zui4hou4 finally
 于是 yu2shi4 "so, as a result"
+最后 zui4hou4 finally
 再者 zai4zhe3 "moreover, next"
+
+time, temporal references
+现在 xian4zai4 now
+目前 mu4qian2 "at present"
+当前 dang1qian2 currently
+最近 zui4jin4 recently
+近来 jin4lai2 lately
+如今 ru2jin1 nowadays
+这阵子 zhe4zhen4zi "these days"
+暂时 zan4shi2 temporarily
+很快 hen3kuai4 soon
+一会儿 yi1hui4r "in a moment"
+以前 yi3qian2 "in the past"
+将来 jiang1lai2 "in the future"
+
+frequency, repetition
+总是 zong3shi4 always
+常常 chang2chang2 "often"
+经常 jing1chang2 frequently
+有时候 you3shi2hou4 "sometimes"
+偶尔 ou3er3 occasionally
+不常 bu4chang2 seldom
+很少 hen3shao3 rarely
+几乎不 ji1hu1bu4 hardly
+从来不 cong2lai2bu4 never
+一直 yi4zhi2 consistently
+一直以来 yi4zhi2yi3lai2 "all along"
+
+degree constructions
+非常 fei1chang2 very
+十分 shi2fen1 "very, extremely"
+极其 ji2qi2 exceedingly
+挺 ting3 "quite, pretty"
+相当 xiang1dang1 "quite, considerably"
+尤其 you2qi2 especially
+更 geng4 more
+更加 geng4jia1 "even more"
+最 zui4 "the most"
+太 tai4 "too, overly"
+稍微 shao1wei1 slightly
+有点儿 you3dian3r "a bit"
+一点点 yi1dian3dian3 "a tiny bit"
+略微 lüèwei1 "a bit, slightly"
+过于 guo4yu2 "too much"
+过分 guo4fen4 "excessively"
+异常 yi4chang2 "exceptionally, unusually"
+极了 ji2le "extremely"
+完全 wan2quan2 "completely, entirely"
+彻底 che4di3 "thoroughly"
+尽 jin4 "to the fullest extent"
+部分地 bu4fen4de partly
+大多 da4duo1 "mostly, for the most part"
+多半 duo1ban4 "mostly, most likely, probably"
+大部分地 da4bu4fen4de "mostly, in large part"
+微妙地 wei1miao4de subtly
+
+aspectual gradation
+逐渐 zhu2jian4 gradually
+渐渐 jian4jian4 "gradually"
+一点一点 yi4dian3yi4dian3 "little by little"
+越来越 yue4lai2yue4 "more and more"
+日益 ri4yi4 "increasingly"
+突然 tu1ran2 suddenly
+一下子 yi1xia4zi "all at once"
+
+limiting, quantifying, approximation
+只 zhi3 "only"
+仅 jin3 "only"
+光 guang1 "only, merely"
+不过 bu2guo4 "only, no more than"
+至少 zhi4shao3 "at least"
+至多 zhi4duo1 "at most"
+最多 zui4duo1 "most, at most"
+起 qi3 "starting from"
+左右 zuo3you4 "around"
+
+entirety, wholeness
+所有 suo3you3 "all, every"
+全 quán "whole, complete, entire"
+全部 quan2bu4 "entirely, all of"
+完全 wan2quan2 "completely, entirely"
+整个 zheng3ge4 "whole, entire"
+全体 quan2ti3 "entire group"
+一共 yi1gong4 "altogether, in total"
+总共 zong3gong4 "in total, altogether"
+通通 tong1tong1 "all, entirely"
+
+focus, emphasis, restriction
+特别 te4bie2 especially
+主要 zhu3yao4 mainly
+甚至 shen4zhi4 even
+只是 zhi3shi4 "only, just"
+仅仅 jin3jin3 "merely, just"
+连 lian2 even
+只要 zhi3yao4 "as long as"
+就 jiu4 "only, just"
+才 cai2 only
+唯独 wei2du2 "only, solely"
+
+typicality and normativity
+通常 tong1chang2 "usually, normally"
+一般 yi4ban1 generally
+平时 ping2shi2 normally
+平常 ping2chang2 "ordinarily, usually"
+往往 wang3wang3 "often, frequently"
+
+subjectivity and judgment
+看来 kan4lai2 "it seems"
+恐怕 kong3pa4 "I'm afraid, probably"
+听说 ting1shuo1 "I heard"
+据说 ju4shuo1 "it is said"
+据我所知 ju4wo3suo3zhi1 "as far as I know"
+
+intensity and emphasis
+实在 shi2zai4 really
+的确 di2que4 indeed
+简直 jian3zhi2 "simply, really"
+果然 guo3ran2 "as expected"
+毫不 hao2bu4 "not at all"
+并不 bing4bu4 "not at all"
+根本不 gen1ben3bu4 "absolutely not"
+一点也不 yi1dian3ye3bu4 "not in the slightest"
+
+expectation, evaluation, surprise
+本来 ben3lai2 "originally, supposed to"
+实际上 shi2ji4shang4 "in fact, actually"
+事实上 shi4shi2shang4 "actually, in reality"
+居然 ju1ran2 "unexpectedly, actually"
+竟然 jing4ran2 "actually, to one's surprise"
+没想到 mei2xiang3dao4 "unexpectedly"
+按理说 an4li3shuo1 "logically speaking"
+照理说 zhao4li3shuo1 "normally, theoretically"
+
+polarity and lexical opposites
+对错 dui4cuo4 "right and wrong"
+是非 shi4fei1 "right and wrong"
+成败 cheng2bai4 "success and failure"
+利弊 li4bi4 "advantages and disadvantages"
+有无 you3wu2 "have or not"
 
 lexical scales
 大小 da4xiao3 size
@@ -190,85 +229,11 @@ lexical scales
 热 re4 hot
 速度 su4du4 speed
 慢 man4 slow
-普通 pu3tong1 "ordinary, average"
 快 kuai4 fast
 强度 qiang2du4 strength
 弱 ruo4 weak
-一般 yi4ban1 average
 强 qiang2 strong
 重要性 zhong4yao4xing4 importance
 不重要 bu2zhong4yao4 unimportant
 重要 zhong4yao4 important
 非常重要 fei1chang2zhong4yao4 "very important"
-
-indefinite determiners and pronouns
-任何 ren4he2 any
-任意 ren4yi4 "any, arbitrary"
-某些 mou3xie1 "some, certain ones"
-无论 wu2lun4 "no matter (what/which)"
-什么都 shen2me dou1 "anything at all"
-任何东西 ren4he2dong1xi "anything"
-任何地方 ren4he2di4fang "anywhere"
-哪些 na3xie1 "which ones"
-哪一个 na3yi2ge4 "which one"
-
-intensity and emphasis
-简直 jian3zhi2 "simply, really"
-的确 di2que4 indeed
-果然 guo3ran2 "as expected"
-实在 shi2zai4 really
-毫不 hao2bu4 "not at all"
-并不 bing4bu4 "not at all"
-根本不 gen1ben3bu4 "absolutely not"
-一点也不 yi1dian3ye3bu4 "not in the slightest"
-
-additive and exclusion logic
-也 ye3 also
-都 dou1 all
-还 hai2 still
-再 zai4 again
-又 you4 again
-并且 bing4qie3 "and also"
-而且 er2qie3 "moreover"
-不但 bu2dan4 "not only"
-反之 fan3zhi1 conversely
-
-conditional and hypothetical
-如果 ru2guo3 if
-要是 yao4shi4 "if (casual)"
-假如 jia3ru2 suppose
-万一 wan4yi1 "in case"
-除非 chu2fei1 unless
-
-subjectivity and judgment
-看来 kan4lai2 "it seems"
-恐怕 kong3pa4 "I'm afraid, probably"
-据说 ju4shuo1 "it is said"
-据我所知 ju4wo3suo3zhi1 "as far as I know"
-听说 ting1shuo1 "I heard"
-
-polarity and lexical opposites
-有无 you3wu2 "have or not"
-是非 shi4fei1 "right and wrong"
-对错 dui4cuo4 "right and wrong"
-成败 cheng2bai4 "success and failure"
-利弊 li4bi4 "advantages and disadvantages"
-
-typicality and normativity
-通常 tong1chang2 "usually, normally"
-一般 yi4ban1 generally
-平时 ping2shi2 normally
-平常 ping2chang2 "ordinarily, usually"
-往往 wang3wang3 "often, frequently"
-
-expectation, evaluation, surprise
-果然 guo3ran2 "as expected" (already added)
-居然 ju1ran2 "unexpectedly, actually"
-竟然 jing4ran2 "actually, to one's surprise"
-没想到 mei2xiang3dao4 "unexpectedly"
-本来 ben3lai2 "originally, supposed to"
-按理说 an4li3shuo1 "logically speaking"
-照理说 zhao4li3shuo1 "normally, theoretically"
-看来 kan4lai2 "it seems" (already added)
-实际上 shi2ji4shang4 "in fact, actually"
-事实上 shi4shi2shang4 "actually, in reality"
