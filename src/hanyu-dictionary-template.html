@@ -87,17 +87,17 @@
     </div>
     <div id="filter">
       <div class="search_type_selection">
-        <label><input id="toggle_search_type" type="checkbox"/>character</label>
+        <label><input id="toggle_search_type" type="checkbox" autocomplete="off"/>character</label>
       </div>
       <div class="search_character">
         <button id="character_reset">X</button> <input id="character_input" placeholder="char..."/>
-        <label title="show characters that contain the given characters"><input id="search_containing" type="checkbox"/>containing</label>
-        <label title="show characters that are contained in the given characters"><input id="search_contained" type="checkbox"/>contained</label>
+        <label title="show characters that contain the given characters"><input id="search_containing" type="checkbox" autocomplete="off"/>containing</label>
+        <label title="show characters that are contained in the given characters"><input id="search_contained" type="checkbox" autocomplete="off"/>contained</label>
       </div>
       <div class="search_word">
         <button id="word_reset">X</button> <input id="word_input" placeholder="word..."/>
-        <label title="search inside translations for latin character input"><input id="search_translations" type="checkbox"/>translations</label>
-        <label title="search partial matches for chinese character input"><input id="search_split" type="checkbox"/>split</label>
+        <label title="search inside translations for latin character input"><input id="search_translations" type="checkbox" autocomplete="off"/>translations</label>
+        <label title="search partial matches for chinese character input"><input id="search_split" type="checkbox" autocomplete="off"/>split</label>
       </div>
     </div>
     <div id="character_results"></div>
