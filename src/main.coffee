@@ -139,9 +139,8 @@ characters_add_learning_data = (rows, allowed_chars=null) ->
       r
   add_contained = (rows) ->
     rows.map (r) ->
-      comps = (char_decompositions_f r[0]).map (x) -> x[0]
-      comps = comps.filter(in_scope)
-      formatted = comps.map((c) -> p = primary_pinyin_f c; if p then "#{c} #{p}" else null).filter Boolean
+      comps = (char_decompositions_f r[0])
+      formatted = comps.map (c) -> "#{c[0]} #{c[1]}"
       r.push formatted.join ", "
       r
   add_containing = (rows) ->
@@ -316,8 +315,21 @@ update_all_characters_with_pinyin = ->
     [b, a] unless b is a
   h.write_csv_file "data/characters-traditional.csv", h.compact traditional
 
+debug_primary_pinyin = ->
+  # 戌 - contains 5 and wrong pinyin
+  # 丧 - sang1 but should be sang4
+  primary_pinyin = lookup.make_primary_pinyin_f()
+  pinyin = primary_pinyin "戌"
+  console.log pinyin
+  pinyin = primary_pinyin "宀"
+  console.log pinyin
+  pinyin = primary_pinyin "宴"
+  console.log pinyin
+  char_decompositions_f = lookup.make_char_decompositions_f primary_pinyin
+  console.log char_decompositions_f "宴"
+
 run = ->
-  update_all_characters_with_pinyin()
+  debug_primary_pinyin()
   #update_all_characters_with_pinyin()
   #update_characters_by_frequency_dependency()
   #update_characters_data()
