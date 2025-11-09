@@ -122,11 +122,11 @@ make_char_freq_dep_index_from_file_f = ->
   f.index_map = index_map
   f
 
-make_primary_pinyin_f = (word_limit=30000) ->
-  build_counts = ->
+make_primary_pinyin_f = ->
+  build_wordlist_map = ->
+    result = {}
     rows = load_words_with_pinyin()
-    counts_by_character = {}
-    rows.forEach (row) ->
+    rows.forEach (row, frequency_index) ->
       word_text = row[0]
       pinyin_text = row[1]
       character_list = h.split_chars word_text
@@ -134,50 +134,59 @@ make_primary_pinyin_f = (word_limit=30000) ->
       return unless character_list.length == pinyin_list.length
       for character, position_index in character_list
         pinyin = pinyin_list[position_index]
-        (counts_by_character[character] ?= {})
-        counts_by_character[character][pinyin] = (counts_by_character[character][pinyin] or 0) + 1
-    counts_by_character
-  prune_neutral = (counts) ->
-    for character, m of counts
-      keys = Object.keys m
-      hasNon5 = keys.some (k) -> not k.endsWith("5")
-      if hasNon5
-        for k in keys when k.endsWith("5")
-          delete m[k]
-    counts
+        continue if pinyin.endsWith "5"
+        result[character] ?= {}
+        h.object_array_add result[character], pinyin, frequency_index
+    result
+  build_wordlist_map2 = (wordlist_map) ->
+    score = (indices) ->
+      sorted = indices[..].sort((a,b) -> a - b)
+      k = 3
+      s = 0
+      i = 0
+      while i < k and i < sorted.length
+        s = s + sorted[i]
+        i = i + 1
+      s / i
+    result = {}
+    for character, readings of wordlist_map
+      best = null
+      best_score = Infinity
+      for pinyin, indices of readings
+        r = score(indices)
+        if r < best_score
+          best_score = r
+          best = pinyin
+      result[character] = best
+    result
   build_standard_map = ->
-    pairs = load_standard_characters_with_pinyin()
-    m = {}
-    pairs.forEach (row) -> m[row[0]] = row[1]
-    m
+    result = {}
+    rows = load_standard_characters_with_pinyin()
+    rows.forEach (row) -> result[row[0]] = row[1]
+    result
   build_additional_map = ->
-    pairs = h.read_csv_file "data/additional-characters.csv"
-    m = {}
-    pairs.forEach (row) ->
-      ch = row[0]
-      py = row[1]
-      return unless ch? and py?
-      m[ch] = py
-    m
-  select_from_counts = (m) ->
-    if m? and Object.keys(m).length > 0
-      Object.keys(m).sort((a, b) -> m[b] - m[a] or a.localeCompare b)[0]
-    else
-      null
-  counts = prune_neutral build_counts()
+    result = {}
+    rows = h.read_csv_file "data/additional-characters.csv"
+    rows.forEach (row) ->
+      character = row[0]
+      pinyin = row[1]
+      return unless character? and pinyin?
+      result[character] = pinyin
+    result
+  wordlist_map = build_wordlist_map2 build_wordlist_map()
   standard_map = build_standard_map()
   additional_map = build_additional_map()
   cache = {}
   f = (character) ->
-    v = cache[character]
-    return v if v?
-    if additional_map[character]?
-      v = additional_map[character]
+    value = cache[character]
+    return value if value
+    if additional_map[character]
+      value = additional_map[character]
     else
-      v = select_from_counts(counts[character])
-      v = standard_map[character] ? "" unless v?
-    cache[character] = v
-    v
+      value = wordlist_map[character]
+      value = standard_map[character] unless value
+    cache[character] = value
+    value
   f
 
 make_contains_map_f = ->

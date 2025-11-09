@@ -8,7 +8,6 @@ coffee = require "coffeescript"
 lookup = require "./lookup"
 
 update_all_characters_with_pinyin = ->
-  console.log "here"
   primary_pinyin_f = lookup.make_primary_pinyin_f()
   order_f = lookup.make_char_freq_dep_index_from_file_f()
   if Object.keys(order_f.index_map).length is 0 then order_f = lookup.make_char_freq_dep_index_f()
@@ -330,7 +329,6 @@ debug_primary_pinyin = ->
   console.log char_decompositions_f "宴"
 
 run = ->
-  #update_all_characters_with_pinyin()
   #update_all_characters_with_pinyin()
   #update_characters_by_frequency_dependency()
   update_characters_data()
