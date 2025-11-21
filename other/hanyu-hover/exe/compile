@@ -30,15 +30,26 @@ dictionary_cedict_to_json = function(data) {
   }));
 };
 
+traditional_data_to_json = function(data) {
+  const result = {}
+  data.forEach((a) => {
+    result[a[0]] = a[1]
+  })
+  return JSON.stringify(result)
+};
+
 update_hover_dictionary = function() {
-  var script, word_data;
+  var script, word_data, traditional_data;
   word_data = read_csv_file("../../data/cedict.csv");
   word_data = dictionary_cedict_to_json(word_data);
+  traditional_data = read_csv_file("../../data/characters-traditional.csv");
+  traditional_data = traditional_data_to_json(traditional_data);
   script = read_text_file("js/content-template.js");
   script = replace_placeholders(script, {
-    word_data
+    word_data,
+    traditional_data
   });
-  return fs.writeFileSync("compiled/content.js", script);
+  return fs.writeFileSync("js/content.js", script);
 };
 
 update_hover_dictionary()

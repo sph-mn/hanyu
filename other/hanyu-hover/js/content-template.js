@@ -1,6 +1,7 @@
 "use strict"
 
-const word_data = __word_data__
+const word_data = __word_data__;
+const traditional_data = __traditional_data__;
 
 const hanzi_ranges = [
   [0x2E80, 0x2EFF],
@@ -34,8 +35,20 @@ const helpers = {
       if (u >= r[0] && u <= r[1]) return true
     }
     return false
+  },
+  normalize_traditional_f() {
+    const all_keys = Object.keys(traditional_data)
+    const class_string = all_keys.join("")
+    const test_regex = new RegExp("[" + class_string + "]")
+    const replace_regex = new RegExp("[" + class_string + "]", "g")
+    return s =>
+      test_regex.test(s) ?
+      s.replace(replace_regex, c => traditional_data[c]) :
+      s
   }
 }
+
+helpers.normalize_traditional = helpers.normalize_traditional_f()
 
 const dict = {
   idx: null,
@@ -78,6 +91,7 @@ const dict = {
     }
   }
 }
+
 dict.build(word_data)
 
 const overlay = {
@@ -338,12 +352,12 @@ const selector = {
     if (!helpers.in_lang_u(u0)) return null
     const buf = selector.get_text_from_range(node, ro, Math.max(13, dict.max_len), null)
     if (!buf) return null
-    let res = dict.lookup_prefixes(buf)
+    let res = dict.lookup_prefixes(helpers.normalize_traditional(buf))
     if (res) return res
     let left = ro - 1
     while (left >= 0 && helpers.is_hanzi(s[left])) {
       const alt = selector.get_text_from_range(node, left, Math.max(13, dict.max_len), null)
-      res = dict.lookup_prefixes(alt)
+      res = dict.lookup_prefixes(helpers.normalize_traditional(alt))
       if (res) return res
       left -= 1
     }
