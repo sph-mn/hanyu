@@ -149,13 +149,31 @@ make_primary_pinyin_f = ->
         i = i + 1
       s / i
     result = {}
+    n = 3
     for character, readings of wordlist_map
-      best = null
-      best_score = Infinity
+      pairs = []
       for pinyin, indices of readings
-        r = score(indices)
-        if r < best_score
-          best_score = r
+        for index in indices
+          pairs.push [pinyin, index]
+      pairs.sort (a, b) -> a[1] - b[1]
+      top = pairs.slice 0, n
+      counts = {}
+      best_index_for = {}
+      for [pinyin, index] in top
+        counts[pinyin] = (counts[pinyin] ? 0) + 1
+        if best_index_for[pinyin]?
+          if index < best_index_for[pinyin]
+            best_index_for[pinyin] = index
+        else
+          best_index_for[pinyin] = index
+      best = null
+      best_count = -1
+      best_rank = Infinity
+      for pinyin, count of counts
+        rank = best_index_for[pinyin]
+        if count > best_count or (count is best_count and rank < best_rank)
+          best_count = count
+          best_rank = rank
           best = pinyin
       result[character] = best
     result
@@ -177,7 +195,7 @@ make_primary_pinyin_f = ->
   standard_map = build_standard_map()
   additional_map = build_additional_map()
   cache = {}
-  f = (character) ->
+  (character) ->
     value = cache[character]
     return value if value
     if additional_map[character]
@@ -187,7 +205,6 @@ make_primary_pinyin_f = ->
       value = standard_map[character] unless value
     cache[character] = value
     value
-  f
 
 make_contains_map_f = ->
   full_decompositions_f = make_full_decompositions_index_f()

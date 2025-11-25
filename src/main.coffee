@@ -68,7 +68,7 @@ update_characters_by_frequency_dependency = ->
 
 update_word_frequency_pinyin = ->
   char_freq_f = lookup.make_char_freq_index_f()
-  dict_f = lookup.make_dictionary_index_word_f 0
+  dict = lookup.make_dictionary_index_word_f 0
   words = h.array_from_newline_file "data/subtlex-words-by-frequency.txt"
   add = (r[0] for r in h.read_csv_file "data/cedict.csv")
   seen = new Set words
@@ -82,7 +82,7 @@ update_word_frequency_pinyin = ->
     sa - sb
   words = words.concat add
   result = for w in words
-    e = dict_f w
+    e = dict w
     continue unless e
     [w, e[0][1], e[0][2]]
   h.write_csv_file "data/words-by-frequency-with-pinyin-translation.csv", result
@@ -123,47 +123,53 @@ update_characters_data = ->
   fs.writeFileSync "data/characters-svg.json", JSON.stringify out
 
 characters_add_learning_data = (rows, allowed_chars=null) ->
-  char_by_reading_f = lookup.make_char_by_reading_index_f()
-  primary_pinyin_f = lookup.make_primary_pinyin_f()
-  char_decompositions_f = lookup.make_char_decompositions_f primary_pinyin_f
-  contained_by_f = lookup.make_contained_by_map_f()
+  char_by_reading = lookup.make_char_by_reading_index_f()
+  primary_pinyin = lookup.make_primary_pinyin_f()
+  char_decompositions = lookup.make_char_decompositions_f primary_pinyin
+  contained_by = lookup.make_contained_by_map_f()
   rows = h.array_deduplicate_key rows, (r) -> r[0]
   max_same = 16
   max_containing = 5
   in_scope = (c) -> (not allowed_chars?) or allowed_chars.has c
+  add_primary_pinyin = (rows) ->
+    for a in rows
+      b = primary_pinyin a[0]
+      a[1] = b if b
+    rows
   add_same_reading = (rows) ->
     rows.map (r) ->
-      cs = (char_by_reading_f.index_map[r[1]] or []).filter(in_scope).slice 0, max_same
+      cs = (char_by_reading.index_map[r[1]] or []).filter(in_scope).slice 0, max_same
       cs = cs.filter (c) -> c isnt r[0]
       r.push cs.join ""
       r
   add_contained = (rows) ->
     rows.map (r) ->
-      comps = (char_decompositions_f r[0])
+      comps = (char_decompositions r[0])
       formatted = comps.map (c) -> "#{c[0]} #{c[1]}"
       r.push formatted.join ", "
       r
   add_containing = (rows) ->
     rows.map (r) ->
-      carriers = (contained_by_f r[0]).filter(in_scope).slice 0, max_containing
-      formatted = carriers.map((c) -> p = primary_pinyin_f c; if p then "#{c} #{p}" else null).filter Boolean
+      carriers = (contained_by r[0]).filter(in_scope).slice 0, max_containing
+      formatted = carriers.map((c) -> p = primary_pinyin c; if p then "#{c} #{p}" else null).filter Boolean
       r.push formatted.join ", "
       r
   add_examples = (rows) ->
-    top_examples_f = lookup.make_top_examples_f()
+    top_examples = lookup.make_top_examples_f()
     rows.map (r) ->
-      words = top_examples_f r[0], 4
+      words = top_examples r[0], 4
       r.push words.map((w) -> w.join " ").join "\n"
       r
   add_reading_classification = (rows) ->
     rows.map (r) ->
-      cs = (char_by_reading_f.index_map[r[1]] or []).filter(in_scope)
+      cs = (char_by_reading.index_map[r[1]] or []).filter(in_scope)
       label = if cs.length is 1 then "unique" else if cs.length <= 3 then "rare" else ""
       r.push label
       r
   add_sort_field = (rows) ->
     a.push i for a, i in rows
     rows
+  rows = add_primary_pinyin rows
   rows = add_contained rows
   rows = add_containing rows
   rows = add_same_reading rows

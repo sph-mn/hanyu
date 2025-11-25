@@ -85,6 +85,7 @@ cedict_glossary = (a) ->
     /masturbation/
     /clitoris/
     /penis/
+    /\bfuck\b/
     /\(name\)/
     /\(chewing gum company\)/
     /allianz, german financial service company/
