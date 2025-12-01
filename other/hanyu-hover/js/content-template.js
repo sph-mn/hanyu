@@ -276,9 +276,25 @@ const selector = {
     let r = null
     if (document.caretPositionFromPoint) {
       const p = document.caretPositionFromPoint(x, y)
-      if (!p) return null
+      if (!p || !p.offsetNode) return null
+      const node = p.offsetNode
+      if (selector.is_ignored(node)) return null
+      let offset = p.offset
+      let max_len
+      if (node.nodeType === 3) {
+        max_len = node.data ? node.data.length : 0
+      } else {
+        max_len = node.childNodes ? node.childNodes.length : 0
+      }
+      if (max_len < 0) return null
+      if (offset < 0) offset = 0
+      if (offset > max_len) offset = max_len
       r = document.createRange()
-      r.setStart(p.offsetNode, p.offset)
+      try {
+        r.setStart(node, offset)
+      } catch (e) {
+        return null
+      }
       r.collapse(true)
     } else if (document.caretRangeFromPoint) {
       r = document.caretRangeFromPoint(x, y)

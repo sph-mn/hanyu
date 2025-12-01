@@ -96,7 +96,7 @@ class character_search_class
   filter: =>
     # support pinyin and characters, split at non-hanzi, sort frequent first, only use pinyin prefix
     dom.character_results.innerHTML = ""
-    values = dom.character_input.value.split(",").map (a) -> a.trim()
+    values = dom.character_input.value.split(/,|，/).map (a) -> a.trim()
     latin_values = []
     hanzi_values = []
     for a in values
@@ -212,7 +212,7 @@ class word_search_class
     dom.word_input.value = ""
     dom.word_results.innerHTML = ""
   filter: =>
-    values = dom.word_input.value.split(",").map (v) -> v.trim().toLowerCase()
+    values = dom.word_input.value.split(/,|，/g).map (v) -> v.trim().toLowerCase()
     values = values.filter (v) -> v.length > 0
     unless values.length
       dom.word_results.innerHTML = ""
@@ -277,9 +277,13 @@ class word_search_class
 class app_class
   constructor: ->
     dom.toggle_search_type.checked = false
+    dom.toggle_search_type.defaultChecked = false
+    dom.toggle_search_type.removeAttribute "checked"
+    dom.filter.classList.remove "search_character_active"
     dom.about_link.addEventListener "click", -> dom.about.classList.toggle "hidden"
     dom.about_link_close.addEventListener "click", -> dom.about.classList.toggle "hidden"
-    dom.toggle_search_type.addEventListener "change", (event) -> dom.filter.classList.toggle "search_character_active"
+    dom.toggle_search_type.addEventListener "change", (event) ->
+      dom.filter.classList.toggle "search_character_active", event.target.checked
     @url_params = new URLSearchParams window.location.search
     @character_search = new character_search_class @
     @word_search = new word_search_class @
