@@ -266,12 +266,12 @@ update_gridlearner_data = ->
     order.forEach (syl) -> groups[syl].forEach ([c, py]) -> rows.push [syl, c, py]
     rows
   write = (tag, rows) -> h.write_csv_file "data/gridlearner/characters-#{tag}.csv", rows
-  write "top4000-containing",  containing_rows top4000
-  write "top4000-by_pinyin",   by_pinyin_rows  top4000
-  write "top4000-by_syllable", by_syllable_rows top4000
-  write "top8000-containing",  containing_rows top8000
-  write "top8000-by_pinyin",   by_pinyin_rows  top8000
-  write "top8000-by_syllable", by_syllable_rows top8000
+  write "top4000-by-component",  containing_rows top4000
+  write "top4000-by-pinyin",   by_pinyin_rows  top4000
+  write "top4000-by-syllable", by_syllable_rows top4000
+  write "top8000-by-component",  containing_rows top8000
+  write "top8000-by-pinyin",   by_pinyin_rows  top8000
+  write "top8000-by-syllable", by_syllable_rows top8000
   unique_rows = (pool) ->
     counts = {}
     pool.forEach (c) ->
@@ -337,9 +337,9 @@ debug_primary_pinyin = ->
 run = ->
   #update_all_characters_with_pinyin()
   #update_characters_by_frequency_dependency()
-  update_characters_data()
+  #update_characters_data()
   #add_missing_pinyin()
-  #update_gridlearner_data()
+  update_gridlearner_data()
 
 module.exports = {
   run
