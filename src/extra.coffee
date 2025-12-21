@@ -77,7 +77,6 @@ find_component_repetitions = () ->
       if 1 == delete_duplicates(split_chars(b)).length
         console.log a[0], b
 
-
 update_characters_by_pinyin_learning = ->
   by_pinyin = {}
   chars = get_all_characters_with_pinyin().filter((a) -> !a[1].endsWith("5"))

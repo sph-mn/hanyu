@@ -12,7 +12,7 @@ update_all_characters_with_pinyin = ->
   order_f = lookup.make_char_freq_dep_index_from_file_f()
   if Object.keys(order_f.index_map).length is 0 then order_f = lookup.make_char_freq_dep_index_f()
   character_set = new Set()
-  h.read_csv_file("data/table-of-general-standard-chinese-characters.csv").forEach (row) -> character_set.add row[0]
+  h.read_csv_file_csv_file("data/table-of-general-standard-chinese-characters.csv").forEach (row) -> character_set.add row[0]
   h.read_csv_file("data/additional-characters.csv").forEach (row) -> unless character_exclusions.includes row[0] then character_set.add row[0]
   h.read_csv_file("data/characters-strokes-decomposition.csv").forEach (row) ->
     character_set.add row[0]
@@ -321,6 +321,21 @@ update_characters_traditional = ->
     [b, a] unless b is a
   h.write_csv_file "data/characters-traditional.csv", h.compact traditional
 
+traditional_to_simplified = (paths) ->
+  mapping = h.read_csv_file "data/characters-traditional.csv"
+  mapping = ([(new RegExp(a, "g")), b] for [a, b] in mapping)
+  unless paths.length
+    paths = [0]
+    stdout = true
+  else stdout = false
+  for path in paths
+    output = h.read_text_file path
+    output = output.replace(a, b) for [a, b] in mapping
+    if stdout then console.log output
+    else
+      output_path = node_path.dirname(path) + "/s-" + node_path.basename(path)
+      fs.writeFileSync output_path, output
+
 debug_primary_pinyin = ->
   # 戌 - contains 5 and wrong pinyin
   # 丧 - sang1 but should be sang4
@@ -339,10 +354,12 @@ run = ->
   #update_characters_by_frequency_dependency()
   #update_characters_data()
   #add_missing_pinyin()
-  update_gridlearner_data()
+  #update_gridlearner_data()
+  traditional_to_simplified()
 
 module.exports = {
   run
+  traditional_to_simplified
   update_characters_learning
   update_dictionary
   update_gridlearner_data
