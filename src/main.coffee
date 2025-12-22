@@ -27,7 +27,7 @@ get_all_characters_with_pinyin = -> h.read_csv_file("data/characters-pinyin-by-f
 get_characters_by_pinyin_rows = ->
   primary_pinyin_f = lookup.make_primary_pinyin_f()
   groups = {}
-  get_all_characters().forEach (c) ->
+  get_all_characters_with_pinyin().forEach (c) ->
     p = primary_pinyin_f c
     return unless p? and not p.endsWith "5"
     (groups[p] ?= []).push c
@@ -321,9 +321,10 @@ update_characters_traditional = ->
     [b, a] unless b is a
   h.write_csv_file "data/characters-traditional.csv", h.compact traditional
 
-traditional_to_simplified = (paths) ->
-  mapping = h.read_csv_file "data/characters-traditional.csv"
-  mapping = ([(new RegExp(a, "g")), b] for [a, b] in mapping)
+convert_to_simplified = (paths) ->
+  mapping1 = h.read_csv_file "data/characters-traditional.csv"
+  mapping2 = h.read_csv_file "data/characters-nonstandard.csv"
+  mapping = ([(new RegExp(a, "g")), b] for [a, b] in mapping1.concat(mapping2))
   unless paths.length
     paths = [0]
     stdout = true
@@ -349,17 +350,41 @@ debug_primary_pinyin = ->
   char_decompositions_f = lookup.make_char_decompositions_f primary_pinyin
   console.log char_decompositions_f "宴"
 
+unicode_from_hex_code = (s) ->
+  m = s.match /U\+([0-9A-Fa-f]+)/
+  return '' unless m
+  String.fromCodePoint parseInt m[1], 16
+
+update_unihan_nonstandard_mapping = ->
+  simplified = {}
+  simplified[a] = a for [a, b] in get_all_characters_with_pinyin()
+  traditional = {}
+  traditional[a] = b for [a, b] in h.read_csv_file("data/characters-traditional.csv")
+  rows = h.read_csv_file(0, "\t").filter (a) -> a[0].startsWith "U"
+  relevant_categories = ["kSimplifiedVariant", "kZVariant", "kCompatibilityVariant", "kSpecializedSemanticVariant"]
+  rows = for row in rows
+    continue unless relevant_categories.includes row[1]
+    from = unicode_from_hex_code row[0]
+    continue if simplified[from] or traditional[from]
+    to = unicode_from_hex_code row[2]
+    to_simplified = traditional[to]
+    continue unless to_simplified or simplified[to]
+    to = to_simplified if to_simplified
+    [from, to]
+  h.write_csv_file "data/characters-nonstandard.csv", rows
+
 run = ->
   #update_all_characters_with_pinyin()
   #update_characters_by_frequency_dependency()
   #update_characters_data()
   #add_missing_pinyin()
   #update_gridlearner_data()
-  traditional_to_simplified()
+  #traditional_to_simplified()
+  update_unihan_nonstandard_mapping()
 
 module.exports = {
+  convert_to_simplified
   run
-  traditional_to_simplified
   update_characters_learning
   update_dictionary
   update_gridlearner_data

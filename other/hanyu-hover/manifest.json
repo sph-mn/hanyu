@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "hanyu-hover",
-  "version": "0.4",
+  "version": "0.5",
   "description": "Hover to see Chinese word definitions",
   "icons": {
     "128": "icons/icon-128.png"
@@ -16,7 +16,7 @@
   },
   "content_scripts": [{
     "matches": ["<all_urls>"],
-    "js": ["compiled/content.js"],
+    "js": ["js/content.js"],
     "css": ["content.css"],
     "run_at": "document_start",
     "all_frames": true

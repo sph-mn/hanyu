@@ -1,55 +1,35 @@
-#!/usr/bin/env node
-
-csv_parse = require("csv-parse/sync");
-fs = require("fs")
-
-var csv_parse, dictionary_cedict_to_json, read_csv_file, read_text_file, replace_placeholders, update_hover_dictionary;
-
-read_text_file = function(a) {
-  return fs.readFileSync(a, "utf8");
-};
-
-read_csv_file = function(path, delimiter) {
-  return csv_parse.parse(read_text_file(path), {
-    delimiter: delimiter || " ",
+#!/usr/bin/env coffee
+csv_parse = require "csv-parse/sync"
+fs = require "fs"
+read_text_file = (path) ->
+  fs.readFileSync path, "utf8"
+read_csv_file = (path, delimiter) ->
+  csv_parse.parse read_text_file(path),
+    delimiter: delimiter or " "
     relax_column_count: true
-  });
-};
-
-replace_placeholders = function(text, mapping) {
-  return text.replace(/__(.*?)__/g, function(_, k) {
-    return mapping[k] || "";
-  });
-};
-
-dictionary_cedict_to_json = function(data) {
-  return JSON.stringify(data.map(function(a) {
-    a[2] = a[2].split("/");
-    a.push(a[1].replace(/[0-4]/g, ""));
-    return a;
-  }));
-};
-
-traditional_data_to_json = function(data) {
-  const result = {}
-  data.forEach((a) => {
-    result[a[0]] = a[1]
-  })
-  return JSON.stringify(result)
-};
-
-update_hover_dictionary = function() {
-  var script, word_data, traditional_data;
-  word_data = read_csv_file("../../data/cedict.csv");
-  word_data = dictionary_cedict_to_json(word_data);
-  traditional_data = read_csv_file("../../data/characters-traditional.csv");
-  traditional_data = traditional_data_to_json(traditional_data);
-  script = read_text_file("js/content-template.js");
-  script = replace_placeholders(script, {
-    word_data,
-    traditional_data
-  });
-  return fs.writeFileSync("js/content.js", script);
-};
-
+replace_placeholders = (text, mapping) ->
+  text.replace /__(.*?)__/g, (match, k) ->
+    mapping[k] or ""
+dictionary_cedict_to_json = (data) ->
+  JSON.stringify data.map (row) ->
+    row[2] = row[2].split "/"
+    row.push row[1].replace /[0-4]/g, ""
+    row
+normalize_data_to_json = (data) ->
+  result = {}
+  data.forEach (row) ->
+    result[row[0]] = row[1]
+  JSON.stringify result
+update_hover_dictionary = ->
+  word_data = read_csv_file "../../data/cedict.csv"
+  word_data = dictionary_cedict_to_json word_data
+  mapping1 = read_csv_file "../../data/characters-traditional.csv"
+  mapping2 = read_csv_file "../../data/characters-nonstandard.csv"
+  mappings = mapping1.concat mapping2
+  normalize_data = normalize_data_to_json mappings
+  script = read_text_file "js/content-template.js"
+  script = replace_placeholders script,
+    word_data: word_data
+    normalize_data: normalize_data
+  fs.writeFileSync "js/content.js", script
 update_hover_dictionary()

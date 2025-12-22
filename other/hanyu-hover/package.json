@@ -1,6 +1,6 @@
 {
   "name": "hanyu-hover",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "license": "cc-by-sa",
   "devDependencies": {
     "csv": "*",
