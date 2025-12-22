@@ -10,7 +10,7 @@
 10 八 ba1 9 "小 xiao3, 公 gong1, 六 liu4, 兮 xi1, 分 fen1"
 11 小 xiao3 10 "东 dong1, 乐 yue4, 尔 er3, 示 shi4, 亦 yi4"
 12 尔 er3 11 "你 ni3, 弥 mi2, 玺 xi3, 称 cheng1, 您 nin2"
-13 亻  12 "亿 yi4, 什 shen2, 仁 ren2, 仅 jin3, 仆 pu2"
+13 亻 ren2 12 "亿 yi4, 什 shen2, 仁 ren2, 仅 jin3, 仆 pu2"
 14 你 ni3 13 "您 nin2"
 15 是 shi4 14 "匙 chi2, 堤 di1, 提 ti2, 缇 ti2, 题 ti2"
 16 了 liao3 15 "子 zi3, 孑 jie2, 孔 kong3, 仔 zi3, 孕 yun4"
@@ -37,7 +37,7 @@
 37 未 wei4 36 "朱 zhu1, 来 lai2, 侏 zhu1, 味 wei4, 妹 mei4"
 38 来 lai2 37 "睐 lai4, 莱 lai2"
 39 人 ren2 38 "大 da4, 介 jie4, 从 cong2, 仑 lun2, 仓 cang1"
-40 那 na4 39 "哪 na3, 娜 nuo2, 挪 nuo2"
+40 那 na4 39 "哪 na3, 娜 na4, 挪 nuo2"
 41 口 kou3 40 "中 zhong1, 兄 xiong1, 加 jia1, 占 zhan4, 古 gu3"
 42 要 yao4 41 "腰 yao1"
 43 二 er4 42 "三 san1, 专 zhuan1, 丰 feng1, 云 yun2, 仁 ren2"
@@ -260,7 +260,7 @@
 260 丰 feng1 259 "邦 bang1, 契 qi4, 拜 bai4, 绑 bang3, 害 hai4"
 261 邦 bang1 260 "绑 bang3, 帮 bang1, 梆 bang1"
 262 帮 bang1 261 
-263 无 wu2 262 "呒 fu3, 妩 wu3, 抚 fu3, 芜 wu2"
+263 无 wu2 262 "呒 m2, 妩 wu3, 抚 fu3, 芜 wu2"
 264 免 mian3 263 "兔 tu4, 勉 mian3, 冤 yuan1, 娩 mian3, 挽 wan3"
 265 晚 wan3 264 
 266 动 dong4 265 
@@ -986,7 +986,7 @@
 986 杂 za2 985 
 987 词 ci2 986 
 988 右 you4 987 "佑 you4, 祐 you4, 若 ruo4, 匿 ni4, 诺 nuo4"
-989 若 ruo4 988 "匿 ni4, 诺 nuo4, 偌 ruo4, 喏 nuo4, 惹 re3"
+989 若 ruo4 988 "匿 ni4, 诺 nuo4, 偌 ruo4, 喏 re3, 惹 re3"
 990 诺 nuo4 989 
 991 读 du2 990 
 992 吴 wu2 991 "误 wu4, 娱 yu2"
@@ -1084,7 +1084,7 @@
 1084 效 xiao4 1083 
 1085 露 lu4 1084 
 1086 替 ti4 1085 "潜 qian2"
-1087 娜 nuo2 1086 
+1087 娜 na4 1086 
 1088 座 zuo4 1087 
 1089 园 yuan2 1088 
 1090 拥 yong1 1089 
@@ -2875,7 +2875,7 @@
 2875 瘟 wen1 2874 
 2876 菇 gu1 2875 
 2877 晴 qing2 2876 
-2878 於 yu1 2877 "淤 yu1, 瘀 yu1"
+2878 於 wu1 2877 "淤 yu1, 瘀 yu1"
 2879 茉 mo4 2878 
 2880 译 yi4 2879 
 2881 侏 zhu1 2880 
@@ -4302,7 +4302,7 @@
 4302 燧 sui4 4301 
 4303 蚣 gong1 4302 
 4304 蜒 yan2 4303 
-4305 喏 nuo4 4304 
+4305 喏 re3 4304 
 4306 哌 pai4 4305 
 4307 栀 zhi1 4306 
 4308 馍 mo2 4307 
@@ -4341,7 +4341,7 @@
 4341 绦 tao1 4340 
 4342 畿 ji1 4341 
 4343 哐 kuang1 4342 
-4344 呒 fu3 4343 
+4344 呒 m2 4343 
 4345 幡 fan1 4344 
 4346 龅 bao1 4345 
 4347 蝾 rong2 4346 

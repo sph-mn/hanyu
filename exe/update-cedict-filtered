@@ -1,0 +1,4 @@
+#!./node_modules/coffeescript/bin/coffee
+
+cedict = require "../src/cedict"
+cedict.update_cedict_filtered()

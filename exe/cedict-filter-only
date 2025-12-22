@@ -1,4 +1,0 @@
-#!./node_modules/coffeescript/bin/coffee
-
-main = require "../src/main"
-main.cedict_filter_only()

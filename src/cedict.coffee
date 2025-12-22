@@ -1,6 +1,8 @@
 h = require "./helper"
 fs = require "fs"
 
+on_error = (a) -> if a then console.error a
+
 get_word_frequency_index_with_pinyin = () ->
   frequency = h.array_from_newline_file "data/words-by-frequency-with-pinyin.csv"
   frequency_index = {}
@@ -28,7 +30,6 @@ cedict_glossary = (a) ->
     /^also pr\. /
     /.ancient/
     /ancient./
-    /[^()a-z0-9?':; ,.-]/
     /.bird species./
     /\(budd.+/
     /.buddhism/
@@ -124,18 +125,43 @@ cedict_glossary = (a) ->
     /\bwrigley\b/
     /\bvanke\b/
     /\bchina mengniu dairy company limited\b/
-    /bcoolpad group ltd\b/
+    /\bcoolpad group ltd\b/
     /\bmaxsun\b/
     /\bshangke corporation\b/
     /\btianjin faw xiali motor company\b/
+    /\bobsolete equivalent\b/
+    /\bmandarin equivalent: /
+    /\bequivalent to: /
+    /\bsame as /
+    /\bused only in /
+    /\bcounty in /
+    /\bcounty-level city in /
+    /\bdistrict of /
   ]
-  a = a.split("/").map (a) -> a.toLowerCase().split(";")
-  a = a.flat().map (a) -> a.trim()
-  a.filter (a) -> !filter_regexp.some((b) -> a.match b)
+  parentheses_filter_regexp = [
+    /[^()a-z0-9?':; ,.-]/
+  ]
+  optional_filter_regexp = [
+    /[^()a-z0-9?':; ,.-]/
+  ]
+  a = a.split("/").map (x) -> x.toLowerCase().split ";"
+  a = a.flat().map (x) ->
+    x = x.trim()
+    for r in parentheses_filter_regexp
+      re = new RegExp "\\([^)]*(?:" + r.source + ")[^)]*\\)", "g"
+      x = x.replace re, ""
+    x.trim().replace /\[[^\]]+\]/g, ""
+  a = a.filter (x) ->
+    x.length > 0 and !filter_regexp.some (r) -> x.match r
+  non_optional = a.filter (x) ->
+    !optional_filter_regexp.some (r) -> x.match r
+  if non_optional.length > 0
+    a = non_optional
+  h.delete_duplicates a
 
-cedict_filter_only = () ->
+update_cedict_filtered = () ->
   cedict = h.read_text_file "data/foreign/cedict_ts.u8"
-  frequency_array = h.array_from_newline_file "data/words-by-frequency.txt"
+  frequency_array = h.array_from_newline_file "data/subtlex-words-by-frequency.txt"
   frequency = {}
   frequency_array.forEach (a, i) -> frequency[a] = i
   rows = cedict.split "\n"
@@ -173,9 +199,11 @@ cedict_filter_only = () ->
 
 cedict_merge_definitions = (rows) ->
   table = {}
-  rows.forEach (r, i) ->
-    k = r[0] + "#" + r[1]
-    if table[k] then table[k][1][2] = table[k][1][2].concat r[2] else table[k] = [i, r]
+  for [word, pinyin, glossary], i in rows
+    key = word + "#" + pinyin
+    if table[key]
+      table[key][1][2] = h.delete_duplicates table[key][1][2].concat glossary
+    else table[key] = [i, rows[i]]
   Object.values(table).sort((a, b) -> a[0] - b[0]).map((x) -> x[1])
 
 cedict_overrides = (rows) ->
@@ -205,6 +233,7 @@ update_cedict_csv = ->
   data = cedict_overrides data
   data = cedict_merge_definitions data
   data.forEach (r) -> r[2] = r[2].join "; "
+  # there is a circular dependency to words-by-frequency-with-pinyin.csv here
   data = sort_by_word_frequency_with_pinyin frequency_index, 0, 1, data
   data = data.filter (r, i) -> i < 3000 or r[0].length < 3
   h.write_csv_file "data/cedict.csv", data
@@ -212,6 +241,6 @@ update_cedict_csv = ->
 module.exports = {
   cedict_glossary
   cedict_merge_definitions
-  cedict_filter_only
+  update_cedict_filtered
   update_cedict_csv
 }

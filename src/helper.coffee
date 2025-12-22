@@ -124,9 +124,22 @@ hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges
 non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
 hanzi_and_idc_regexp = unicode_ranges_regexp hanzi_unicode_ranges.concat([["2FF0", "2FFF"]])
 non_pinyin_regexp = /[^a-z0-5]/g
-
 is_file = (path) -> fs.statSync(path).isFile()
 strip_extensions = (filename) -> filename.replace /\.[^.]+$/, ''
+
+normalize_mapping = do ->
+  mapping1 = read_csv_file "data/characters-traditional.csv"
+  mapping2 = read_csv_file "data/characters-nonstandard.csv"
+  mapping = {}
+  mapping[a] = b for [a, b] in mapping1.concat mapping2
+  mapping
+
+normalize_character = (c) -> normalize_mapping[c] || c
+
+normalize_text = (text) ->
+  out = ""
+  out += normalize_mapping[c] or c for i, c of text
+  out
 
 module.exports = {
   all_syllables
@@ -138,6 +151,8 @@ module.exports = {
   split_chars
   random_integer
   random_element
+  normalize_character
+  normalize_text
   n_times
   remove_non_chinese_characters
   traditional_to_simplified

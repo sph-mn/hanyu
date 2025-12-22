@@ -322,16 +322,12 @@ update_characters_traditional = ->
   h.write_csv_file "data/characters-traditional.csv", h.compact traditional
 
 convert_to_simplified = (paths) ->
-  mapping1 = h.read_csv_file "data/characters-traditional.csv"
-  mapping2 = h.read_csv_file "data/characters-nonstandard.csv"
-  mapping = ([(new RegExp(a, "g")), b] for [a, b] in mapping1.concat(mapping2))
+  stdout = false
   unless paths.length
     paths = [0]
     stdout = true
-  else stdout = false
   for path in paths
-    output = h.read_text_file path
-    output = output.replace(a, b) for [a, b] in mapping
+    output = h.normalize_text h.read_text_file path
     if stdout then console.log output
     else
       output_path = node_path.dirname(path) + "/s-" + node_path.basename(path)
