@@ -130,8 +130,10 @@ strip_extensions = (filename) -> filename.replace /\.[^.]+$/, ''
 normalize_mapping = do ->
   mapping1 = read_csv_file "data/characters-traditional.csv"
   mapping2 = read_csv_file "data/characters-nonstandard.csv"
+  mapping3 = {}
+  mapping3[a] = b for [a, b] in mapping1.concat mapping2
   mapping = {}
-  mapping[a] = b for [a, b] in mapping1.concat mapping2
+  mapping[a] = mapping3[b] or b for a, b of mapping3
   mapping
 
 normalize_character = (c) -> normalize_mapping[c] || c

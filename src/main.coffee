@@ -330,7 +330,9 @@ convert_to_simplified = (paths) ->
     output = h.normalize_text h.read_text_file path
     if stdout then console.log output
     else
-      output_path = node_path.dirname(path) + "/s-" + node_path.basename(path)
+      dir = node_path.dirname(path) + "/normalized"
+      fs.mkdirSync dir, recursive: true
+      output_path =  dir + "/" + node_path.basename(path)
       fs.writeFileSync output_path, output
 
 debug_primary_pinyin = ->
@@ -359,14 +361,15 @@ update_unihan_nonstandard_mapping = ->
   rows = h.read_csv_file(0, "\t").filter (a) -> a[0].startsWith "U"
   relevant_categories = ["kSimplifiedVariant", "kZVariant", "kCompatibilityVariant", "kSpecializedSemanticVariant"]
   rows = for row in rows
-    continue unless relevant_categories.includes row[1]
     from = unicode_from_hex_code row[0]
-    continue if simplified[from] or traditional[from]
     to = unicode_from_hex_code row[2]
+    continue unless relevant_categories.includes row[1]
+    continue if simplified[from] or traditional[from]
     to_simplified = traditional[to]
     continue unless to_simplified or simplified[to]
     to = to_simplified if to_simplified
     [from, to]
+  rows.push ["讬", "托"], ["馀", "余"]
   h.write_csv_file "data/characters-nonstandard.csv", rows
 
 run = ->
