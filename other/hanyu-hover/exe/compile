@@ -1,35 +1,24 @@
 #!/usr/bin/env coffee
+h = require "../../../src/helper"
 csv_parse = require "csv-parse/sync"
 fs = require "fs"
-read_text_file = (path) ->
-  fs.readFileSync path, "utf8"
+read_text_file = (path) -> fs.readFileSync path, "utf8"
 read_csv_file = (path, delimiter) ->
   csv_parse.parse read_text_file(path),
     delimiter: delimiter or " "
     relax_column_count: true
 replace_placeholders = (text, mapping) ->
-  text.replace /__(.*?)__/g, (match, k) ->
-    mapping[k] or ""
+  text.replace /__(.*?)__/g, (match, k) -> mapping[k] or ""
 dictionary_cedict_to_json = (data) ->
   JSON.stringify data.map (row) ->
     row[2] = row[2].split "/"
     row.push row[1].replace /[0-4]/g, ""
     row
-normalize_data_to_json = (data) ->
-  result = {}
-  data.forEach (row) ->
-    result[row[0]] = row[1]
-  JSON.stringify result
 update_hover_dictionary = ->
   word_data = read_csv_file "../../data/cedict.csv"
   word_data = dictionary_cedict_to_json word_data
-  mapping1 = read_csv_file "../../data/characters-traditional.csv"
-  mapping2 = read_csv_file "../../data/characters-nonstandard.csv"
-  mappings = mapping1.concat mapping2
-  normalize_data = normalize_data_to_json mappings
+  normalize_data = JSON.stringify {strings: h.normalize_mapping.strings, characters: h.normalize_mapping.characters}
   script = read_text_file "js/content-template.js"
-  script = replace_placeholders script,
-    word_data: word_data
-    normalize_data: normalize_data
+  script = replace_placeholders script, {word_data, normalize_data}
   fs.writeFileSync "js/content.js", script
 update_hover_dictionary()

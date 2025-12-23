@@ -1,3 +1,4 @@
+node_path = require "path"
 csv_parse = require "csv-parse/sync"
 csv_stringify = require "csv-stringify/sync"
 coffee = require "coffeescript"
@@ -126,21 +127,25 @@ hanzi_and_idc_regexp = unicode_ranges_regexp hanzi_unicode_ranges.concat([["2FF0
 non_pinyin_regexp = /[^a-z0-5]/g
 is_file = (path) -> fs.statSync(path).isFile()
 strip_extensions = (filename) -> filename.replace /\.[^.]+$/, ''
+root_relative_path = (a) -> node_path.join node_path.dirname(__dirname), a
 
 normalize_mapping = do ->
-  mapping1 = read_csv_file "data/characters-traditional.csv"
-  mapping2 = read_csv_file "data/characters-nonstandard.csv"
-  mapping3 = {}
-  mapping3[a] = b for [a, b] in mapping1.concat mapping2
-  mapping = {}
-  mapping[a] = mapping3[b] or b for a, b of mapping3
-  mapping
+  additions = read_csv_file root_relative_path "data/words-nonstandard.csv"
+  strings = read_csv_file root_relative_path("data/foreign/TSPhrases.txt"), "\t"
+  strings = strings.concat additions
+  string_regexps = ([(new RegExp(a, "g")), b] for [a, b] in strings)
+  characters = read_csv_file root_relative_path("data/foreign/TSCharacters.txt"), "\t"
+  characters_map = {}
+  characters_map[a] = b.split(" ")[0] for [a, b] in characters
+  {characters: characters_map, strings, string_regexps}
 
-normalize_character = (c) -> normalize_mapping[c] || c
+normalize_character = (c) -> normalize_mapping.characters[c] || c
 
 normalize_text = (text) ->
+  for [regexp, replacement] in normalize_mapping.string_regexps
+    text = text.replace regexp, replacement
   out = ""
-  out += normalize_mapping[c] or c for i, c of text
+  out += normalize_mapping.characters[c] or c for i, c of text
   out
 
 module.exports = {
@@ -155,6 +160,7 @@ module.exports = {
   random_element
   normalize_character
   normalize_text
+  normalize_mapping
   n_times
   remove_non_chinese_characters
   traditional_to_simplified

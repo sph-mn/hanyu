@@ -20,7 +20,7 @@ const hanzi_ranges = [
 ]
 
 const helpers = {
-  is_hanzi: c => {
+  is_hanzi(c) {
     if (!c || c.length !== 1) return false
     const u = c.codePointAt(0)
     for (let i = 0; i < hanzi_ranges.length; i++) {
@@ -29,30 +29,50 @@ const helpers = {
     }
     return false
   },
-  in_lang_u: u => {
+  in_lang_u(u) {
     for (let i = 0; i < hanzi_ranges.length; i++) {
       const r = hanzi_ranges[i]
       if (u >= r[0] && u <= r[1]) return true
     }
     return false
   },
-  normalize_f() {
-    return s => {
-      let changed = false
-      let out = ""
-      for (const c of s) {
-        const cc = normalize_data[c]
-        if (cc !== undefined) {
-          out += cc
-          changed = true
-        } else out += c
-      }
-      return changed ? out : s
+  replace_all_literal(text, from, to) {
+    let index = text.indexOf(from)
+    if (index < 0) return text
+    let out = ""
+    let cursor = 0
+    const from_length = from.length
+    while (index >= 0) {
+      out += text.slice(cursor, index)
+      out += to
+      cursor = index + from_length
+      index = text.indexOf(from, cursor)
     }
+    out += text.slice(cursor)
+    return out
+  },
+  normalize(text) {
+    let out = text
+    const string_replacements = normalize_data.strings
+    for (let i = 0; i < string_replacements.length; i += 1) {
+      const from = string_replacements[i][0]
+      const to = string_replacements[i][1]
+      if (from.length !== 0 && out.indexOf(from) >= 0) out = helpers.replace_all_literal(out, from, to)
+    }
+    const character_replacements = normalize_data.characters
+    for (const character of out) {
+      if (character_replacements[character] !== undefined) {
+        let normalized = ""
+        for (const c of out) {
+          const replacement = character_replacements[c]
+          normalized += replacement !== undefined ? replacement : c
+        }
+        return normalized
+      }
+    }
+    return out
   }
 }
-
-helpers.normalize = helpers.normalize_f()
 
 const dict = {
   idx: null,

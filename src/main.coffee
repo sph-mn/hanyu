@@ -314,13 +314,6 @@ dsv_add_pinyin = (character_index) ->
     a
   h.write_csv_file 1, rows
 
-update_characters_traditional = ->
-  chars = h.read_csv_file("data/characters-by-frequency-dependency.csv")
-  traditional = for [a, ...b] in chars
-    b = h.simplified_to_traditional a
-    [b, a] unless b is a
-  h.write_csv_file "data/characters-traditional.csv", h.compact traditional
-
 convert_to_simplified = (paths) ->
   stdout = false
   unless paths.length
@@ -353,33 +346,12 @@ unicode_from_hex_code = (s) ->
   return '' unless m
   String.fromCodePoint parseInt m[1], 16
 
-update_unihan_nonstandard_mapping = ->
-  simplified = {}
-  simplified[a] = a for [a, b] in get_all_characters_with_pinyin()
-  traditional = {}
-  traditional[a] = b for [a, b] in h.read_csv_file("data/characters-traditional.csv")
-  rows = h.read_csv_file(0, "\t").filter (a) -> a[0].startsWith "U"
-  relevant_categories = ["kSimplifiedVariant", "kZVariant", "kCompatibilityVariant", "kSpecializedSemanticVariant"]
-  rows = for row in rows
-    from = unicode_from_hex_code row[0]
-    to = unicode_from_hex_code row[2]
-    continue unless relevant_categories.includes row[1]
-    continue if simplified[from] or traditional[from]
-    to_simplified = traditional[to]
-    continue unless to_simplified or simplified[to]
-    to = to_simplified if to_simplified
-    [from, to]
-  rows.push ["讬", "托"], ["馀", "余"]
-  h.write_csv_file "data/characters-nonstandard.csv", rows
-
 run = ->
   #update_all_characters_with_pinyin()
   #update_characters_by_frequency_dependency()
   #update_characters_data()
   #add_missing_pinyin()
   #update_gridlearner_data()
-  #traditional_to_simplified()
-  update_unihan_nonstandard_mapping()
 
 module.exports = {
   convert_to_simplified
