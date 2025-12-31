@@ -346,7 +346,18 @@ unicode_from_hex_code = (s) ->
   return '' unless m
   String.fromCodePoint parseInt m[1], 16
 
+intersect = (a, b) ->
+  b_set = new Set b
+  a.filter (x) -> b_set.has x
+
+filter_standard_characters = ->
+  input = h.array_from_newline_file 0
+  standard = h.read_csv_file("data/table-of-general-standard-chinese-characters.csv").map (a) -> a[0]
+  for a in intersect input, standard
+    console.log a
+
 run = ->
+  filter_standard_characters()
   #update_all_characters_with_pinyin()
   #update_characters_by_frequency_dependency()
   #update_characters_data()

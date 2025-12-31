@@ -17,12 +17,9 @@ sort_by_word_frequency_with_pinyin = (frequency_index, word_key, pinyin_key, dat
     fb = frequency_index[b[word_key] + b[pinyin_key]]
     if fa is undefined and fb is undefined
       a[word_key].length - b[word_key].length
-    else if fa is undefined
-      1
-    else if fb is undefined
-      -1
-    else
-      fa - fb
+    else if fa is undefined then 1
+    else if fb is undefined then -1
+    else fa - fb
 
 cedict_glossary = (a) ->
   filter_regexp = [
@@ -159,44 +156,6 @@ cedict_glossary = (a) ->
     a = non_optional
   h.delete_duplicates a
 
-update_cedict_filtered = () ->
-  cedict = h.read_text_file "data/foreign/cedict_ts.u8"
-  frequency_array = h.array_from_newline_file "data/subtlex-words-by-frequency.txt"
-  frequency = {}
-  frequency_array.forEach (a, i) -> frequency[a] = i
-  rows = cedict.split "\n"
-  data = rows.map (line) ->
-    if "#" is line[0] then return null
-    line = line.trim()
-    parsed = line.match(/^([^ ]+) ([^ ]+) \[([^\]]+)\] \/(.*)\//)
-    word_traditional = parsed[1]
-    word = parsed[2]
-    if word.match(/[a-zA-Z0-9]/) then return null
-    pinyin = parsed[3]
-    pinyin = pinyin.split(" ").map (a) ->
-      h.pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3").replace("45", "4").replace("25", "2")
-    pinyin = pinyin.join("").toLowerCase()
-    glossary = cedict_glossary(parsed[4]).join("/")
-    line = [word_traditional, word, "[#{pinyin}]", "/#{glossary}/"].join(" ")
-    frequency = frequency[word] || (word.length + frequency_array.length)
-    [frequency, line, word, word_traditional] if glossary.length
-  data = data.filter (a) -> a
-  data = data.sort (a, b) -> a[0] - b[0]
-  cedict_filtered_lines = data.map (a) -> a[1]
-  cedict_filtered = cedict_filtered_lines.join "\n"
-  fs.writeFile "data/cedict-filtered.u8", cedict_filtered, on_error
-  index_lines = []
-  index_lines_traditional = []
-  character_offset = 0
-  data.forEach (a) ->
-    word = a[2]
-    word_traditional = a[3]
-    character_offset = cedict_filtered.indexOf("#{word_traditional} #{word} ", character_offset)
-    index_lines.push "#{word},#{character_offset}"
-    index_lines_traditional.push "#{word_traditional},#{character_offset}"
-  index_lines = index_lines.concat index_lines_traditional
-  fs.writeFile "data/cedict-filtered.idx", index_lines.join("\n"), on_error
-
 cedict_merge_definitions = (rows) ->
   table = {}
   for [word, pinyin, glossary], i in rows
@@ -213,6 +172,97 @@ cedict_overrides = (rows) ->
   base = rows.filter (r) -> not override_words.has r[0]
   base.concat overrides
 
+filter_dictionary_data = (data, top_keep, short_word_length_limit, long_word_length_limit, cedict_excluded) ->
+  piece_text_set = new Set (row[0] for row in data when row[0].length < short_word_length_limit)
+  for row in data
+    for ch in row[0]
+      piece_text_set.add ch
+  for piece_text in cedict_excluded
+    if piece_text.length < short_word_length_limit
+      piece_text_set.add piece_text
+      for ch in piece_text
+        piece_text_set.add ch
+  piece_length_limit = short_word_length_limit - 1
+  is_text_constructed = (text) ->
+    text_length = text.length
+    prefix_no_big = new Array(text_length + 1)
+    prefix_has_big = new Array(text_length + 1)
+    prefix_no_big[0] = true
+    prefix_has_big[0] = false
+    text_index = 1
+    while text_index <= text_length
+      prefix_no_big[text_index] = false
+      prefix_has_big[text_index] = false
+      piece_length = 1
+      while piece_length <= piece_length_limit and piece_length <= text_index
+        piece_text = text.slice text_index - piece_length, text_index
+        if piece_text_set.has piece_text
+          if piece_length >= 2
+            prefix_has_big[text_index] = true if prefix_no_big[text_index - piece_length] or prefix_has_big[text_index - piece_length]
+          else
+            prefix_no_big[text_index] = true if prefix_no_big[text_index - piece_length]
+            prefix_has_big[text_index] = true if prefix_has_big[text_index - piece_length]
+        piece_length = piece_length + 1
+      text_index = text_index + 1
+    prefix_has_big[text_length]
+  keep_row = (row, row_index) ->
+    word_text = row[0]
+    if word_text == "金融界"
+      console.log row_index, row
+    if row_index < top_keep then true else if word_text.length < short_word_length_limit then true else if word_text.length >= long_word_length_limit then false else not is_text_constructed word_text
+  data.filter keep_row
+
+update_cedict_filtered = () ->
+  cedict = h.read_text_file "data/foreign/cedict_ts.u8"
+  frequency_array = h.array_from_newline_file "data/subtlex-words-by-frequency.txt"
+  frequency = {}
+  frequency_array.forEach (a, i) -> frequency[a] = i
+  short_word_length_limit = 4
+  piece_keep = 20000
+  rows = cedict.split "\n"
+  raw_short_word_table = {}
+  filtered_short_word_set = new Set
+  data = rows.map (line) ->
+    if "#" is line[0] then return null
+    line = line.trim()
+    parsed = line.match(/^([^ ]+) ([^ ]+) \[([^\]]+)\] \/(.*)\//)
+    word_traditional = parsed[1]
+    word = parsed[2]
+    return null if word.match /[^\u4e00-\u9fff]/
+    pinyin = parsed[3]
+    pinyin = pinyin.split(" ").map (a) ->
+      h.pinyin_utils.markToNumber(a).replace("u:", "ü").replace("35", "3").replace("45", "4").replace("25", "2")
+    pinyin = pinyin.join("").toLowerCase()
+    raw_frequency = frequency[word] || (word.length + frequency_array.length)
+    if word.length < short_word_length_limit
+      raw_short_word_table[word] = raw_frequency if raw_short_word_table[word] is undefined or raw_frequency < raw_short_word_table[word]
+    glossary = cedict_glossary(parsed[4]).join("/")
+    if glossary.length and word.length < short_word_length_limit
+      filtered_short_word_set.add word
+    line = [word_traditional, word, "[#{pinyin}]", "/#{glossary}/"].join(" ")
+    filtered_frequency = raw_frequency
+    [filtered_frequency, line, word, word_traditional] if glossary.length
+  data = data.filter (a) -> a
+  data = data.sort (a, b) -> a[0] - b[0]
+  cedict_filtered_lines = data.map (a) -> a[1]
+  cedict_filtered = cedict_filtered_lines.join "\n"
+  fs.writeFile "data/cedict-filtered.u8", cedict_filtered, on_error
+  cedict_excluded = Object.keys(raw_short_word_table).filter (word) -> not filtered_short_word_set.has word
+  cedict_excluded = cedict_excluded.sort (a, b) -> raw_short_word_table[a] - raw_short_word_table[b]
+  cedict_excluded = cedict_excluded.slice 0, piece_keep
+  fs.writeFile "data/cedict-excluded.txt", cedict_excluded.join("\n"), on_error
+  index_lines = []
+  index_lines_traditional = []
+  character_offset = 0
+  data.forEach (a) ->
+    word = a[2]
+    word_traditional = a[3]
+    character_offset = cedict_filtered.indexOf("#{word_traditional} #{word} ", character_offset)
+    index_lines.push "#{word},#{character_offset}"
+    index_lines_traditional.push "#{word_traditional},#{character_offset}"
+  index_lines = index_lines.concat index_lines_traditional
+  fs.writeFile "data/cedict-filtered.idx", index_lines.join("\n"), on_error
+
 update_cedict_csv = ->
   cedict = h.read_text_file "data/cedict-filtered.u8"
   frequency_index = get_word_frequency_index_with_pinyin()
@@ -222,20 +272,23 @@ update_cedict_csv = ->
     line = line.trim()
     parsed = line.match(/^([^ ]+) ([^ ]+) \[([^\]]+)\] \/(.*)\//)
     word = parsed[2]
-    return null if word.match /[a-zA-Z0-9]/
+    return null if word.match /[^\u4e00-\u9fff]/
     pinyin = parsed[3]
     pinyin = h.pinyin_split2(pinyin).map((s)-> h.pinyin_utils.markToNumber(s).replace("u:", "ü").replace("35","3").replace("45","4").replace("25","2")).join("").toLowerCase()
     glossary = cedict_glossary parsed[4]
     return null unless glossary.length
     [word, pinyin, glossary]
-  data = data.filter (r) -> r
+  data = data.filter (row) -> row
   data = cedict_merge_definitions data
   data = cedict_overrides data
   data = cedict_merge_definitions data
-  data.forEach (r) -> r[2] = r[2].join "; "
-  # there is a circular dependency to words-by-frequency-with-pinyin.csv here
+  data.forEach (row) -> row[2] = row[2].join "; "
   data = sort_by_word_frequency_with_pinyin frequency_index, 0, 1, data
-  data = data.filter (r, i) -> i < 3000 or r[0].length < 3
+  top_keep = 3000
+  short_word_length_limit = 4
+  long_word_length_limit = 999999
+  cedict_excluded = h.array_from_newline_file "data/cedict-excluded.txt"
+  data = filter_dictionary_data data, top_keep, short_word_length_limit, long_word_length_limit, cedict_excluded
   h.write_csv_file "data/cedict.csv", data
 
 module.exports = {

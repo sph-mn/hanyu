@@ -32,6 +32,8 @@ hanzi_unicode_ranges = [
 unicode_ranges_pattern = (a, is_reject) -> "[" + (if is_reject then "^" else "") + a.map((a) -> a.map((b) -> "\\u{#{b}}").join("-")).join("") + "]"
 unicode_ranges_regexp = (a, is_reject, regexp_flags) -> new RegExp unicode_ranges_pattern(a, is_reject), "u" + (regexp_flags || "")
 non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
+hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges
+hanzi_regexp_global = unicode_ranges_regexp hanzi_unicode_ranges, false, "g"
 latin_regexp = /([a-z]+)([0-5])?$/i
 delete_duplicates = (a) -> [...new Set(a)]
 split_chars = (a) -> [...a]
@@ -96,21 +98,27 @@ class character_search_class
   filter: =>
     # support pinyin and characters, split at non-hanzi, sort frequent first, only use pinyin prefix
     dom.character_results.innerHTML = ""
-    values = dom.character_input.value.split(/,|，/).map (a) -> a.trim()
+    raw = (dom.character_input.value or "").trim()
     latin_values = []
     hanzi_values = []
-    for a in values
-      continue unless 0 < a.length
-      if non_hanzi_regexp.test a
-        continue unless 1 < a.length
-        syllable = a.match latin_regexp
-        continue unless syllable
-        [_, syllable, tone] = syllable
-        if @is_syllable syllable
-          latin_values.push new RegExp "^" + syllable + (tone || "[0-5]")
-      else
-        if 1 < a.length then hanzi_values = hanzi_values.concat split_chars a
-        else hanzi_values.push a
+    has_hanzi = hanzi_regexp.test raw
+    comma_regexp = /,/
+    has_comma = comma_regexp.test raw
+    if has_hanzi
+      hanzi_only = raw.replace non_hanzi_regexp, ""
+      if 1 < hanzi_only.length then hanzi_values = split_chars hanzi_only
+      else if 0 < hanzi_only.length then hanzi_values.push hanzi_only
+      if has_comma
+        values = raw.split(comma_regexp).map((a) -> a.trim())
+        for a in values
+          continue unless non_hanzi_regexp.test a
+          continue unless 0 < a.length and a.length <= 7
+          latin_values.push new RegExp "^" + a.replace(/\s+/g, "") + "[0-5]"
+    else
+      values = raw.split(comma_regexp).map((a) -> a.trim())
+      for a in values
+        continue unless 0 < a.length and a.length <= 7
+        latin_values.push new RegExp "^" + a.replace(/\s+/g, "") + "[0-5]"
     return unless latin_values.length or hanzi_values.length
     latin_values = delete_duplicates latin_values
     hanzi_values = delete_duplicates hanzi_values
