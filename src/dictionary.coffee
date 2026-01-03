@@ -34,7 +34,7 @@ unicode_ranges_regexp = (a, is_reject, regexp_flags) -> new RegExp unicode_range
 non_hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges, true
 hanzi_regexp = unicode_ranges_regexp hanzi_unicode_ranges
 hanzi_regexp_global = unicode_ranges_regexp hanzi_unicode_ranges, false, "g"
-latin_regexp = /([a-z]+)([0-5])?$/i
+latin_regexp = /([a-zü]+)([0-5])?$/i
 delete_duplicates = (a) -> [...new Set(a)]
 split_chars = (a) -> [...a]
 
@@ -109,16 +109,28 @@ class character_search_class
       if 1 < hanzi_only.length then hanzi_values = split_chars hanzi_only
       else if 0 < hanzi_only.length then hanzi_values.push hanzi_only
       if has_comma
-        values = raw.split(comma_regexp).map((a) -> a.trim())
+        values = raw.split(comma_regexp).map (a) -> a.trim()
         for a in values
           continue unless non_hanzi_regexp.test a
+          a = a.replace(/\s+/g, "")
           continue unless 0 < a.length and a.length <= 7
-          latin_values.push new RegExp "^" + a.replace(/\s+/g, "") + "[0-5]"
+          m = a.match latin_regexp
+          continue unless m
+          [_, syllable, tone] = m
+          syllable = syllable.replace /v/g, "ü"
+          continue unless @is_syllable syllable
+          latin_values.push new RegExp "^" + syllable + (tone or "[0-5]")
     else
       values = raw.split(comma_regexp).map((a) -> a.trim())
       for a in values
+        a = a.replace(/\s+/g, "")
         continue unless 0 < a.length and a.length <= 7
-        latin_values.push new RegExp "^" + a.replace(/\s+/g, "") + "[0-5]"
+        m = a.match latin_regexp
+        continue unless m
+        [_, syllable, tone] = m
+        syllable = syllable.replace /v/g, "ü"
+        continue unless @is_syllable syllable
+        latin_values.push new RegExp "^" + syllable + (tone or "[0-5]")
     return unless latin_values.length or hanzi_values.length
     latin_values = delete_duplicates latin_values
     hanzi_values = delete_duplicates hanzi_values
